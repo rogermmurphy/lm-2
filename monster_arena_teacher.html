@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monster Arena - Teacher Host</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useMemo } = React;
+
+    // Helper functions
+    const COLORS = ["#F472B6", "#60A5FA", "#34D399", "#A78BFA", "#F59E0B", "#F87171", "#22D3EE", "#C084FC"];
+    const NAMES = ["Ava", "Liam", "Mia", "Noah", "Zoe", "Elijah", "Ivy", "Lucas", "Leo", "Emma", "Olivia", "Sophia", "Ethan", "Mason"];
+    
+    const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const genId = () => Math.random().toString(36).slice(2, 8);
+    
+    const DEMO_QUESTIONS = [
+      { id: genId(), question: "Which subatomic particle has a positive charge?", choices: ["Electron", "Proton", "Neutron", "Positron"], correctIndex: 1, topic: "Chemistry" },
+      { id: genId(), question: "What is the chemical formula for water?", choices: ["H2O", "HO2", "OH2", "H3O"], correctIndex: 0, topic: "Chemistry" },
+      { id: genId(), question: "pH < 7 indicates…", choices: ["Neutral", "Acidic", "Basic", "Buffer"], correctIndex: 1, topic: "Chemistry" },
+      { id: genId(), question: "Avogadro's number is…", choices: ["6.02×10^23", "3.14", "9.81 m/s^2", "0.082"], correctIndex: 0, topic: "Chemistry" },
+      { id: genId(), question: "Which bond is strongest?", choices: ["Ionic", "Hydrogen", "Covalent", "Metallic"], correctIndex: 2, topic: "Chemistry" },
+    ];
+
+    function MonsterAvatar({ name, color, size = 44 }) {
+      const initials = name.slice(0, 2).toUpperCase();
+      return (
+        <div
+          className="flex items-center justify-center rounded-full shadow-lg"
+          style={{ width: size, height: size, background: color }}
+        >
+          <span className="text-xs font-bold text-white">{initials}</span>
+        </div>
+      );
+    }
+
+    function App() {
+      const [stage, setStage] = useState("setup");
+      const [code] = useState(genId().toUpperCase());
+      const [players, setPlayers] = useState([]);
+      const [questions, setQuestions] = useState(DEMO_QUESTIONS);
+      const [current, setCurrent] = useState(0);
+      const [duration, setDuration] = useState(18);
+      const [secsLeft, setSecsLeft] = useState(18);
+      const [isLive, setIsLive] = useState(false);
+      
+      const q = questions[current];
+      const minPlayers = 6;
+
+      const addBot = () => {
+        const taken = players.map(p => p.name);
+        let name = rand(NAMES);
+        let i = 1;
+        while (taken.includes(name)) { name = `${rand(NAMES)}${i++}`; }
+        
+        setPlayers(p => [...p, {
+          id: genId(),
+          name,
+          color: rand(COLORS),
+          score: 0,
+          streak: 0,
+          alive: true,
+        }]);
+      };
+
+      const removeLast = () => setPlayers(p => p.slice(0, -1));
+
+      const startGame = () => {
+        if (players.length >= minPlayers) {
+          setCurrent(0);
+          setSecsLeft(duration);
+          setStage("question");
+        }
+      };
+
+      // Timer
+      useEffect(() => {
+        if (stage !== "question") return;
+        
+        const timer = setInterval(() => {
+          setSecsLeft(s => {
+            if (s <= 1) {
+              clearInterval(timer);
+              endQuestion();
+              return duration;
+            }
+            return s - 1;
+          });
+        }, 1000);
+
+        // Simulate bot answers
+        const timeout = setTimeout(() => {
+          setPlayers(p => p.map(pl => {
+            if (Math.random() < 0.7) {
+              const correct = Math.random() < 0.65;
+              const choice = correct ? q.correctIndex : Math.floor(Math.random() * q.choices.length);
+              return { ...pl, answered: choice };
+            }
+            return pl;
+          }));
+        }, 800);
+
+        return () => { clearInterval(timer); clearTimeout(timeout); };
+      }, [stage, current]);
+
+      const endQuestion = () => {
+        setPlayers(p => p.map(pl => {
+          if (pl.answered == null) return { ...pl, streak: 0 };
+          const correct = pl.answered === q.correctIndex;
+          const delta = correct ? 100 + pl.streak * 10 : -10;
+          return {
+            ...pl,
+            score: Math.max(0, pl.score + delta),
+            streak: correct ? pl.streak + 1 : 0,
+          };
+        }));
+        setStage("leaderboard");
+      };
+
+      const nextQ = () => {
+        if (current < questions.length - 1) {
+          setCurrent(c => c + 1);
+          setSecsLeft(duration);
+          setPlayers(p => p.map(pl => ({ ...pl, answered: undefined })));
+          setStage("question");
+        } else {
+          setStage("summary");
+        }
+      };
+
+      const sorted = useMemo(() => [...players].sort((a, b) => b.score - a.score), [players]);
+
+      return (
+        <div className="min-h-screen w-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 p-4 md:p-8">
+          <div className="mx-auto max-w-6xl">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6 p-4 rounded-2xl border border-white/10 bg-white/5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600"></div>
+                <div>
+                  <h1 className="text-xl font-bold">Monster Arena</h1>
+                  <p className="text-xs text-slate-400">Teacher Host View</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-sm">
+                  <span className="text-slate-400">Join: </span>
+                  <code className="bg-white/10 px-2 py-1 rounded">{code}</code>
+                </div>
+                <button
+                  onClick={() => setIsLive(!isLive)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold ${isLive ? 'bg-emerald-500' : 'bg-slate-600'}`}
+                >
+                  {isLive ? '🟢 Live' : 'Go Live'}
+                </button>
+              </div>
+            </div>
+
+            {/* Setup */}
+            {stage === "setup" && (
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                  <h2 className="text-lg font-semibold mb-4">Game Setup</h2>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm text-slate-300">Questions Loaded</label>
+                      <div className="mt-2 bg-white/10 px-3 py-2 rounded-lg">
+                        <strong>{questions.length}</strong> questions
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-300">Time per Question</label>
+                      <div className="mt-2 flex items-center gap-3">
+                        <button onClick={() => setDuration(Math.max(8, duration - 2))} className="px-3 py-2 bg-white/10 rounded-lg hover:bg-white/15">-</button>
+                        <span className="w-16 text-center">{duration}s</span>
+                        <button onClick={() => setDuration(Math.min(45, duration + 2))} className="px-3 py-2 bg-white/10 rounded-lg hover:bg-white/15">+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                  <h2 className="text-lg font-semibold mb-4">Players ({players.length}/{minPlayers} min)</h2>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    {players.map(p => (
+                      <div key={p.id} className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
+                        <MonsterAvatar name={p.name} color={p.color} size={32} />
+                        <span className="text-sm">{p.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={addBot} className="flex-1 px-4 py-2 bg-emerald-500 rounded-xl hover:bg-emerald-400">Add Bot</button>
+                    <button onClick={removeLast} disabled={!players.length} className="px-4 py-2 bg-white/10 rounded-xl hover:bg-white/15 disabled:opacity-40">Remove</button>
+                  </div>
+                  {players.length < minPlayers && (
+                    <p className="mt-3 text-xs text-amber-400">Need {minPlayers - players.length} more to start</p>
+                  )}
+                </div>
+
+                <div className="md:col-span-2 flex justify-end">
+                  <button
+                    onClick={startGame}
+                    disabled={players.length < minPlayers}
+                    className="px-6 py-3 bg-fuchsia-600 rounded-2xl font-semibold hover:bg-fuchsia-500 disabled:opacity-40"
+                  >
+                    Start Game →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Question */}
+            {stage === "question" && q && (
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm text-slate-300">Question {current + 1}/{questions.length}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-48 h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-fuchsia-500" style={{ width: `${(secsLeft / duration) * 100}%` }}></div>
+                    </div>
+                    <span className="w-12 text-right">{secsLeft}s</span>
+                  </div>
+                </div>
+                <h3 className="text-2xl font-bold mb-6">{q.question}</h3>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {q.choices.map((c, i) => (
+                    <div key={i} className="border border-white/10 bg-white/5 rounded-xl px-4 py-3">
+                      <span className="font-semibold mr-2">{String.fromCharCode(65 + i)}.</span>
+                      {c}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6">
+                  <p className="text-xs text-slate-400 mb-2">Live Answers</p>
+                  <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                    {players.map(p => (
+                      <div key={p.id} className="flex items-center gap-2 bg-white/5 px-2 py-1 rounded-lg">
+                        <MonsterAvatar name={p.name} color={p.color} size={24} />
+                        <span className="text-xs">{p.answered != null ? String.fromCharCode(65 + p.answered) : '...'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Leaderboard */}
+            {stage === "leaderboard" && (
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold">Leaderboard</h2>
+                  <span className="text-sm text-slate-400">Correct: {String.fromCharCode(65 + q.correctIndex)}</span>
+                </div>
+                <div className="grid md:grid-cols-2 gap-3 mb-6">
+                  {sorted.slice(0, 8).map((p, i) => (
+                    <div key={p.id} className="flex items-center gap-3 bg-white/5 p-3 rounded-xl">
+                      <span className="w-6 text-slate-400">{i + 1}</span>
+                      <MonsterAvatar name={p.name} color={p.color} />
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{p.name}</p>
+                        <div className="h-2 bg-white/10 rounded-full overflow-hidden mt-1">
+                          <div className="h-full bg-fuchsia-500" style={{ width: `${Math.min(100, p.score / 5)}%` }}></div>
+                        </div>
+                      </div>
+                      <span className="font-mono text-sm">{p.score}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end">
+                  <button onClick={nextQ} className="px-6 py-3 bg-fuchsia-600 rounded-2xl font-semibold hover:bg-fuchsia-500">
+                    {current < questions.length - 1 ? 'Next Question →' : 'View Summary →'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Summary */}
+            {stage === "summary" && (
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <h2 className="text-xl font-semibold mb-6">🏆 Game Summary</h2>
+                <div className="grid md:grid-cols-3 gap-4 mb-6">
+                  {sorted.slice(0, 3).map((w, i) => (
+                    <div key={w.id} className="rounded-xl bg-gradient-to-br from-yellow-400/10 to-white/5 border border-yellow-400/20 p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="text-3xl">{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}</div>
+                        <MonsterAvatar name={w.name} color={w.color} size={48} />
+                        <div>
+                          <p className="font-semibold">{w.name}</p>
+                          <p className="text-sm text-slate-300">Score: {w.score}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <button onClick={() => window.location.href = 'techer.html'} className="px-4 py-2 bg-white/10 rounded-xl hover:bg-white/15">
+                    Back to Dashboard
+                  </button>
+                  <button onClick={() => { setCurrent(0); setPlayers([]); setStage("setup"); }} className="px-6 py-3 bg-fuchsia-600 rounded-2xl font-semibold hover:bg-fuchsia-500">
+                    Play Again
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Element &amp; Molecule Explorer</title>
+  <style>
+    :root {
+      /* Pastel colour palette for a Little‑Monster vibe */
+      --lm-purple: #a68de4;
+      --lm-pink: #f4b7c3;
+      --lm-blue: #8ecae6;
+      --lm-cream: #f6f0fa;
+      --lm-yellow: #f9e79f;
+      --lm-green: #c5e1a5;
+    }
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--lm-cream) 0%, var(--lm-blue) 100%);
+      color: #333;
+      margin: 20px;
+    }
+    h1 {
+      color: var(--lm-purple);
+      margin-bottom: 0.5em;
+      font-size: 2rem;
+    }
+    .input-group {
+      margin-bottom: 1em;
+    }
+    input[type="text"] {
+      padding: 8px 12px;
+      font-size: 16px;
+      width: 300px;
+      max-width: 80%;
+      border: 1px solid var(--lm-purple);
+      border-radius: 6px;
+      background: #ffffff;
+      color: #333;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+      margin-left: 8px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: none;
+      background: var(--lm-purple);
+      color: #fff;
+      transition: background 0.2s ease;
+    }
+    button:hover {
+      background: #8e7cc3;
+    }
+    #info {
+      margin-top: 20px;
+    }
+    .section {
+      background: rgba(255,255,255,0.8);
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .section h2 {
+      margin-top: 0;
+      color: var(--lm-purple);
+      font-size: 1.5rem;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    table, th, td {
+      border: 1px solid #e0e0e0;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: var(--lm-purple);
+      color: #fff;
+      font-weight: 600;
+    }
+    td {
+      background-color: rgba(255,255,255,0.9);
+    }
+    canvas {
+      border: 1px solid #ccc;
+      background: #fff;
+      border-radius: 12px;
+    }
+    .note {
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* Styles for the interactive periodic table */
+    #periodic-table-section {
+      overflow-x: auto;
+    }
+    /* Periodic table grid now includes a left column for period labels and a top row for group labels (19 columns total) */
+    .ptable {
+      display: grid;
+      grid-template-columns: repeat(19, 1fr);
+      gap: 2px;
+      margin-top: 10px;
+    }
+    /* Header labels (group numbers) and row labels (period numbers) */
+    .group-label,
+    .row-label {
+      border: 1px solid #e0e0e0;
+      background-color: rgba(255,255,255,0.9);
+      padding: 4px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 6px;
+      color: var(--lm-purple);
+      cursor: default;
+    }
+    /* Default element cell styling; specific categories override the background colour */
+    .cell {
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: center;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: rgba(255,255,255,0.8);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    .cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    /* Blank cells (used for spacing) */
+    .blank {
+      background-color: transparent;
+      border: none;
+      cursor: default;
+    }
+    /* Colour coding for periodic table categories */
+    .cell.alkali-metal {
+      background-color: #ffd6d6;
+    }
+    .cell.alkaline-earth-metal {
+      background-color: #fff2d5;
+    }
+    .cell.transition-metal {
+      background-color: #e7f7f7;
+    }
+    .cell.post-transition-metal {
+      background-color: #f7efc6;
+    }
+    .cell.metalloid {
+      background-color: #dcf5dc;
+    }
+    .cell.non-metal {
+      background-color: #f9f9e8;
+    }
+    .cell.halogen {
+      background-color: #fffbdc;
+    }
+    .cell.noble-gas {
+      background-color: #e9d8ed;
+    }
+    .cell.lanthanide {
+      background-color: #f0f0ff;
+    }
+    .cell.actinide {
+      background-color: #ffe6e6;
+    }
+
+    /* Legend styles for periodic table colour key */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+    }
+    .legend-box {
+      width: 16px;
+      height: 16px;
+      border: 1px solid #ccc;
+      margin-right: 4px;
+      border-radius: 3px;
+    }
+    .legend-box.alkali-metal { background-color: #FFC1C1; }
+    .legend-box.alkaline-earth-metal { background-color: #FFE4B5; }
+    .legend-box.transition-metal { background-color: #E0FFFF; }
+    .legend-box.post-transition-metal { background-color: #F0E68C; }
+    .legend-box.metalloid { background-color: #CCFFCC; }
+    .legend-box.non-metal { background-color: #F5F5DC; }
+    .legend-box.halogen { background-color: #FFFACD; }
+    .legend-box.noble-gas { background-color: #D8BFD8; }
+    .legend-box.lanthanide { background-color: #E6E6FA; }
+    .legend-box.actinide { background-color: #FFE4E1; }
+    /* Link-style button for molecule list */
+    .link-button {
+      background: none;
+      border: none;
+      color: #007BFF;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+    }
+    .link-button:hover {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Element &amp; Molecule Explorer</h1>
+  <p>Enter an element or molecule by symbol, name or formula (e.g., <em>H</em>, <em>O</em>, <em>H₂O</em>, <em>water</em>, <em>2‑methylpropane</em>). The tool will display protons, electrons, neutrons and, for supported molecules, geometry and polarity.</p>
+  <div class="input-group">
+    <input id="searchInput" type="text" placeholder="Enter symbol, name or formula" onkeypress="if(event.key === 'Enter') lookup()" />
+    <button onclick="lookup()">Lookup</button>
+  </div>
+  <div id="info"></div>
+  <canvas id="moleculeCanvas" width="500" height="450"></canvas>
+  <div class="section" id="periodic-table-section">
+    <h2>Periodic Table</h2>
+    <div id="periodic-table" class="ptable"></div>
+  </div>
+  <!-- Legend for periodic table colour coding -->
+  <div class="legend">
+    <div class="legend-item"><span class="legend-box alkali-metal"></span> Alkali metal</div>
+    <div class="legend-item"><span class="legend-box alkaline-earth-metal"></span> Alkaline earth metal</div>
+    <div class="legend-item"><span class="legend-box transition-metal"></span> Transition metal</div>
+    <div class="legend-item"><span class="legend-box post-transition-metal"></span> Post-transition metal</div>
+    <div class="legend-item"><span class="legend-box metalloid"></span> Metalloid</div>
+    <div class="legend-item"><span class="legend-box non-metal"></span> Non-metal</div>
+    <div class="legend-item"><span class="legend-box halogen"></span> Halogen</div>
+    <div class="legend-item"><span class="legend-box noble-gas"></span> Noble gas</div>
+    <div class="legend-item"><span class="legend-box lanthanide"></span> Lanthanide</div>
+    <div class="legend-item"><span class="legend-box actinide"></span> Actinide</div>
+  </div>
+  <div class="section" id="molecule-list-section">
+    <h2>Molecules, Geometries and Polarities</h2>
+    <table id="moleculeTable">
+      <thead>
+        <tr><th>Molecule</th><th>VSEPR geometry</th><th>Polarity</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <!-- Molecule builder section -->
+  <div class="section" id="molecule-builder-section">
+    <h2>Molecule Builder</h2>
+    <p>Enter a molecular formula or common name to draw the molecule.</p>
+    <div class="input-group">
+      <input id="builderInput" type="text" placeholder="Enter formula or name" onkeypress="if(event.key === 'Enter') builderLookup()" />
+      <button onclick="builderLookup()">Build</button>
+    </div>
+  </div>
+
+  <!-- VSEPR shape explorer section -->
+  <div class="section" id="shape-explorer-section">
+    <h2>VSEPR Shape Explorer</h2>
+    <p>Select the number of bonding pairs and lone pairs on the central atom to explore the geometry.</p>
+    <div class="input-group" style="gap: 10px; flex-wrap: wrap;">
+      <label style="display:flex; align-items: center; gap:4px;">Bond pairs:
+        <select id="bondPairsSelect">
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </label>
+      <label style="display:flex; align-items: center; gap:4px;">Lone pairs:
+        <select id="lonePairsSelect">
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+      </label>
+      <button onclick="showShape()">Show shape</button>
+    </div>
+    <div id="shapeInfo" style="margin-top: 10px;"></div>
+    <canvas id="shapeCanvas" width="350" height="350" style="border:1px solid #ddd; margin-top: 10px;"></canvas>
+  </div>
+  <script>
+    // Element data for the first 20 elements (more can be added later)
+    const elements = {
+      H: { name: 'Hydrogen', atomicNumber: 1, atomicMass: 1.008, shells: [1] },
+      He: { name: 'Helium', atomicNumber: 2, atomicMass: 4.003, shells: [2] },
+      Li: { name: 'Lithium', atomicNumber: 3, atomicMass: 6.941, shells: [2,1] },
+      Be: { name: 'Beryllium', atomicNumber: 4, atomicMass: 9.012, shells: [2,2] },
+      B: { name: 'Boron', atomicNumber: 5, atomicMass: 10.81, shells: [2,3] },
+      C: { name: 'Carbon', atomicNumber: 6, atomicMass: 12.01, shells: [2,4] },
+      N: { name: 'Nitrogen', atomicNumber: 7, atomicMass: 14.01, shells: [2,5] },
+      O: { name: 'Oxygen', atomicNumber: 8, atomicMass: 16.00, shells: [2,6] },
+      F: { name: 'Fluorine', atomicNumber: 9, atomicMass: 19.00, shells: [2,7] },
+      Ne: { name: 'Neon', atomicNumber: 10, atomicMass: 20.18, shells: [2,8] },
+      Na: { name: 'Sodium', atomicNumber: 11, atomicMass: 22.99, shells: [2,8,1] },
+      Mg: { name: 'Magnesium', atomicNumber: 12, atomicMass: 24.31, shells: [2,8,2] },
+      Al: { name: 'Aluminum', atomicNumber: 13, atomicMass: 26.98, shells: [2,8,3] },
+      Si: { name: 'Silicon', atomicNumber: 14, atomicMass: 28.09, shells: [2,8,4] },
+      P: { name: 'Phosphorus', atomicNumber: 15, atomicMass: 30.97, shells: [2,8,5] },
+      S: { name: 'Sulfur', atomicNumber: 16, atomicMass: 32.07, shells: [2,8,6] },
+      Cl: { name: 'Chlorine', atomicNumber: 17, atomicMass: 35.45, shells: [2,8,7] },
+      Ar: { name: 'Argon', atomicNumber: 18, atomicMass: 39.95, shells: [2,8,8] },
+      K: { name: 'Potassium', atomicNumber: 19, atomicMass: 39.10, shells: [2,8,8,1] },
+      Ca: { name: 'Calcium', atomicNumber: 20, atomicMass: 40.08, shells: [2,8,8,2] }
+    ,
+      // Extended elements (21-54)
+      Sc: { name: 'Scandium', atomicNumber: 21, atomicMass: 44.96, shells: [2,8,9,2] },
+      Ti: { name: 'Titanium', atomicNumber: 22, atomicMass: 47.87, shells: [2,8,10,2] },
+      V: { name: 'Vanadium', atomicNumber: 23, atomicMass: 50.94, shells: [2,8,11,2] },
+      Cr: { name: 'Chromium', atomicNumber: 24, atomicMass: 51.996, shells: [2,8,13,1] },
+      Mn: { name: 'Manganese', atomicNumber: 25, atomicMass: 54.94, shells: [2,8,13,2] },
+      Fe: { name: 'Iron', atomicNumber: 26, atomicMass: 55.85, shells: [2,8,14,2] },
+      Co: { name: 'Cobalt', atomicNumber: 27, atomicMass: 58.93, shells: [2,8,15,2] },
+      Ni: { name: 'Nickel', atomicNumber: 28, atomicMass: 58.69, shells: [2,8,16,2] },
+      Cu: { name: 'Copper', atomicNumber: 29, atomicMass: 63.55, shells: [2,8,18,1] },
+      Zn: { name: 'Zinc', atomicNumber: 30, atomicMass: 65.38, shells: [2,8,18,2] },
+      Ga: { name: 'Gallium', atomicNumber: 31, atomicMass: 69.72, shells: [2,8,18,3] },
+      Ge: { name: 'Germanium', atomicNumber: 32, atomicMass: 72.63, shells: [2,8,18,4] },
+      As: { name: 'Arsenic', atomicNumber: 33, atomicMass: 74.92, shells: [2,8,18,5] },
+      Se: { name: 'Selenium', atomicNumber: 34, atomicMass: 78.97, shells: [2,8,18,6] },
+      Br: { name: 'Bromine', atomicNumber: 35, atomicMass: 79.90, shells: [2,8,18,7] },
+      Kr: { name: 'Krypton', atomicNumber: 36, atomicMass: 83.80, shells: [2,8,18,8] },
+      Rb: { name: 'Rubidium', atomicNumber: 37, atomicMass: 85.47, shells: [2,8,18,8,1] },
+      Sr: { name: 'Strontium', atomicNumber: 38, atomicMass: 87.62, shells: [2,8,18,8,2] },
+      Y: { name: 'Yttrium', atomicNumber: 39, atomicMass: 88.91, shells: [2,8,18,9,2] },
+      Zr: { name: 'Zirconium', atomicNumber: 40, atomicMass: 91.22, shells: [2,8,18,10,2] },
+      Nb: { name: 'Niobium', atomicNumber: 41, atomicMass: 92.91, shells: [2,8,18,12,1] },
+      Mo: { name: 'Molybdenum', atomicNumber: 42, atomicMass: 95.95, shells: [2,8,18,13,1] },
+      Tc: { name: 'Technetium', atomicNumber: 43, atomicMass: 98.00, shells: [2,8,18,14,1] },
+      Ru: { name: 'Ruthenium', atomicNumber: 44, atomicMass: 101.07, shells: [2,8,18,15,1] },
+      Rh: { name: 'Rhodium', atomicNumber: 45, atomicMass: 102.91, shells: [2,8,18,16,1] },
+      Pd: { name: 'Palladium', atomicNumber: 46, atomicMass: 106.42, shells: [2,8,18,18,0] },
+      Ag: { name: 'Silver', atomicNumber: 47, atomicMass: 107.87, shells: [2,8,18,18,1] },
+      Cd: { name: 'Cadmium', atomicNumber: 48, atomicMass: 112.41, shells: [2,8,18,18,2] },
+      In: { name: 'Indium', atomicNumber: 49, atomicMass: 114.82, shells: [2,8,18,18,3] },
+      Sn: { name: 'Tin', atomicNumber: 50, atomicMass: 118.71, shells: [2,8,18,18,4] },
+      Sb: { name: 'Antimony', atomicNumber: 51, atomicMass: 121.76, shells: [2,8,18,18,5] },
+      Te: { name: 'Tellurium', atomicNumber: 52, atomicMass: 127.60, shells: [2,8,18,18,6] },
+      I: { name: 'Iodine', atomicNumber: 53, atomicMass: 126.90, shells: [2,8,18,18,7] },
+      Xe: { name: 'Xenon', atomicNumber: 54, atomicMass: 131.29, shells: [2,8,18,18,8] },
+      Cs: { name: 'Cesium', atomicNumber: 55, atomicMass: 132.91, shells: [2,8,18,18,8,1] },
+      Ba: { name: 'Barium', atomicNumber: 56, atomicMass: 137.33, shells: [2,8,18,18,8,2] },
+      La: { name: 'Lanthanum', atomicNumber: 57, atomicMass: 138.91, shells: [2,8,18,18,9,2] },
+      Ce: { name: 'Cerium', atomicNumber: 58, atomicMass: 140.12, shells: [2,8,18,19,9,2] },
+      Pr: { name: 'Praseodymium', atomicNumber: 59, atomicMass: 140.91, shells: [2,8,18,21,8,2] },
+      Nd: { name: 'Neodymium', atomicNumber: 60, atomicMass: 144.24, shells: [2,8,18,22,8,2] },
+      Pm: { name: 'Promethium', atomicNumber: 61, atomicMass: 145, shells: [2,8,18,23,8,2] },
+      Sm: { name: 'Samarium', atomicNumber: 62, atomicMass: 150.36, shells: [2,8,18,24,8,2] },
+      Eu: { name: 'Europium', atomicNumber: 63, atomicMass: 151.96, shells: [2,8,18,25,8,2] },
+      Gd: { name: 'Gadolinium', atomicNumber: 64, atomicMass: 157.25, shells: [2,8,18,25,9,2] },
+      Tb: { name: 'Terbium', atomicNumber: 65, atomicMass: 158.93, shells: [2,8,18,27,8,2] },
+      Dy: { name: 'Dysprosium', atomicNumber: 66, atomicMass: 162.50, shells: [2,8,18,28,8,2] },
+      Ho: { name: 'Holmium', atomicNumber: 67, atomicMass: 164.93, shells: [2,8,18,29,8,2] },
+      Er: { name: 'Erbium', atomicNumber: 68, atomicMass: 167.26, shells: [2,8,18,30,8,2] },
+      Tm: { name: 'Thulium', atomicNumber: 69, atomicMass: 168.93, shells: [2,8,18,31,8,2] },
+      Yb: { name: 'Ytterbium', atomicNumber: 70, atomicMass: 173.04, shells: [2,8,18,32,8,2] },
+      Lu: { name: 'Lutetium', atomicNumber: 71, atomicMass: 174.97, shells: [2,8,18,32,9,2] },
+      Hf: { name: 'Hafnium', atomicNumber: 72, atomicMass: 178.49, shells: [2,8,18,32,10,2] },
+      Ta: { name: 'Tantalum', atomicNumber: 73, atomicMass: 180.95, shells: [2,8,18,32,11,2] },
+      W: { name: 'Tungsten', atomicNumber: 74, atomicMass: 183.84, shells: [2,8,18,32,12,2] },
+      Re: { name: 'Rhenium', atomicNumber: 75, atomicMass: 186.21, shells: [2,8,18,32,13,2] },
+      Os: { name: 'Osmium', atomicNumber: 76, atomicMass: 190.23, shells: [2,8,18,32,14,2] },
+      Ir: { name: 'Iridium', atomicNumber: 77, atomicMass: 192.22, shells: [2,8,18,32,15,2] },
+      Pt: { name: 'Platinum', atomicNumber: 78, atomicMass: 195.08, shells: [2,8,18,32,17,1] },
+      Au: { name: 'Gold', atomicNumber: 79, atomicMass: 196.97, shells: [2,8,18,32,18,1] },
+      Hg: { name: 'Mercury', atomicNumber: 80, atomicMass: 200.59, shells: [2,8,18,32,18,2] },
+      Tl: { name: 'Thallium', atomicNumber: 81, atomicMass: 204.38, shells: [2,8,18,32,18,3] },
+      Pb: { name: 'Lead', atomicNumber: 82, atomicMass: 207.2, shells: [2,8,18,32,18,4] },
+      Bi: { name: 'Bismuth', atomicNumber: 83, atomicMass: 208.98, shells: [2,8,18,32,18,5] },
+      Po: { name: 'Polonium', atomicNumber: 84, atomicMass: 209, shells: [2,8,18,32,18,6] },
+      At: { name: 'Astatine', atomicNumber: 85, atomicMass: 210, shells: [2,8,18,32,18,7] },
+      Rn: { name: 'Radon', atomicNumber: 86, atomicMass: 222, shells: [2,8,18,32,18,8] },
+      Fr: { name: 'Francium', atomicNumber: 87, atomicMass: 223, shells: [2,8,18,32,18,8,1] },
+      Ra: { name: 'Radium', atomicNumber: 88, atomicMass: 226, shells: [2,8,18,32,18,8,2] },
+      Ac: { name: 'Actinium', atomicNumber: 89, atomicMass: 227, shells: [2,8,18,32,18,9,2] },
+      Th: { name: 'Thorium', atomicNumber: 90, atomicMass: 232.04, shells: [2,8,18,32,18,10,2] },
+      Pa: { name: 'Protactinium', atomicNumber: 91, atomicMass: 231.04, shells: [2,8,18,32,20,9,2] },
+      U: { name: 'Uranium', atomicNumber: 92, atomicMass: 238.03, shells: [2,8,18,32,21,9,2] },
+      Np: { name: 'Neptunium', atomicNumber: 93, atomicMass: 237, shells: [2,8,18,32,22,9,2] },
+      Pu: { name: 'Plutonium', atomicNumber: 94, atomicMass: 244, shells: [2,8,18,32,24,8,2] },
+      Am: { name: 'Americium', atomicNumber: 95, atomicMass: 243, shells: [2,8,18,32,25,8,2] },
+      Cm: { name: 'Curium', atomicNumber: 96, atomicMass: 247, shells: [2,8,18,32,25,9,2] },
+      Bk: { name: 'Berkelium', atomicNumber: 97, atomicMass: 247, shells: [2,8,18,32,27,8,2] },
+      Cf: { name: 'Californium', atomicNumber: 98, atomicMass: 251, shells: [2,8,18,32,28,8,2] },
+      Es: { name: 'Einsteinium', atomicNumber: 99, atomicMass: 252, shells: [2,8,18,32,29,8,2] },
+      Fm: { name: 'Fermium', atomicNumber: 100, atomicMass: 257, shells: [2,8,18,32,30,8,2] },
+      Md: { name: 'Mendelevium', atomicNumber: 101, atomicMass: 258, shells: [2,8,18,32,31,8,2] },
+      No: { name: 'Nobelium', atomicNumber: 102, atomicMass: 259, shells: [2,8,18,32,32,8,2] },
+      Lr: { name: 'Lawrencium', atomicNumber: 103, atomicMass: 266, shells: [2,8,18,32,32,8,3] },
+      Rf: { name: 'Rutherfordium', atomicNumber: 104, atomicMass: 267, shells: [2,8,18,32,32,10,2] },
+      Db: { name: 'Dubnium', atomicNumber: 105, atomicMass: 268, shells: [2,8,18,32,32,11,2] },
+      Sg: { name: 'Seaborgium', atomicNumber: 106, atomicMass: 269, shells: [2,8,18,32,32,12,2] },
+      Bh: { name: 'Bohrium', atomicNumber: 107, atomicMass: 270, shells: [2,8,18,32,32,13,2] },
+      Hs: { name: 'Hassium', atomicNumber: 108, atomicMass: 277, shells: [2,8,18,32,32,14,2] },
+      Mt: { name: 'Meitnerium', atomicNumber: 109, atomicMass: 278, shells: [2,8,18,32,32,15,2] },
+      Ds: { name: 'Darmstadtium', atomicNumber: 110, atomicMass: 281, shells: [2,8,18,32,32,16,2] },
+      Rg: { name: 'Roentgenium', atomicNumber: 111, atomicMass: 282, shells: [2,8,18,32,32,17,2] },
+      Cn: { name: 'Copernicium', atomicNumber: 112, atomicMass: 285, shells: [2,8,18,32,32,18,2] },
+      Nh: { name: 'Nihonium', atomicNumber: 113, atomicMass: 286, shells: [2,8,18,32,32,18,3] },
+      Fl: { name: 'Flerovium', atomicNumber: 114, atomicMass: 289, shells: [2,8,18,32,32,18,4] },
+      Mc: { name: 'Moscovium', atomicNumber: 115, atomicMass: 290, shells: [2,8,18,32,32,18,5] },
+      Lv: { name: 'Livermorium', atomicNumber: 116, atomicMass: 293, shells: [2,8,18,32,32,18,6] },
+      Ts: { name: 'Tennessine', atomicNumber: 117, atomicMass: 294, shells: [2,8,18,32,32,18,7] },
+      Og: { name: 'Oganesson', atomicNumber: 118, atomicMass: 294, shells: [2,8,18,32,32,18,8] }
+    };
+
+    // Radii and colors for drawing atoms (relative sizes for visual appeal)
+    const elementDrawInfo = {
+      H: { radius: 14, color: '#ffffff', stroke: '#000000' },
+      C: { radius: 22, color: '#888888', stroke: '#000000' },
+      N: { radius: 20, color: '#5677ab', stroke: '#000000' },
+      O: { radius: 20, color: '#e04e4e', stroke: '#000000' },
+      F: { radius: 18, color: '#78c34f', stroke: '#000000' },
+      Cl: { radius: 24, color: '#78c34f', stroke: '#000000' },
+      S: { radius: 24, color: '#f2c32d', stroke: '#000000' },
+      P: { radius: 24, color: '#f2a633', stroke: '#000000' },
+      Na: { radius: 26, color: '#dcc8ff', stroke: '#000000' },
+      Mg: { radius: 24, color: '#c0c0c0', stroke: '#000000' },
+      Al: { radius: 24, color: '#b0b0b0', stroke: '#000000' },
+      Si: { radius: 24, color: '#f7a8b8', stroke: '#000000' },
+      Ca: { radius: 26, color: '#a2c4c9', stroke: '#000000' },
+      K: { radius: 28, color: '#a2c4c9', stroke: '#000000' },
+      He: { radius: 18, color: '#d9ffff', stroke: '#000000' },
+      B: { radius: 20, color: '#ffb5b5', stroke: '#000000' },
+      Li: { radius: 20, color: '#ccffff', stroke: '#000000' },
+      Be: { radius: 20, color: '#caffca', stroke: '#000000' },
+      Ne: { radius: 20, color: '#b3e5fc', stroke: '#000000' }
+    };
+
+    // Predefined molecules with geometry and polarity information
+    const molecules = {
+      'H2O': {
+        name: 'Water',
+        geometry: 'Bent',
+        polarity: 'Polar',
+        atoms: [
+          { element: 'O', x: 0, y: 0 },
+          { element: 'H', x: -1, y: 1 },
+          { element: 'H', x: 1, y: 1 }
+        ],
+        bonds: [[0,1],[0,2]]
+      },
+      'CO2': {
+        name: 'Carbon dioxide',
+        geometry: 'Linear',
+        polarity: 'Nonpolar',
+        atoms: [
+          { element: 'O', x: -1, y: 0 },
+          { element: 'C', x: 0, y: 0 },
+          { element: 'O', x: 1, y: 0 }
+        ],
+        bonds: [[0,1],[1,2]]
+      },
+      'CH4': {
+        name: 'Methane',
+        geometry: 'Tetrahedral',
+        polarity: 'Nonpolar',
+        atoms: [
+          { element: 'C', x: 0, y: 0 },
+          { element: 'H', x: -1, y: -1 },
+          { element: 'H', x: 1, y: -1 },
+          { element: 'H', x: -1, y: 1 },
+          { element: 'H', x: 1, y: 1 }
+        ],
+        bonds: [[0,1],[0,2],[0,3],[0,4]]
+      },
+      'NH3': {
+        name: 'Ammonia',
+        geometry: 'Trigonal pyramidal',
+        polarity: 'Polar',
+        atoms: [
+          { element: 'N', x: 0, y: 0 },
+          { element: 'H', x: 0, y: 1 },
+          { element: 'H', x: -0.866, y: -0.5 },
+          { element: 'H', x: 0.866, y: -0.5 }
+        ],
+        bonds: [[0,1],[0,2],[0,3]]
+      },
+      'CH2Cl2': {
+        name: 'Dichloromethane',
+        geometry: 'Tetrahedral',
+        polarity: 'Polar',
+        atoms: [
+          { element: 'C', x: 0, y: 0 },
+          { element: 'Cl', x: -1, y: -1 },
+          { element: 'Cl', x: 1, y: -1 },
+          { element: 'H', x: -1, y: 1 },
+          { element: 'H', x: 1, y: 1 }
+        ],
+        bonds: [[0,1],[0,2],[0,3],[0,4]]
+      },
+      'CH3OH': {
+        name: 'Methanol',
+        geometry: 'Tetrahedral (around C and O)',
+        polarity: 'Polar',
+        atoms: [
+          { element: 'C', x: -1, y: 0 },
+          { element: 'O', x: 0, y: 0 },
+          { element: 'H', x: -2, y: 1 },
+          { element: 'H', x: -2, y: -1 },
+          { element: 'H', x: -1, y: -1.5 },
+          { element: 'H', x: 1, y: 0 }
+        ],
+        bonds: [[0,1],[0,2],[0,3],[0,4],[1,5]]
+      },
+      'C2H6': {
+        name: 'Ethane',
+        geometry: 'Tetrahedral (around each carbon)',
+        polarity: 'Nonpolar',
+        atoms: [
+          { element: 'C', x: -1, y: 0 },
+          { element: 'C', x: 1, y: 0 },
+          { element: 'H', x: -2, y: 1 },
+          { element: 'H', x: -2, y: -1 },
+          { element: 'H', x: 0, y: 1 },
+          { element: 'H', x: 0, y: -1 },
+          { element: 'H', x: 2, y: 1 },
+          { element: 'H', x: 2, y: -1 }
+        ],
+        bonds: [[0,1],[0,2],[0,3],[0,4],[0,5],[1,6],[1,7]]
+      },
+      'C3H8': {
+        name: 'Propane',
+        geometry: 'Tetrahedral (around each carbon)',
+        polarity: 'Nonpolar',
+        atoms: [
+          { element: 'C', x: -2, y: 0 },
+          { element: 'C', x: 0, y: 0 },
+          { element: 'C', x: 2, y: 0 },
+          { element: 'H', x: -3, y: 1 },
+          { element: 'H', x: -3, y: -1 },
+          { element: 'H', x: -1, y: 1 },
+          { element: 'H', x: -1, y: -1 },
+          { element: 'H', x: 1, y: 1 },
+          { element: 'H', x: 1, y: -1 },
+          { element: 'H', x: 3, y: 1 },
+          { element: 'H', x: 3, y: -1 }
+        ],
+        bonds: [[0,1],[1,2],[0,3],[0,4],[0,5],[0,6],[1,7],[1,8],[2,9],[2,10]]
+      },
+      'C4H10': {
+        name: 'Butane',
+        geometry: 'Tetrahedral (around each carbon)',
+        polarity: 'Nonpolar',
+        atoms: [
+          { element: 'C', x: -3, y: 0 },
+          { element: 'C', x: -1, y: 0 },
+          { element: 'C', x: 1, y: 0 },
+          { element: 'C', x: 3, y: 0 },
+          { element: 'H', x: -4, y: 1 },
+          { element: 'H', x: -4, y: -1 },
+          { element: 'H', x: -2, y: 1 },
+          { element: 'H', x: -2, y: -1 },
+          { element: 'H', x: 0, y: 1 },
+          { element: 'H', x: 0, y: -1 },
+          { element: 'H', x: 2, y: 1 },
+          { element: 'H', x: 2, y: -1 },
+          { element: 'H', x: 4, y: 1 },
+          { element: 'H', x: 4, y: -1 }
+        ],
+        bonds: [[0,1],[1,2],[2,3],[0,4],[0,5],[1,6],[1,7],[2,8],[2,9],[3,10],[3,11],[3,12],[3,13]]
+      },
+      'iso-C4H10': {
+        name: '2‑Methylpropane',
+        geometry: 'Tetrahedral (around each carbon)',
+        polarity: 'Nonpolar',
+        atoms: [
+          { element: 'C', x: 0, y: 0 },      // central C
+          { element: 'C', x: -1, y: 0 },     // left CH3
+          { element: 'C', x: 1, y: 0 },      // right CH3
+          { element: 'C', x: 0, y: -1 },     // bottom CH3
+          // hydrogens for left CH3
+          { element: 'H', x: -2, y: 0 },
+          { element: 'H', x: -1, y: 1 },
+          { element: 'H', x: -1, y: -1 },
+          // hydrogens for right CH3
+          { element: 'H', x: 2, y: 0 },
+          { element: 'H', x: 1, y: 1 },
+          { element: 'H', x: 1, y: -1 },
+          // hydrogens for bottom CH3
+          { element: 'H', x: -1, y: -2 },
+          { element: 'H', x: 1, y: -2 },
+          { element: 'H', x: 0, y: -2 } 
+        ],
+        bonds: [
+          [0,1],[0,2],[0,3],     // central C to three CH3s
+          [1,4],[1,5],[1,6],      // left CH3 Hs
+          [2,7],[2,8],[2,9],      // right CH3 Hs
+        [3,10],[3,11],[3,12]    // bottom CH3 Hs
+        ]
+      },
+      'BF3': {
+        name: 'Boron trifluoride',
+        geometry: 'Trigonal planar',
+        polarity: 'Nonpolar',
+        atoms: [
+          { element: 'B', x: 0, y: 0 },
+          { element: 'F', x: -1, y: 0 },
+          { element: 'F', x: 0.5, y: 0.866 },
+          { element: 'F', x: 0.5, y: -0.866 }
+        ],
+        bonds: [[0,1],[0,2],[0,3]]
+      },
+      'PF5': {
+        name: 'Phosphorus pentafluoride',
+        geometry: 'Trigonal bipyramidal',
+        polarity: 'Nonpolar',
+        atoms: [
+          { element: 'P', x: 0, y: 0 },
+          { element: 'F', x: -1, y: 0 },
+          { element: 'F', x: 0.5, y: 0.866 },
+          { element: 'F', x: 0.5, y: -0.866 },
+          { element: 'F', x: 0, y: 1.3 },
+          { element: 'F', x: 0, y: -1.3 }
+        ],
+        bonds: [[0,1],[0,2],[0,3],[0,4],[0,5]]
+      },
+      'SF4': {
+        name: 'Sulfur tetrafluoride',
+        geometry: 'See-saw',
+        polarity: 'Polar',
+        atoms: [
+          { element: 'S', x: 0, y: 0 },
+          { element: 'F', x: -1, y: 0 },
+          { element: 'F', x: 1, y: 0 },
+          { element: 'F', x: 0, y: 1.3 },
+          { element: 'F', x: 0, y: -1.3 }
+        ],
+        bonds: [[0,1],[0,2],[0,3],[0,4]]
+      },
+      'SF6': {
+        name: 'Sulfur hexafluoride',
+        geometry: 'Octahedral',
+        polarity: 'Nonpolar',
+        atoms: [
+          { element: 'S', x: 0, y: 0 },
+          { element: 'F', x: 1, y: 0 },
+          { element: 'F', x: -1, y: 0 },
+          { element: 'F', x: 0, y: 1 },
+          { element: 'F', x: 0, y: -1 },
+          { element: 'F', x: 0.8, y: 0.8 },
+          { element: 'F', x: -0.8, y: -0.8 }
+        ],
+        bonds: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6]]
+      },
+      'XeF4': {
+        name: 'Xenon tetrafluoride',
+        geometry: 'Square planar',
+        polarity: 'Nonpolar',
+        atoms: [
+          { element: 'Xe', x: 0, y: 0 },
+          { element: 'F', x: 1, y: 0 },
+          { element: 'F', x: -1, y: 0 },
+          { element: 'F', x: 0, y: 1 },
+          { element: 'F', x: 0, y: -1 }
+        ],
+        bonds: [[0,1],[0,2],[0,3],[0,4]]
+      }
+    };
+
+    // Mapping from names to formulas (lowercase keys)
+    const nameToFormula = {
+      'water': 'H2O',
+      'dihydrogen monoxide': 'H2O',
+      'hydrogen oxide': 'H2O',
+      'carbon dioxide': 'CO2',
+      'carbonic acid gas': 'CO2',
+      'methane': 'CH4',
+      'natural gas': 'CH4',
+      'ammonia': 'NH3',
+      'ammonia gas': 'NH3',
+      'dichloromethane': 'CH2Cl2',
+      'methylene chloride': 'CH2Cl2',
+      'methanol': 'CH3OH',
+      'wood alcohol': 'CH3OH',
+      'ethanol': 'C2H5OH',
+      'ethyl alcohol': 'C2H5OH',
+      'ethane': 'C2H6',
+      'propane': 'C3H8',
+      'propane gas': 'C3H8',
+      'butane': 'C4H10',
+      'n-butane': 'C4H10',
+      'isobutane': 'iso-C4H10',
+      'isobutane gas': 'iso-C4H10',
+      '2-methylpropane': 'iso-C4H10',
+      '2 methylpropane': 'iso-C4H10',
+      'hydrogen': 'H',
+      'oxygen': 'O',
+      'nitrogen': 'N',
+      'carbon': 'C',
+      'chlorine': 'Cl',
+      'fluorine': 'F',
+      'sulfur': 'S',
+      'phosphorus': 'P'
+      ,
+      // New molecules common names
+      'boron trifluoride': 'BF3',
+      'phosphorus pentafluoride': 'PF5',
+      'sulfur tetrafluoride': 'SF4',
+      'sulfur hexafluoride': 'SF6',
+      'xenon tetrafluoride': 'XeF4'
+    };
+
+    // Generate a map from atomic number to element symbol
+    const atomicNumberToSymbol = {};
+    for (const sym in elements) {
+      atomicNumberToSymbol[elements[sym].atomicNumber] = sym;
+    }
+
+    // Utility to parse a chemical formula into an object of element counts
+    function parseFormula(formula) {
+      // Support parentheses? For simplicity, we do not handle nested parentheses. Only simple formulas like C2H6.
+      const tokenRegex = /([A-Z][a-z]?)(\d*)/g;
+      const counts = {};
+      let match;
+      while ((match = tokenRegex.exec(formula)) !== null) {
+        const element = match[1];
+        const num = match[2] ? parseInt(match[2]) : 1;
+        counts[element] = (counts[element] || 0) + num;
+      }
+      return counts;
+    }
+
+    // Main lookup function triggered by button or Enter key
+    function lookup() {
+      const input = document.getElementById('searchInput').value.trim();
+      if (!input) return;
+      const lower = input.toLowerCase();
+      let formula = '';
+      let isElement = false;
+      let elementSym = '';
+      let elementData = null;
+
+      // Check if user entered an atomic number
+      if (/^\d+$/.test(lower)) {
+        const num = parseInt(lower);
+        if (atomicNumberToSymbol[num]) {
+          elementSym = atomicNumberToSymbol[num];
+          elementData = elements[elementSym];
+          isElement = true;
+        }
+      }
+      // Check if input is an element symbol
+      if (!isElement && /^[A-Z][a-z]?$/.test(input)) {
+        const sym = input;
+        if (elements[sym]) {
+          elementSym = sym;
+          elementData = elements[sym];
+          isElement = true;
+        }
+      }
+      // Check if input is a known name
+      if (!isElement && nameToFormula[lower]) {
+        formula = nameToFormula[lower];
+      }
+      // Check if input looks like a formula (contains digits or multiple elements)
+      if (!isElement && formula === '') {
+        // Remove any whitespace and treat numbers and letters
+        const cleaned = input.replace(/\s+/g, '');
+        if (/^[A-Za-z0-9]+$/.test(cleaned)) {
+          formula = cleaned;
+        }
+      }
+      // If we still have no identification
+      if (!isElement && formula === '') {
+        displayMessage('Unrecognized input. Please enter a valid element symbol, name or molecular formula.');
+        return;
+      }
+      // Display element information
+      if (isElement) {
+        displayElement(elementSym, elementData);
+      } else {
+        // Determine if formula corresponds to a molecule we know
+        let moleculeKey = formula;
+        if (molecules[moleculeKey]) {
+          displayMolecule(moleculeKey);
+        } else if (molecules['iso-' + formula]) {
+          moleculeKey = 'iso-' + formula;
+          displayMolecule(moleculeKey);
+        } else {
+          // Unknown molecule: parse formula and attempt to derive a symmetrical molecule
+          const counts = parseFormula(formula);
+          const derived = deriveSymmetricalMolecule(formula, counts);
+          if (derived) {
+            displayDerivedMolecule(derived, counts);
+          } else {
+            displayUnknownMolecule(formula, counts);
+          }
+        }
+      }
+    }
+
+    // Display element details and draw atomic model
+    function displayElement(sym, data) {
+      const infoDiv = document.getElementById('info');
+      const protons = data.atomicNumber;
+      const electrons = data.atomicNumber;
+      const neutrons = Math.round(data.atomicMass - data.atomicNumber);
+      let shellStr = '';
+      data.shells.forEach((count, index) => {
+        shellStr += 'Shell ' + (index + 1) + ': ' + count + ' electrons\n';
+      });
+      let html = '<div class="section"><h2>' + data.name + ' (' + sym + ')</h2>';
+      html += '<p><strong>Atomic Number (Z):</strong> ' + protons + '</p>';
+      html += '<p><strong>Atomic Mass:</strong> ' + data.atomicMass + '</p>';
+      html += '<p><strong>Protons:</strong> ' + protons + '</p>';
+      html += '<p><strong>Electrons:</strong> ' + electrons + '</p>';
+      html += '<p><strong>Approx. Neutrons:</strong> ' + neutrons + '</p>';
+      html += '<p><strong>Electron Shell Distribution:</strong></p><pre>' + shellStr + '</pre>';
+      // Include the ground-state electron configuration using the Madelung rule
+      const config = electronConfiguration(protons);
+      html += '<p><strong>Electron Configuration:</strong></p><p class="config">' + config + '</p>';
+      html += '</div>';
+      infoDiv.innerHTML = html;
+      // Draw atomic model on the canvas
+      drawElementModel(sym, data);
+    }
+
+    // Display a known molecule
+    function displayMolecule(key) {
+      const mol = molecules[key];
+      const counts = parseFormula(key.includes('iso-') ? key.slice(4) : key);
+      const infoDiv = document.getElementById('info');
+      let html = `<div class="section"><h2>${mol.name} (${key.replace('iso-','')})</h2>`;
+      html += `<p><strong>Geometry:</strong> ${mol.geometry}</p>`;
+      html += `<p><strong>Polarity:</strong> ${mol.polarity}</p>`;
+      html += `<p><strong>Composition:</strong></p>`;
+      html += `<ul>`;
+      for (const el in counts) {
+        const count = counts[el];
+        const elData = elements[el];
+        if (elData) {
+          const protons = elData.atomicNumber;
+          const electrons = elData.atomicNumber;
+          const neutrons = Math.round(elData.atomicMass - elData.atomicNumber);
+          // Use e<sup>-</sup> to denote electrons without implying negativity
+          html += `<li>${el} (${elData.name}): <strong>${count}</strong> × [P:${protons}, e<sup>-</sup>:${electrons}, n≈${neutrons}]</li>`;
+        } else {
+          html += `<li>${el}: ${count}</li>`;
+        }
+      }
+      html += `</ul>`;
+      html += `</div>`;
+      infoDiv.innerHTML = html;
+      drawMolecule(mol);
+    }
+
+    // Display unknown molecule composition
+    function displayUnknownMolecule(formula, counts) {
+      const infoDiv = document.getElementById('info');
+      let html = `<div class="section"><h2>${formula}</h2>`;
+      html += `<p><strong>Unknown molecule:</strong> not in our database.</p>`;
+      html += `<p><strong>Composition:</strong></p>`;
+      html += `<ul>`;
+      for (const el in counts) {
+        const count = counts[el];
+        if (elements[el]) {
+          const elData = elements[el];
+          const protons = elData.atomicNumber;
+          const electrons = elData.atomicNumber;
+          const neutrons = Math.round(elData.atomicMass - elData.atomicNumber);
+          // Use e<sup>-</sup> to denote electrons without implying negativity
+          html += `<li>${el} (${elData.name}): <strong>${count}</strong> × [P:${protons}, e<sup>-</sup>:${electrons}, n≈${neutrons}]</li>`;
+        } else {
+          html += `<li>${el}: ${count}</li>`;
+        }
+      }
+      html += `</ul>`;
+      html += `</div>`;
+      infoDiv.innerHTML = html;
+      // Clear canvas
+      const ctx = document.getElementById('moleculeCanvas').getContext('2d');
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+
+    // Display a simple message
+    function displayMessage(msg) {
+      const infoDiv = document.getElementById('info');
+      infoDiv.innerHTML = `<div class="section"><p>${msg}</p></div>`;
+      const ctx = document.getElementById('moleculeCanvas').getContext('2d');
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+
+    // Draw an atomic model for a single element
+    function drawElementModel(sym, data) {
+      const canvas = document.getElementById('moleculeCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const shells = data.shells || [];
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const maxShells = shells.length;
+      // Determine maximum radius for the outermost electron shell with some padding
+      const maxRadius = Math.min(canvas.width, canvas.height) / 2 - 30;
+      // Step size between shells; add one extra step for the nucleus area
+      const step = maxShells > 0 ? maxRadius / (maxShells + 1) : maxRadius / 2;
+      // Draw each shell and its electrons
+      shells.forEach((count, index) => {
+        const radius = step * (index + 1);
+        // Draw the shell circle
+        ctx.beginPath();
+        ctx.strokeStyle = '#bbb';
+        ctx.lineWidth = 1;
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.stroke();
+        // Draw electrons evenly spaced on this shell
+        if (count > 0) {
+          const angleStep = (2 * Math.PI) / count;
+          for (let i = 0; i < count; i++) {
+            const angle = i * angleStep;
+            const ex = centerX + radius * Math.cos(angle);
+            const ey = centerY + radius * Math.sin(angle);
+            ctx.beginPath();
+            ctx.fillStyle = '#000';
+            ctx.arc(ex, ey, 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      });
+      // Draw nucleus
+      const nucleusRadius = step * 0.7;
+      ctx.beginPath();
+      ctx.fillStyle = '#f5f5f5';
+      ctx.strokeStyle = '#444';
+      ctx.arc(centerX, centerY, nucleusRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      // Draw nucleus labels for protons and neutrons
+      const protons = data.atomicNumber;
+      const neutrons = Math.round(data.atomicMass - data.atomicNumber);
+      ctx.fillStyle = '#000';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      // Use smaller font size if numbers are large
+      const fontSize = Math.max(12, nucleusRadius * 0.6);
+      ctx.font = fontSize + 'px sans-serif';
+      ctx.fillText('P:' + protons, centerX, centerY - nucleusRadius * 0.3);
+      ctx.fillText('N:' + neutrons, centerX, centerY + nucleusRadius * 0.3);
+    }
+
+    // Draw molecule on the canvas
+    function drawMolecule(mol) {
+      const canvas = document.getElementById('moleculeCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const atoms = mol.atoms;
+      const bonds = mol.bonds;
+      // Compute bounding box
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      atoms.forEach(a => {
+        if (a.x < minX) minX = a.x;
+        if (a.x > maxX) maxX = a.x;
+        if (a.y < minY) minY = a.y;
+        if (a.y > maxY) maxY = a.y;
+      });
+      // Add some padding
+      const padding = 0.5;
+      minX -= padding; maxX += padding; minY -= padding; maxY += padding;
+      // Compute scale and offsets
+      const width = maxX - minX;
+      const height = maxY - minY;
+      const canvasW = canvas.width;
+      const canvasH = canvas.height;
+      const scaleX = canvasW / width;
+      const scaleY = canvasH / height;
+      const scale = Math.min(scaleX, scaleY) * 0.4; // 0.4 to keep margins
+      const offsetX = canvasW/2 - ((minX + maxX)/2) * scale;
+      const offsetY = canvasH/2 - ((minY + maxY)/2) * scale;
+      // Draw bonds
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#555';
+      bonds.forEach(pair => {
+        const a1 = atoms[pair[0]];
+        const a2 = atoms[pair[1]];
+        const x1 = a1.x * scale + offsetX;
+        const y1 = a1.y * scale + offsetY;
+        const x2 = a2.x * scale + offsetX;
+        const y2 = a2.y * scale + offsetY;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      });
+      // Draw atoms
+      atoms.forEach((atom, index) => {
+        const info = elementDrawInfo[atom.element] || { radius: 20, color: '#ccc', stroke: '#333' };
+        const x = atom.x * scale + offsetX;
+        const y = atom.y * scale + offsetY;
+        // Draw circle
+        ctx.beginPath();
+        ctx.fillStyle = info.color;
+        ctx.strokeStyle = info.stroke;
+        const r = info.radius;
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // Draw text (element symbol)
+        ctx.fillStyle = '#000';
+        ctx.font = `${r * 0.9}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(atom.element, x, y);
+      });
+    }
+
+    // Layout for periodic table (18 columns per row, includes lanthanides and actinides rows)
+    const periodicLayout = [
+      ['H','','','','','','','','','','','','','','','','','He'],
+      ['Li','Be','','','','','','','','','B','C','N','O','F','Ne','',''],
+      ['Na','Mg','','','','','','','','','Al','Si','P','S','Cl','Ar','',''],
+      ['K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr'],
+      ['Rb','Sr','Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn','Sb','Te','I','Xe'],
+      ['Cs','Ba','','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po','At','Rn'],
+      ['Fr','Ra','','Rf','Db','Sg','Bh','Hs','Mt','Ds','Rg','Cn','Nh','Fl','Mc','Lv','Ts','Og'],
+      ['', '', 'La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu',''],
+      ['', '', 'Ac','Th','Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm','Md','No','Lr','']
+    ];
+
+    /* --------------------------------------------------------------------------
+       Periodic table category definitions and mapping.
+       Each element symbol is assigned to a category such as alkali metal,
+       transition metal, metalloid, etc.  These categories are used to colour
+       the periodic table cells and are defined below.  If a symbol is not
+       present in the mapping it will not receive a special colour.
+    -------------------------------------------------------------------------- */
+    const categories = {
+      'alkali-metal': ['Li','Na','K','Rb','Cs','Fr'],
+      'alkaline-earth-metal': ['Be','Mg','Ca','Sr','Ba','Ra'],
+      'lanthanide': ['La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu'],
+      'actinide': ['Ac','Th','Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm','Md','No','Lr'],
+      'transition-metal': [
+        'Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn',
+        'Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
+        'Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg',
+        'Rf','Db','Sg','Bh','Hs','Mt','Ds','Rg','Cn'
+      ],
+      'post-transition-metal': [
+        'Al','Ga','In','Sn','Tl','Pb','Bi','Po','Nh','Fl','Mc','Lv','Ts','Og'
+      ],
+      'metalloid': ['B','Si','Ge','As','Sb','Te','At'],
+      'non-metal': ['H','C','N','O','P','S','Se'],
+      'halogen': ['F','Cl','Br','I','At','Ts'],
+      'noble-gas': ['He','Ne','Ar','Kr','Xe','Rn','Og']
+    };
+    const elementCategories = {};
+    Object.keys(categories).forEach(cat => {
+      categories[cat].forEach(sym => {
+        elementCategories[sym] = cat;
+      });
+    });
+
+    /* --------------------------------------------------------------------------
+       Compute the electron configuration for an atomic number using the
+       Madelung rule.  Configurations are returned with superscripts for the
+       number of electrons in each subshell.  A few elements (e.g. Cr, Cu)
+       have anomalous configurations; these are provided explicitly.
+    -------------------------------------------------------------------------- */
+    function electronConfiguration(z) {
+      const special = {
+        24: ['1s2','2s2','2p6','3s2','3p6','4s1','3d5'], // Cr
+        29: ['1s2','2s2','2p6','3s2','3p6','4s1','3d10'], // Cu
+        42: ['1s2','2s2','2p6','3s2','3p6','4s2','3d10','4p6','5s1','4d5'], // Mo
+        46: ['1s2','2s2','2p6','3s2','3p6','4s2','3d10','4p6','4d10','5s0'], // Pd
+        47: ['1s2','2s2','2p6','3s2','3p6','4s2','3d10','4p6','5s1','4d10'], // Ag
+        79: ['1s2','2s2','2p6','3s2','3p6','4s2','3d10','4p6','5s2','4d10','5p6','6s1','4f14','5d10'] // Au
+      };
+      if (special[z]) {
+        return special[z].map(part => {
+          const m = part.match(/^(\d+[spdf])(\d+)$/);
+          if (m) {
+            return `${m[1]}<sup>${m[2]}</sup>`;
+          }
+          return part;
+        }).join(' ');
+      }
+      const orbitals = [
+        ['1s',2], ['2s',2], ['2p',6], ['3s',2], ['3p',6],
+        ['4s',2], ['3d',10], ['4p',6], ['5s',2], ['4d',10],
+        ['5p',6], ['6s',2], ['4f',14], ['5d',10], ['6p',6],
+        ['7s',2], ['5f',14], ['6d',10], ['7p',6]
+      ];
+      let remaining = z;
+      const parts = [];
+      for (const [orb, max] of orbitals) {
+        if (remaining <= 0) break;
+        const fill = Math.min(max, remaining);
+        parts.push(`${orb}<sup>${fill}</sup>`);
+        remaining -= fill;
+      }
+      return parts.join(' ');
+    }
+
+    function createPeriodicTable() {
+      const tableDiv = document.getElementById('periodic-table');
+      if (!tableDiv) return;
+      tableDiv.innerHTML = '';
+      // Create header row with group numbers (blank top-left cell then 1-18)
+      const groupLabels = ['', '1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18'];
+      groupLabels.forEach(label => {
+        const cell = document.createElement('div');
+        cell.className = 'group-label';
+        cell.textContent = label;
+        tableDiv.appendChild(cell);
+      });
+      // Period labels for each row, including lanthanides and actinides
+      const periodLabels = ['1','2','3','4','5','6','7','La','Ac'];
+      periodicLayout.forEach((row, rowIndex) => {
+        // Insert row label at the start of each row
+        const rl = document.createElement('div');
+        rl.className = 'row-label';
+        rl.textContent = periodLabels[rowIndex] || '';
+        tableDiv.appendChild(rl);
+        row.forEach(symbol => {
+          const cell = document.createElement('div');
+          if (!symbol) {
+            cell.className = 'blank';
+            cell.textContent = '';
+          } else {
+            const cat = elementCategories[symbol] || '';
+            cell.className = 'cell' + (cat ? ' ' + cat : '');
+            cell.textContent = symbol;
+            cell.setAttribute('data-symbol', symbol);
+            cell.title = elements[symbol] ? elements[symbol].name : symbol;
+            cell.addEventListener('click', () => {
+              displayElement(symbol, elements[symbol]);
+            });
+          }
+          tableDiv.appendChild(cell);
+        });
+      });
+    }
+
+    // List of featured molecules with geometry and polarity
+    const featuredMolecules = [
+      { formula: 'CO2', geometry: 'Linear (AX\u2082)', polarity: 'Nonpolar' },
+      { formula: 'BF3', geometry: 'Trigonal planar (AX\u2083)', polarity: 'Nonpolar' },
+      { formula: 'NH3', geometry: 'Trigonal pyramidal (AX\u2083E)', polarity: 'Polar' },
+      { formula: 'SF4', geometry: 'Seesaw (AX\u2084E)', polarity: 'Polar' },
+      { formula: 'CH4', geometry: 'Tetrahedral (AX\u2084)', polarity: 'Nonpolar' },
+      { formula: 'H2O', geometry: 'Bent/Angular (AX\u2082E\u2082)', polarity: 'Polar' },
+      { formula: 'PF5', geometry: 'Trigonal bipyramidal (AX\u2085)', polarity: 'Nonpolar' },
+      { formula: 'SF6', geometry: 'Octahedral (AX\u2086)', polarity: 'Nonpolar' },
+      { formula: 'XeF4', geometry: 'Square planar (AX\u2084E\u2082)', polarity: 'Nonpolar' },
+      { formula: 'CH2Cl2', geometry: 'Tetrahedral (2H, 2Cl)', polarity: 'Polar' }
+    ];
+
+    function populateMoleculeTable() {
+      const tbl = document.getElementById('moleculeTable');
+      if (!tbl) return;
+      const tbody = tbl.querySelector('tbody');
+      tbody.innerHTML = '';
+      featuredMolecules.forEach(m => {
+        const tr = document.createElement('tr');
+        const tdFormula = document.createElement('td');
+        const btn = document.createElement('button');
+        btn.className = 'link-button';
+        btn.textContent = m.formula;
+        btn.addEventListener('click', () => {
+          document.getElementById('searchInput').value = m.formula;
+          lookup();
+        });
+        tdFormula.appendChild(btn);
+        const tdGeom = document.createElement('td');
+        tdGeom.textContent = m.geometry;
+        const tdPol = document.createElement('td');
+        tdPol.textContent = m.polarity;
+        tr.appendChild(tdFormula);
+        tr.appendChild(tdGeom);
+        tr.appendChild(tdPol);
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Lookup function for the molecule builder section.  It copies the value
+    // from the builder input into the main search field and triggers a lookup.
+    function builderLookup() {
+      const input = document.getElementById('builderInput');
+      if (!input) return;
+      const val = input.value.trim();
+      if (val) {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+          searchInput.value = val;
+          lookup();
+        }
+      }
+    }
+
+    // Data for VSEPR shape explorer. Keys are "bondPairs-lonePairs".  Each entry
+    // includes the electron geometry, molecular geometry and an array of
+    // coordinate objects for drawing.  Coordinates are defined relative to a
+    // central atom at (0,0) and will be scaled to fit the shape canvas.
+    const vseprShapes = {
+      '2-0': { electronGeometry: 'Linear', molecularGeometry: 'Linear', coords: [ { x: 0, y: 0 }, { x: -0.8, y: 0 }, { x: 0.8, y: 0 } ] },
+      '2-1': { electronGeometry: 'Trigonal planar', molecularGeometry: 'Bent', coords: [ { x: 0, y: 0 }, { x: -0.7, y: 0.5 }, { x: 0.7, y: 0.5 } ] },
+      '3-0': { electronGeometry: 'Trigonal planar', molecularGeometry: 'Trigonal planar', coords: [ { x: 0, y: 0 }, { x: 0, y: -0.9 }, { x: 0.78, y: 0.45 }, { x: -0.78, y: 0.45 } ] },
+      '3-1': { electronGeometry: 'Tetrahedral', molecularGeometry: 'Trigonal pyramidal', coords: [ { x: 0, y: 0 }, { x: 0, y: -0.8 }, { x: 0.7, y: 0.6 }, { x: -0.7, y: 0.6 } ] },
+      '3-2': { electronGeometry: 'Trigonal bipyramidal', molecularGeometry: 'T-shaped', coords: [ { x: 0, y: 0 }, { x: 0, y: -0.8 }, { x: 0.9, y: 0 }, { x: -0.9, y: 0 } ] },
+      '4-0': { electronGeometry: 'Tetrahedral', molecularGeometry: 'Tetrahedral', coords: [ { x: 0, y: 0 }, { x: 0, y: -0.8 }, { x: 0.78, y: 0.45 }, { x: -0.78, y: 0.45 }, { x: 0, y: 0.8 } ] },
+      '4-1': { electronGeometry: 'Trigonal bipyramidal', molecularGeometry: 'See-saw', coords: [ { x: 0, y: 0 }, { x: 0, y: -0.9 }, { x: 0.9, y: -0.3 }, { x: -0.9, y: -0.3 }, { x: 0, y: 0.8 } ] },
+      '4-2': { electronGeometry: 'Octahedral', molecularGeometry: 'Square planar', coords: [ { x: 0, y: 0 }, { x: 0.8, y: 0 }, { x: -0.8, y: 0 }, { x: 0, y: 0.8 }, { x: 0, y: -0.8 } ] },
+      '5-0': { electronGeometry: 'Trigonal bipyramidal', molecularGeometry: 'Trigonal bipyramidal', coords: [ { x: 0, y: 0 }, { x: 0, y: -0.9 }, { x: 0, y: 0.9 }, { x: 0.8, y: 0.4 }, { x: -0.8, y: 0.4 }, { x: 0, y: -0.4 } ] },
+      '5-1': { electronGeometry: 'Octahedral', molecularGeometry: 'Square pyramidal', coords: [ { x: 0, y: 0 }, { x: 0, y: -1 }, { x: 0.8, y: 0 }, { x: -0.8, y: 0 }, { x: 0, y: 0.8 }, { x: 0, y: -0.8 } ] },
+      '5-2': { electronGeometry: 'Pentagonal bipyramidal', molecularGeometry: 'Trigonal bipyramidal', coords: [ { x: 0, y: 0 }, { x: 0, y: -0.9 }, { x: 0, y: 0.9 }, { x: 0.8, y: 0 }, { x: -0.8, y: 0 }, { x: 0.5, y: 0.8 }, { x: -0.5, y: 0.8 } ] },
+      '6-0': { electronGeometry: 'Octahedral', molecularGeometry: 'Octahedral', coords: [ { x: 0, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }, { x: 0.8, y: 0.8 }, { x: -0.8, y: -0.8 } ] },
+      '6-1': { electronGeometry: 'Pentagonal bipyramidal', molecularGeometry: 'Square pyramidal', coords: [ { x: 0, y: 0 }, { x: 0, y: -1 }, { x: 0.8, y: 0 }, { x: -0.8, y: 0 }, { x: 0, y: 0.8 }, { x: 0, y: -0.8 }, { x: 0.5, y: -0.5 } ] },
+      '6-2': { electronGeometry: 'Square antiprism', molecularGeometry: 'Square planar', coords: [ { x: 0, y: 0 }, { x: 0.8, y: 0 }, { x: -0.8, y: 0 }, { x: 0, y: 0.8 }, { x: 0, y: -0.8 }, { x: 0.8, y: 0.8 }, { x: -0.8, y: 0.8 }, { x: 0.8, y: -0.8 }, { x: -0.8, y: -0.8 } ] }
+    };
+
+    // Draw a generic VSEPR shape on the shape canvas.  Uses polar coordinates scaled
+    // to fit within the canvas area.  The first entry in the coords array is the
+    // central atom, and subsequent entries are substituents.
+    function drawGenericShape(coords) {
+      const canvas = document.getElementById('shapeCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!coords || coords.length === 0) return;
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      // Determine maximum radial distance for scaling
+      let maxDist = 0;
+      coords.forEach(pt => {
+        const dist = Math.sqrt(pt.x * pt.x + pt.y * pt.y);
+        if (dist > maxDist) maxDist = dist;
+      });
+      const scale = maxDist > 0 ? (Math.min(canvas.width, canvas.height) / 2 - 40) / maxDist : 1;
+      // Draw bonds from central atom to substituents
+      for (let i = 1; i < coords.length; i++) {
+        const start = coords[0];
+        const end = coords[i];
+        ctx.beginPath();
+        ctx.moveTo(centerX + start.x * scale, centerY + start.y * scale);
+        ctx.lineTo(centerX + end.x * scale, centerY + end.y * scale);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#666';
+        ctx.stroke();
+      }
+      // Draw central atom
+      ctx.beginPath();
+      ctx.arc(centerX + coords[0].x * scale, centerY + coords[0].y * scale, 12, 0, 2 * Math.PI);
+      ctx.fillStyle = '#007ACC';
+      ctx.fill();
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      // Draw substituent atoms
+      for (let i = 1; i < coords.length; i++) {
+        const pt = coords[i];
+        ctx.beginPath();
+        ctx.arc(centerX + pt.x * scale, centerY + pt.y * scale, 7, 0, 2 * Math.PI);
+        ctx.fillStyle = '#FFC107';
+        ctx.fill();
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+
+    // Show the selected VSEPR shape information and draw it.  Looks up the
+    // appropriate entry from the vseprShapes map based on the selected number
+    // of bonding pairs and lone pairs.  Displays electron geometry and
+    // molecular geometry and then draws the shape if coordinates are available.
+    function showShape() {
+      const bondSelect = document.getElementById('bondPairsSelect');
+      const loneSelect = document.getElementById('lonePairsSelect');
+      if (!bondSelect || !loneSelect) return;
+      const bonds = parseInt(bondSelect.value, 10);
+      const lone = parseInt(loneSelect.value, 10);
+      const key = bonds + '-' + lone;
+      const data = vseprShapes[key];
+      const info = document.getElementById('shapeInfo');
+      const canvas = document.getElementById('shapeCanvas');
+      if (!data) {
+        if (info) info.innerHTML = 'This combination of bond pairs and lone pairs is not supported in this explorer.';
+        // Clear the shape canvas if data is undefined
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        return;
+      }
+      // Populate information about the geometry
+      if (info) {
+        info.innerHTML = '<strong>Electron Geometry:</strong> ' + data.electronGeometry + '<br>' +
+                         '<strong>Molecular Geometry:</strong> ' + data.molecularGeometry;
+      }
+      // Draw the shape
+      drawGenericShape(data.coords);
+    }
+
+    // ------------------------------------------------------------------------
+    // Helper functions for derived symmetrical molecules (AXn) not explicitly
+    // defined in the molecules list.  These allow the tool to interpret
+    // formulas like CO3 by assuming one central atom and identical
+    // substituents with no lone pairs on the central atom.  The geometry is
+    // determined from the VSEPR map and a simple name is generated using
+    // basic prefixes.
+    // ------------------------------------------------------------------------
+    function deriveSymmetricalMolecule(formula, counts) {
+      // Determine the central atom: choose an element that appears exactly once.
+      let centralEl = null;
+      for (const el in counts) {
+        if (counts[el] === 1) {
+          centralEl = el;
+          break;
+        }
+      }
+      if (!centralEl) return null;
+      // Determine substituent: only one other element type must be present.
+      const subs = [];
+      for (const el in counts) {
+        if (el !== centralEl) subs.push([el, counts[el]]);
+      }
+      if (subs.length !== 1) return null;
+      const [subsEl, subsCount] = subs[0];
+      const n = subsCount;
+      // Only handle cases with 2 to 6 substituents.
+      if (n < 2 || n > 6) return null;
+      const key = n + '-0';
+      const shape = vseprShapes[key];
+      if (!shape) return null;
+      return {
+        centralEl,
+        substituentEl: subsEl,
+        substituentCount: n,
+        geometry: shape.molecularGeometry,
+        electronGeometry: shape.electronGeometry,
+        coords: shape.coords,
+        polarity: 'Nonpolar'
+      };
+    }
+
+    function displayDerivedMolecule(derived, counts) {
+      const infoDiv = document.getElementById('info');
+      const centralEl = derived.centralEl;
+      const subsEl = derived.substituentEl;
+      const subsCount = derived.substituentCount;
+      const centralName = elements[centralEl] ? elements[centralEl].name : centralEl;
+      // Basic mapping for second element names in binary molecular compounds
+      const suffixMap = {
+        H: 'hydride', F: 'fluoride', Cl: 'chloride', Br: 'bromide', I: 'iodide',
+        O: 'oxide', S: 'sulfide', N: 'nitride', P: 'phosphide',
+        C: 'carbide', Se: 'selenide', As: 'arsenide'
+      };
+      const baseSubs = suffixMap[subsEl] || (elements[subsEl] ? elements[subsEl].name.toLowerCase() : subsEl.toLowerCase());
+      const prefixes = ['', 'mono', 'di', 'tri', 'tetra', 'penta', 'hexa', 'hepta', 'octa', 'nona', 'deca'];
+      const prefix = subsCount < prefixes.length ? prefixes[subsCount] : subsCount + '';
+      const moleculeName = centralName + ' ' + (subsCount > 1 ? prefix : '') + baseSubs;
+      let html = `<div class="section"><h2>${moleculeName} (${centralEl}${subsCount > 1 ? '' : ''}${subsEl}${subsCount > 1 ? subsCount : ''})</h2>`;
+      html += `<p><strong>Geometry:</strong> ${derived.geometry}</p>`;
+      html += `<p><strong>Polarity:</strong> ${derived.polarity}</p>`;
+      html += `<p><strong>Composition:</strong></p><ul>`;
+      for (const el in counts) {
+        const count = counts[el];
+        const elData = elements[el];
+        if (elData) {
+          const protons = elData.atomicNumber;
+          const electrons = elData.atomicNumber;
+          const neutrons = Math.round(elData.atomicMass - elData.atomicNumber);
+          html += `<li>${el} (${elData.name}): <strong>${count}</strong> × [P:${protons}, e<sup>-</sup>:${electrons}, n≈${neutrons}]</li>`;
+        } else {
+          html += `<li>${el}: ${count}</li>`;
+        }
+      }
+      html += `</ul></div>`;
+      infoDiv.innerHTML = html;
+      drawDerivedMolecule(centralEl, subsEl, derived.coords);
+    }
+
+    function drawDerivedMolecule(centralEl, subsEl, coords) {
+      const canvas = document.getElementById('moleculeCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!coords || coords.length === 0) return;
+      let maxDist = 0;
+      coords.forEach(pt => {
+        const dist = Math.sqrt(pt.x * pt.x + pt.y * pt.y);
+        if (dist > maxDist) maxDist = dist;
+      });
+      const scale = maxDist > 0 ? (Math.min(canvas.width, canvas.height) / 2 - 60) / maxDist : 1;
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      // Draw bonds
+      for (let i = 1; i < coords.length; i++) {
+        const start = coords[0];
+        const end = coords[i];
+        ctx.beginPath();
+        ctx.moveTo(centerX + start.x * scale, centerY + start.y * scale);
+        ctx.lineTo(centerX + end.x * scale, centerY + end.y * scale);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#555';
+        ctx.stroke();
+      }
+      // Draw central atom
+      const centralInfo = elementDrawInfo[centralEl] || { radius: 22, color: '#888888', stroke: '#333' };
+      const cx = centerX + coords[0].x * scale;
+      const cy = centerY + coords[0].y * scale;
+      ctx.beginPath();
+      ctx.arc(cx, cy, centralInfo.radius, 0, Math.PI * 2);
+      ctx.fillStyle = centralInfo.color;
+      ctx.fill();
+      ctx.strokeStyle = centralInfo.stroke || '#333';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = '#000';
+      ctx.font = `${centralInfo.radius * 0.8}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(centralEl, cx, cy);
+      // Draw substituent atoms
+      const subsInfo = elementDrawInfo[subsEl] || { radius: 18, color: '#ccc', stroke: '#444' };
+      for (let i = 1; i < coords.length; i++) {
+        const pt = coords[i];
+        const sx = centerX + pt.x * scale;
+        const sy = centerY + pt.y * scale;
+        ctx.beginPath();
+        ctx.arc(sx, sy, subsInfo.radius, 0, Math.PI * 2);
+        ctx.fillStyle = subsInfo.color;
+        ctx.fill();
+        ctx.strokeStyle = subsInfo.stroke || '#444';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = '#000';
+        ctx.font = `${subsInfo.radius * 0.8}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(subsEl, sx, sy);
+      }
+    }
+
+    // Initialize periodic table and molecule list when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      createPeriodicTable();
+      populateMoleculeTable();
+    });
+
+  </script>
+</body>
+</html>

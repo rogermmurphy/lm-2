@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LM Flashcards Hub</title>
+<style>
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(180deg, #fce7f3 0%, #fff 100%);
+  color: #1f2937;
+  min-height: 100vh;
+}
+.home-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 10px 16px;
+  background: rgba(236, 72, 153, 0.1);
+  border: 1px solid #ec4899;
+  border-radius: 12px;
+  color: #ec4899;
+  text-decoration: none;
+  font-weight: 600;
+  z-index: 100;
+  transition: all 0.3s;
+}
+.home-link:hover {
+  background: rgba(236, 72, 153, 0.2);
+  transform: translateY(-2px);
+}
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #fce7f3;
+}
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.lm-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fce7f3;
+  border: 1px solid #ec4899;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ec4899;
+  font-weight: bold;
+}
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.header-right {
+  display: flex;
+  gap: 0.5rem;
+}
+.toggle-btn {
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.toggle-btn.active {
+  background: #ec4899;
+  color: white;
+  border-color: #ec4899;
+}
+.toggle-btn:hover:not(.active) {
+  border-color: #ec4899;
+}
+.subjects {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.subject-pill {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.subject-pill.active {
+  background: #ec4899;
+  color: white;
+  border-color: #ec4899;
+}
+.subject-pill:hover:not(.active) {
+  border-color: #ec4899;
+}
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+}
+.study-card {
+  background: white;
+  border: 1px solid #fce7f3;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.card-subject {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+.card-subject span {
+  font-weight: 600;
+  color: #1f2937;
+}
+.progress-container {
+  width: 200px;
+}
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #fce7f3;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #ec4899;
+  transition: width 0.3s;
+}
+.flashcard-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+.flashcard {
+  width: 100%;
+  max-width: 500px;
+  background: white;
+  border: 2px solid #fce7f3;
+  border-radius: 20px;
+  padding: 3rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+.flashcard:hover {
+  transform: scale(1.01);
+}
+.flashcard h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+.flashcard p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 1rem;
+}
+.controls {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+.control-btn {
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.control-btn:hover {
+  border-color: #ec4899;
+}
+.control-btn.primary {
+  background: #ec4899;
+  color: white;
+  border-color: #ec4899;
+}
+.control-btn.primary:hover {
+  background: #db2777;
+}
+.sidebar {
+  background: white;
+  border: 1px solid #fce7f3;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.sidebar h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+.stats {
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+.stats li {
+  margin-bottom: 0.5rem;
+}
+.stats span {
+  font-weight: 600;
+}
+.queue-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+.queue {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+.queue-item {
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.85rem;
+}
+.queue-item:last-child {
+  border-bottom: none;
+}
+.queue-item.current {
+  background: #fce7f3;
+}
+.queue-item span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.badge {
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1px solid;
+  margin-left: 0.5rem;
+}
+.badge.got {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #16a34a;
+}
+.badge.not {
+  background: #fef3c7;
+  border-color: #fbbf24;
+  color: #d97706;
+}
+.badge.new {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #6b7280;
+}
+.lm-coach {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  z-index: 100;
+}
+.lm-bubble {
+  max-width: 250px;
+  background: white;
+  border: 1px solid #fce7f3;
+  border-radius: 16px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.lm-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ff77b0, #a11a66);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+  border: 3px solid #ec4899;
+  animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+}
+</style>
+</head>
+<body>
+<a href="../../index.html" class="home-link">🏠 Back to Hub</a>
+
+<header>
+  <div class="header-content">
+    <div class="header-left">
+      <div class="lm-icon">LM</div>
+      <h1 class="header-title">Flashcards Hub</h1>
+    </div>
+    <div class="header-right">
+      <button class="toggle-btn" id="reviewBtn" onclick="toggleReview()">Review: OFF</button>
+      <button class="toggle-btn" onclick="resetProgress()">Reset Progress</button>
+    </div>
+  </div>
+</header>
+
+<div class="subjects" id="subjects"></div>
+
+<main id="main"></main>
+
+<div class="lm-coach">
+  <div class="lm-bubble" id="lmMsg">Let's study together!</div>
+  <div class="lm-avatar">😊</div>
+</div>
+
+<script>
+const SUBJECT_DECKS = {
+  Math: [
+    { id: "m1", front: "What is 2 + 2?", back: "4" },
+    { id: "m2", front: "Derivative of x^2?", back: "2x" },
+    { id: "m3", front: "Solve: 3x = 12", back: "x = 4" },
+  ],
+  Science: [
+    { id: "s1", front: "H2O is known as…", back: "Water" },
+    { id: "s2", front: "Unit of force?", back: "Newton (N)" },
+    { id: "s3", front: "Gas responsible for photosynthesis input?", back: "CO₂" },
+  ],
+  History: [
+    { id: "h1", front: "Capital of France?", back: "Paris" },
+    { id: "h2", front: "Year the U.S. declared independence?", back: "1776" },
+    { id: "h3", front: "Renaissance city famous for art & banking?", back: "Florence" },
+  ],
+  English: [
+    { id: "e1", front: "Define simile.", back: "A comparison using 'like' or 'as'." },
+    { id: "e2", front: "Opposite of a protagonist?", back: "Antagonist" },
+    { id: "e3", front: "What is a thesis?", back: "A paper's main claim/argument." },
+  ],
+};
+
+const subjects = Object.keys(SUBJECT_DECKS);
+let subject = subjects[0];
+let showBack = false;
+let index = 0;
+let reviewMode = false;
+let knowledge = {};
+let lastRating = null;
+
+function getWorkingDeck() {
+  const fullDeck = SUBJECT_DECKS[subject];
+  if (!reviewMode) return fullDeck;
+  return fullDeck.filter(c => knowledge[c.id] === "not");
+}
+
+function renderSubjects() {
+  const div = document.getElementById("subjects");
+  div.innerHTML = subjects.map(s => 
+    `<button class="subject-pill ${s === subject ? 'active' : ''}" onclick="changeSubject('${s}')">${s}</button>`
+  ).join('');
+}
+
+function renderMain() {
+  const workingDeck = getWorkingDeck();
+  const emptyReview = reviewMode && workingDeck.length === 0;
+  const safeIndex = workingDeck.length === 0 ? 0 : Math.min(index, workingDeck.length - 1);
+  const current = workingDeck[safeIndex];
+  const progress = workingDeck.length ? ((safeIndex + 1) / workingDeck.length) * 100 : 0;
+  
+  const fullDeck = SUBJECT_DECKS[subject];
+  const got = fullDeck.filter(c => knowledge[c.id] === "got").length;
+  const not = fullDeck.filter(c => knowledge[c.id] === "not").length;
+  const unseen = fullDeck.length - got - not;
+  
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <section class="study-card">
+      <div class="card-header">
+        <div class="card-subject">Subject: <span>${subject}</span></div>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${progress}%"></div>
+          </div>
+        </div>
+      </div>
+      
+      ${emptyReview ? `
+        <div class="empty-state">
+          <p style="font-size:1.1rem; font-weight:600; margin-bottom:0.5rem;">Nothing to review 🎉</p>
+          <p>You've marked everything as known. Switch off Review to keep practicing or change subjects.</p>
+        </div>
+      ` : `
+        <div class="flashcard-area">
+          <div class="flashcard" onclick="flipCard()">
+            <h3>${showBack ? current.back : current.front}</h3>
+            <p>${showBack ? 'Tap to view question' : 'Tap to view answer'}</p>
+          </div>
+        </div>
+        
+        <div class="controls">
+          <button class="control-btn" onclick="rate('not')">Not yet 😕</button>
+          <button class="control-btn primary" onclick="rate('got')">Got it 👍</button>
+          <button class="control-btn" onclick="flipCard()">Flip</button>
+          <button class="control-btn" onclick="nextCard()">Next →</button>
+        </div>
+      `}
+    </section>
+    
+    <aside class="sidebar">
+      <h2>Progress</h2>
+      <ul class="stats">
+        <li><span>Known:</span> ${got}</li>
+        <li><span>Not yet:</span> ${not}</li>
+        <li><span>Unseen:</span> ${unseen}</li>
+      </ul>
+      
+      <h3 class="queue-title">${reviewMode ? 'Review Queue' : 'Deck Order'}</h3>
+      <div class="queue">
+        ${(reviewMode ? workingDeck : fullDeck).map((c, i) => `
+          <div class="queue-item ${i === safeIndex && !emptyReview ? 'current' : ''}">
+            <span>${c.front}</span>
+            <span class="badge ${knowledge[c.id] === 'got' ? 'got' : knowledge[c.id] === 'not' ? 'not' : 'new'}">
+              ${knowledge[c.id] || 'new'}
+            </span>
+          </div>
+        `).join('')}
+      </div>
+    </aside>
+  `;
+  
+  updateLMMessage();
+}
+
+function updateLMMessage() {
+  const workingDeck = getWorkingDeck();
+  const emptyReview = reviewMode && workingDeck.length === 0;
+  const lmMsg = document.getElementById("lmMsg");
+  
+  if (emptyReview) {
+    lmMsg.textContent = "No cards to review — nice! Switch off Review to study the full deck.";
+  } else if (lastRating === "not") {
+    lmMsg.textContent = "It's okay if you don't know it yet. We'll get it together — I'm proud of you for trying. 💪";
+  } else if (lastRating === "got") {
+    lmMsg.textContent = "Nice! Locked in. Keep the streak going! ✨";
+  } else {
+    lmMsg.textContent = "Tap the card to flip. Then tell me if you 'Got it' or 'Not yet'. I've got you.";
+  }
+}
+
+function changeSubject(s) {
+  subject = s;
+  reviewMode = false;
+  showBack = false;
+  index = 0;
+  lastRating = null;
+  document.getElementById("reviewBtn").textContent = "Review: OFF";
+  document.getElementById("reviewBtn").classList.remove("active");
+  renderSubjects();
+  renderMain();
+}
+
+function toggleReview() {
+  reviewMode = !reviewMode;
+  index = 0;
+  showBack = false;
+  const btn = document.getElementById("reviewBtn");
+  btn.textContent = reviewMode ? "Review: ON" : "Review: OFF";
+  btn.classList.toggle("active", reviewMode);
+  renderMain();
+}
+
+function resetProgress() {
+  knowledge = {};
+  lastRating = null;
+  renderMain();
+}
+
+function flipCard() {
+  showBack = !showBack;
+  renderMain();
+}
+
+function nextCard() {
+  const workingDeck = getWorkingDeck();
+  if (!workingDeck.length) return;
+  showBack = false;
+  index = (index + 1) % workingDeck.length;
+  renderMain();
+}
+
+function rate(val) {
+  const workingDeck = getWorkingDeck();
+  if (!workingDeck.length) return;
+  const safeIndex = Math.min(index, workingDeck.length - 1);
+  const current = workingDeck[safeIndex];
+  knowledge[current.id] = val;
+  lastRating = val;
+  nextCard();
+}
+
+// Initialize
+renderSubjects();
+renderMain();
+</script>
+</body>
+</html>

@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard - Learning Monster</title>
+  <style>
+    :root {
+      --lm-pink: #ff62b0;
+      --lm-purple: #6b46c1;
+      --lm-dark: #1f1d29;
+      --lm-darker: #0a0014;
+      --success-green: #10b981;
+      --warning-yellow: #f59e0b;
+      --danger-red: #ef4444;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1f1d29 0%, #0a0014 100%);
+      color: #e5e7eb;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.3;
+    }
+    
+    .bg-animation::before,
+    .bg-animation::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+    }
+    
+    .bg-animation::before {
+      width: 500px;
+      height: 500px;
+      background: var(--lm-pink);
+      top: 20%;
+      left: 10%;
+      animation: float 8s ease-in-out infinite;
+    }
+    
+    .bg-animation::after {
+      width: 400px;
+      height: 400px;
+      background: var(--lm-purple);
+      bottom: 20%;
+      right: 10%;
+      animation: float 10s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(30px, -30px); }
+    }
+    
+    header {
+      background: linear-gradient(135deg, var(--lm-purple), var(--lm-pink));
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-content {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(145deg, #ff77b0, #a11a66);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 4px 15px rgba(255, 102, 163, 0.4);
+    }
+    
+    .header-title h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .header-title p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-top: 0.25rem;
+    }
+    
+    .header-right {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    .header-btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .header-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    .teacher-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+    }
+    
+    .teacher-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(145deg, #a11a66, #ff77b0);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    
+    main {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(255, 98, 176, 0.2);
+    }
+    
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .stat-icon {
+      font-size: 2rem;
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--lm-pink), var(--lm-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-label {
+      color: #9ca3af;
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+    }
+    
+    .section {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--lm-pink), var(--lm-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--lm-pink), var(--lm-purple));
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 98, 176, 0.4);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .student-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .student-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .student-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255, 98, 176, 0.2);
+    }
+    
+    .student-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .student-avatar {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--lm-purple), var(--lm-pink));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    .student-info h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .student-info p {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+    
+    .student-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    
+    .student-stat {
+      text-align: center;
+      padding: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+    
+    .student-stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--lm-pink);
+    }
+    
+    .student-stat-label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+    
+    .assignment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .assignment-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .assignment-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(5px);
+    }
+    
+    .assignment-content {
+      flex: 1;
+    }
+    
+    .assignment-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .assignment-meta {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+    
+    .assignment-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    
+    .badge-pending {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--warning-yellow);
+      border: 1px solid var(--warning-yellow);
+    }
+    
+    .badge-graded {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success-green);
+      border: 1px solid var(--success-green);
+    }
+    
+    .badge-overdue {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger-red);
+      border: 1px solid var(--danger-red);
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--lm-pink), var(--lm-purple));
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      color: #9ca3af;
+    }
+    
+    .tab:hover {
+      color: #e5e7eb;
+    }
+    
+    .tab.active {
+      color: var(--lm-pink);
+      border-bottom-color: var(--lm-pink);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .quick-action {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .quick-action:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-3px);
+    }
+    
+    .quick-action-icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .quick-action-label {
+      font-weight: 600;
+    }
+    
+    .recent-activity {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .activity-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      border-left: 3px solid var(--lm-pink);
+    }
+    
+    .activity-icon {
+      font-size: 1.5rem;
+    }
+    
+    .activity-content {
+      flex: 1;
+    }
+    
+    .activity-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .activity-time {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+    
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .student-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .tabs {
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animation"></div>
+  
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <div class="logo">👩‍🏫</div>
+        <div class="header-title">
+          <h1>Teacher Dashboard</h1>
+          <p>Learning Monster - Instructor Portal</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <a href="index.html" class="header-btn">🏠 Student View</a>
+        <div class="teacher-profile">
+          <div class="teacher-avatar">👤</div>
+          <div>
+            <div style="font-weight: 600;">Ms. Anderson</div>
+            <div style="font-size: 0.85rem; opacity: 0.8;">Science Teacher</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <main>
+    <!-- Stats Overview -->
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon">👥</span>
+        </div>
+        <div class="stat-value">32</div>
+        <div class="stat-label">Total Students</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 85%;"></div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon">📝</span>
+        </div>
+        <div class="stat-value">12</div>
+        <div class="stat-label">Pending Assignments</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 60%;"></div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon">📊</span>
+        </div>
+        <div class="stat-value">87%</div>
+        <div class="stat-label">Average Class Grade</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 87%;"></div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon">🎯</span>
+        </div>
+        <div class="stat-value">94%</div>
+        <div class="stat-label">Assignment Completion</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 94%;"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Students Section -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">👥 My Students</h2>
+        <button class="btn" onclick="alert('Add new student functionality')">➕ Add Student</button>
+      </div>
+      
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('all-students')">All Students (32)</div>
+        <div class="tab" onclick="switchTab('top-performers')">Top Performers (8)</div>
+        <div class="tab" onclick="switchTab('needs-attention')">Needs Attention (5)</div>
+      </div>
+      
+      <div id="all-students" class="tab-content active">
+        <div class="student-grid">
+          <div class="student-card" onclick="viewStudentDetails('Emma Johnson')">
+            <div class="student-header">
+              <div class="student-avatar">EJ</div>
+              <div class="student-info">
+                <h3>Emma Johnson</h3>
+                <p>Grade 10 • ID: 2025001</p>
+              </div>
+            </div>
+            <div class="student-stats">
+              <div class="student-stat">
+                <div class="student-stat-value">92%</div>
+                <div class="student-stat-label">Average</div>
+              </div>
+              <div class="student-stat">
+                <div class="student-stat-value">18/20</div>
+                <div class="student-stat-label">Completed</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="student-card" onclick="viewStudentDetails('Michael Chen')">
+            <div class="student-header">
+              <div class="student-avatar">MC</div>
+              <div class="student-info">
+                <h3>Michael Chen</h3>
+                <p>Grade 10 • ID: 2025002</p>
+              </div>
+            </div>
+            <div class="student-stats">
+              <div class="student-stat">
+                <div class="student-stat-value">88%</div>
+                <div class="student-stat-label">Average</div>
+              </div>
+              <div class="student-stat">
+                <div class="student-stat-value">19/20</div>
+                <div class="student-stat-label">Completed</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="student-card" onclick="viewStudentDetails('Sarah Martinez')">
+            <div class="student-header">
+              <div class="student-avatar">SM</div>
+              <div class="student-info">
+                <h3>Sarah Martinez</h3>
+                <p>Grade 10 • ID: 2025003</p>
+              </div>
+            </div>
+            <div class="student-stats">
+              <div class="student-stat">
+                <div class="student-stat-value">95%</div>
+                <div class="student-stat-label">Average</div>
+              </div>
+              <div class="student-stat">
+                <div class="student-stat-value">20/20</div>
+                <div class="student-stat-label">Completed</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="student-card" onclick="viewStudentDetails('David Thompson')">
+            <div class="student-header">
+              <div class="student-avatar">DT</div>
+              <div class="student-info">
+                <h3>David Thompson</h3>
+                <p>Grade 10 • ID: 2025004</p>
+              </div>
+            </div>
+            <div class="student-stats">
+              <div class="student-stat">
+                <div class="student-stat-value">78%</div>
+                <div class="student-stat-label">Average</div>
+              </div>
+              <div class="student-stat">
+                <div class="student-stat-value">15/20</div>
+                <div class="student-stat-label">Completed</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="student-card" onclick="viewStudentDetails('Olivia Brown')">
+            <div class="student-header">
+              <div class="student-avatar">OB</div>
+              <div class="student-info">
+                <h3>Olivia Brown</h3>
+                <p>Grade 10 • ID: 2025005</p>
+              </div>
+            </div>
+            <div class="student-stats">
+              <div class="student-stat">
+                <div class="student-stat-value">91%</div>
+                <div class="student-stat-label">Average</div>
+              </div>
+              <div class="student-stat">
+                <div class="student-stat-value">19/20</div>
+                <div class="student-stat-label">Completed</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="student-card" onclick="viewStudentDetails('James Wilson')">
+            <div class="student-header">
+              <div class="student-avatar">JW</div>
+              <div class="student-info">
+                <h3>James Wilson</h3>
+                <p>Grade 10 • ID: 2025006</p>
+              </div>
+            </div>
+            <div class="student-stats">
+              <div class="student-stat">
+                <div class="student-stat-value">85%</div>
+                <div class="student-stat-label">Average</div>
+              </div>
+              <div class="student-stat">
+                <div class="student-stat-value">17/20</div>
+                <div class="student-stat-label">Completed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="top-performers" class="tab-content">
+        <div class="student-grid">
+          <div class="student-card">
+            <div class="student-header">
+              <div class="student-avatar">SM</div>
+              <div class="student-info">
+                <h3>Sarah Martinez</h3>
+                <p>Grade 10 • 95% Average</p>
+              </div>
+            </div>
+            <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(16, 185, 129, 0.2); border-radius: 8px; text-align: center; color: var(--success-green);">
+              🏆 Top Performer
+            </div>
+          </div>
+          
+          <div class="student-card">
+            <div class="student-header">
+              <div class="student-avatar">EJ</div>
+              <div class="student-info">
+                <h3>Emma Johnson</h3>
+                <p>Grade 10 • 92% Average</p>
+              </div>
+            </div>
+            <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(16, 185, 129, 0.2); border-radius: 8px; text-align: center; color: var(--success-green);">
+              🏆 Top Performer
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="needs-attention" class="tab-content">
+        <div class="student-grid">
+          <div class="student-card">
+            <div class="student-header">
+              <div class="student-avatar">DT</div>
+              <div class="student-info">
+                <h3>David Thompson</h3>
+                <p>Grade 10 • 78% Average</p>
+              </div>
+            </div>
+            <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(245, 158, 11, 0.2); border-radius: 8px; text-align: center; color: var(--warning-yellow);">
+              ⚠️ 5 Missing Assignments
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Assignments Section -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">📝 Recent Assignments</h2>
+        <button class="btn" onclick="alert('Create new assignment')">➕ Create Assignment</button>
+      </div>
+      
+      <div class="assignment-list">
+        <div class="assignment-item" onclick="viewAssignment('Chemistry Lab Report')">
+          <div class="assignment-content">
+            <div class="assignment-title">Chemistry Lab Report - Acids & Bases</div>
+            <div class="assignment-meta">
+              <span>📅 Due: Nov 15, 2025</span>
+              <span>👥 28/32 Submitted</span>
+              <span>⏱️ 12 Pending Reviews</span>
+            </div>
+          </div>
+          <div class="assignment-badge badge-pending">Pending</div>
+        </div>
+        
+        <div class="assignment-item" onclick="viewAssignment('Math Quiz')">
+          <div class="assignment-content">
+            <div class="assignment-title">Algebra Quiz - Chapter 5</div>
+            <div class="assignment-meta">
+              <span>📅 Due: Nov 12, 2025</span>
+              <span>👥 32/32 Submitted</span>
+              <span>✅ All Graded</span>
+            </div>
+          </div>
+          <div class="assignment-badge badge-graded">Graded</div>
+        </div>
+        
+        <div class="assignment-item" onclick="viewAssignment('English Essay')">
+          <div class="assignment-content">
+            <div class="assignment-title">English Essay - Literary Analysis</div>
+            <div class="assignment-meta">
+              <span>📅 Due: Nov 10, 2025</span>
+              <span>👥 30/32 Submitted</span>
+              <span>⚠️ 2 Overdue</span>
+            </div>
+          </div>
+          <div class="assignment-badge badge-overdue">Overdue</div>
+        </div>
+        
+        <div class="assignment-item" onclick="viewAssignment('Science Project')">
+          <div class="assignment-content">
+            <div class="assignment-title">Science Project - Renewable Energy</div>
+            <div class="assignment-meta">
+              <span>📅 Due: Nov 20, 2025</span>
+              <span>👥 15/32 Submitted</span>
+              <span>⏰

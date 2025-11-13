@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LM English Hub</title>
+  <style>
+    /* Base styling */
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #1f2937;
+      color: #e5e7eb;
+    }
+    h1, h2 {
+      margin: 0;
+    }
+    header {
+      background: linear-gradient(to right, #6b46c1, #ee4b6a);
+      color: white;
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    header p {
+      font-size: 0.9rem;
+      color: #d6bcfa;
+    }
+    /* Sidebar navigation */
+    nav {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      bottom: 0;
+      width: 200px;
+      background: #2d3748;
+      padding-top: 10px;
+      overflow-y: auto;
+      border-right: 1px solid #4b5563;
+    }
+    nav button {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      color: #e5e7eb;
+      padding: 12px 20px;
+      text-align: left;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    nav button:hover {
+      background: #4a5568;
+    }
+    nav button.active {
+      background: #4a5568;
+      font-weight: bold;
+      color: #ffffff;
+    }
+    /* Main content area */
+    main {
+      margin-left: 200px;
+      padding: 20px;
+      padding-top: 80px;
+      height: calc(100vh - 80px);
+      overflow-y: auto;
+    }
+    section {
+      display: none;
+    }
+    section.active {
+      display: block;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      background: #374151;
+      border: 1px solid #4b5563;
+      border-radius: 4px;
+      color: #e5e7eb;
+      resize: vertical;
+    }
+    textarea::placeholder, input[type="text"]::placeholder {
+      color: #9ca3af;
+    }
+    button.action {
+      background: #6b46c1;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button.action:hover {
+      background: #805ad5;
+    }
+    button.action:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+    /* Assistant bubble */
+    #assistant {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #2d3748;
+      border: 1px solid #4b5563;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #e5e7eb;
+      z-index: 20;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>LM English Hub</h1>
+    <p>Your all-in-one English study companion</p>
+  </header>
+  <nav>
+    <button class="active" data-target="notes">Notes</button>
+    <button data-target="grammar">Grammar</button>
+    <button data-target="essay">Essay Prompter</button>
+    <button data-target="dictionary">Dictionary</button>
+    <button data-target="synonyms">Synonyms / Antonyms</button>
+    <button data-target="vocab">Vocab Maker</button>
+  </nav>
+  <main>
+    <section id="notes" class="active">
+      <h2>Notes</h2>
+      <textarea id="notesArea" rows="12" placeholder="Type your notes here..."></textarea>
+    </section>
+    <section id="grammar">
+      <h2>Grammar Checker</h2>
+      <textarea rows="6" placeholder="Paste text here..."></textarea>
+      <button class="action" disabled>Check Grammar</button>
+      <p>Check grammar, punctuation, and spelling errors here. Coming soon!</p>
+    </section>
+    <section id="essay">
+      <h2>Essay Prompter</h2>
+      <p>Generate creative essay prompts and outlines to inspire your writing. You will be able to specify genres, topics, and difficulty levels. Coming soon!</p>
+    </section>
+    <section id="dictionary">
+      <h2>Dictionary</h2>
+      <input type="text" placeholder="Search for a word..." />
+      <button class="action" disabled>Search</button>
+      <p>Look up definitions, pronunciations, and usage examples. This feature will integrate with a dictionary API in the future.</p>
+    </section>
+    <section id="synonyms">
+      <h2>Synonyms & Antonyms</h2>
+      <input type="text" placeholder="Enter a word..." />
+      <button class="action" disabled>Find</button>
+      <p>Discover synonyms and antonyms to expand your vocabulary. Coming soon!</p>
+    </section>
+    <section id="vocab">
+      <h2>Vocabulary Builder</h2>
+      <p>Create and study custom vocabulary lists. Add words, definitions, and practice with flashcards. This feature will be available in a future release.</p>
+    </section>
+  </main>
+  <div id="assistant">Hi! Need help? I'm your LM assistant 😊</div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const navButtons = document.querySelectorAll('nav button[data-target]');
+      const sections = document.querySelectorAll('main section');
+      navButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          // Update active nav button
+          navButtons.forEach(function (b) {
+            b.classList.remove('active');
+          });
+          this.classList.add('active');
+          // Show the corresponding section
+          const target = this.getAttribute('data-target');
+          sections.forEach(function (section) {
+            section.classList.remove('active');
+            if (section.id === target) {
+              section.classList.add('active');
+            }
+          });
+        });
+      });
+      // Notes persistence using localStorage
+      const notesArea = document.getElementById('notesArea');
+      const savedNotes = localStorage.getItem('lmNotes');
+      if (savedNotes) {
+        notesArea.value = savedNotes;
+      }
+      notesArea.addEventListener('input', function () {
+        localStorage.setItem('lmNotes', this.value);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monster Milkshake Madness v1.3</title>
+<style>
+:root {
+  --lmPink:#d989b9;
+  --lmCream:#e6cfd2;
+  --lmPurple:#b59db0;
+  --lmDark:#2d2332;
+}
+body{
+  margin:0;
+  font-family:"Poppins",sans-serif;
+  background:linear-gradient(180deg,var(--lmCream) 70%,#fff);
+  overflow:hidden;
+  user-select:none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+.home-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid var(--lmPink);
+  border-radius: 12px;
+  color: var(--lmDark);
+  text-decoration: none;
+  font-weight: 600;
+  z-index: 100;
+  transition: all 0.3s;
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+.home-link:hover {
+  background: white;
+  transform: translateY(-2px);
+}
+#game{
+  width:900px;
+  height:600px;
+  background:#f6f2f4;
+  border:4px solid var(--lmPink);
+  border-radius:20px;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 8px 20px rgba(0,0,0,.2);
+}
+#customers{
+  flex:1;
+  display:flex;
+  justify-content:space-around;
+  align-items:flex-end;
+  background:var(--lmCream);
+  border-bottom:3px solid var(--lmPink);
+  position:relative;
+}
+.monster{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:36px;
+  animation:popIn .5s ease;
+}
+@keyframes popIn{
+  from{transform:scale(0);}
+  to{transform:scale(1);}
+}
+.order{
+  position:absolute;
+  top:-40px;
+  background:#fff;
+  padding:5px 10px;
+  border-radius:10px;
+  border:1px solid var(--lmPurple);
+  font-size:12px;
+}
+#workspace{
+  flex:2;
+  background:linear-gradient(180deg,#f6f2f4 0%,var(--lmCream) 100%);
+  display:flex;
+  justify-content:space-evenly;
+  align-items:center;
+  position:relative;
+}
+.cup,.blender{
+  width:140px;
+  height:180px;
+  border:3px solid var(--lmPurple);
+  border-radius:15px;
+  background:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  position:relative;
+}
+.cup::after{
+  content:"Little Monster Shakes";
+  font-size:10px;
+  color:var(--lmPink);
+  position:absolute;
+  bottom:6px;
+}
+.sparkle{
+  position:absolute;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+.sparkle span{
+  position:absolute;
+  width:6px;
+  height:6px;
+  background:var(--lmPink);
+  border-radius:50%;
+  opacity:0;
+  animation:spark .8s ease forwards;
+}
+@keyframes spark{
+  0%{opacity:1;transform:scale(1);}
+  100%{opacity:0;transform:scale(3);}
+}
+#ingredients{
+  flex:1;
+  background:var(--lmCream);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  border-top:3px solid var(--lmPink);
+}
+.btn{
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#fff;
+  font-size:12px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:transform .1s;
+  box-shadow:0 3px 5px rgba(0,0,0,.2);
+}
+.btn:active{transform:scale(.9);}
+#ui{
+  height:60px;
+  background:#fff;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 20px;
+  border-top:3px solid var(--lmPurple);
+}
+#serve{
+  background:var(--lmPink);
+  border:none;
+  color:#fff;
+  padding:10px 25px;
+  border-radius:10px;
+  font-weight:bold;
+  font-size:16px;
+  cursor:pointer;
+  box-shadow:0 3px 5px rgba(0,0,0,.2);
+}
+#lm{
+  color:var(--lmPurple);
+  font-size:14px;
+}
+</style>
+</head>
+<body>
+<a href="../../index.html" class="home-link">🏠 Back to Hub</a>
+<div id="game">
+  <div id="customers"></div>
+  <div id="workspace">
+    <div class="blender">🌀<div id="blendTxt">Empty</div></div>
+    <div class="cup" id="cup">🥤</div>
+  </div>
+  <div id="ingredients"></div>
+  <div id="ui">
+    <div id="scoreboard">⭐ Score: <span id="score">0</span> | 💰 Coins: <span id="coins">0</span></div>
+    <button id="serve">Serve ▶</button>
+    <div id="lm">LM says: <span id="lmMsg">Let's make shakes!</span></div>
+  </div>
+</div>
+
+<script>
+const flavors=["Chocolate","Vanilla","Strawberry"];
+const flavorColors={
+  Chocolate:"#5C4033",
+  Vanilla:"#FBE8B1",
+  Strawberry:"#F8A5B5",
+  Milk:"#FFFFFF",
+  Water:"#B6E3FF"
+};
+const extras=["Milk","Water"];
+let ingredients=[
+  {name:"Chocolate"},{name:"Vanilla"},{name:"Strawberry"},
+  {name:"Milk"},{name:"Water"}
+];
+let score=0,coins=0;
+let customers=[];
+let currentMix=[];
+
+const customersDiv=document.getElementById("customers");
+const cup=document.getElementById("cup");
+const blendTxt=document.getElementById("blendTxt");
+const serveBtn=document.getElementById("serve");
+const scoreSpan=document.getElementById("score");
+const coinSpan=document.getElementById("coins");
+const lmMsg=document.getElementById("lmMsg");
+const ingrDiv=document.getElementById("ingredients");
+
+function spawnIngredients(){
+  ingrDiv.innerHTML="";
+  ingredients.forEach(i=>{
+    const b=document.createElement("div");
+    b.className="btn";
+    b.style.background=flavorColors[i.name];
+    b.style.color=i.name==="Vanilla"?"#333":"#fff";
+    b.innerText=i.name;
+    b.onclick=()=>addIngredient(i.name);
+    ingrDiv.appendChild(b);
+  });
+}
+
+function addIngredient(name){
+  currentMix.push(name);
+  blendTxt.textContent=currentMix.join(", ");
+  lmMsg.textContent=`Added ${name}!`;
+}
+
+function makeSparkles(el){
+  const spark=document.createElement("div");
+  spark.className="sparkle";
+  for(let i=0;i<15;i++){
+    const s=document.createElement("span");
+    s.style.left=Math.random()*100+"%";
+    s.style.top=Math.random()*100+"%";
+    spark.appendChild(s);
+  }
+  el.appendChild(spark);
+  setTimeout(()=>spark.remove(),800);
+}
+
+function spawnMonster(){
+  const id=Date.now();
+  const flavor=flavors[Math.floor(Math.random()*flavors.length)];
+  const m=document.createElement("div");
+  m.className="monster";
+  m.dataset.id=id;
+  const colors=["#F8A5B5","#A6E3AE","#B6E3FF","#E5B5F5"];
+  m.style.background=colors[Math.floor(Math.random()*colors.length)];
+  m.innerHTML="👾";
+  const bubble=document.createElement("div");
+  bubble.className="order";
+  bubble.textContent=`${flavor} Shake`;
+  m.appendChild(bubble);
+  customersDiv.appendChild(m);
+  customers.push({id,flavor});
+  setTimeout(()=>{removeMonster(id)},30000);
+}
+
+function removeMonster(id){
+  const index=customers.findIndex(c=>c.id===id);
+  if(index>=0){
+    customers.splice(index,1);
+    const m=document.querySelector(`.monster[data-id='${id}']`);
+    if(m){
+      m.style.opacity=0;
+      setTimeout(()=>m.remove(),400);
+    }
+  }
+}
+
+function serve(){
+  if(customers.length===0){
+    lmMsg.textContent="No customers right now!";
+    return;
+  }
+  const current=customers[0];
+  const good=currentMix.includes(current.flavor);
+  if(good){
+    score++;
+    coins+=5;
+    lmMsg.textContent="Yummy! They loved it 😋";
+    makeSparkles(cup);
+  }else{
+    lmMsg.textContent="Oops! Wrong flavor 😭";
+  }
+  scoreSpan.textContent=score;
+  coinSpan.textContent=coins;
+  currentMix=[];
+  blendTxt.textContent="Empty";
+  removeMonster(current.id);
+}
+
+spawnIngredients();
+serveBtn.onclick=serve;
+spawnMonster();
+setInterval(spawnMonster,15000);
+</script>
+</body>
+</html>

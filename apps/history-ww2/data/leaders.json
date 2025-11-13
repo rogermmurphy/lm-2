@@ -1,0 +1,107 @@
+[
+  {
+    "name": "Winston Churchill",
+    "country": "UK",
+    "role": "Prime Minister",
+    "years": "1940–1945",
+    "bio": "Led Britain through its darkest hour. Famous for inspiring speeches and determination to never surrender."
+  },
+  {
+    "name": "Franklin D. Roosevelt",
+    "country": "US",
+    "role": "President",
+    "years": "1933–1945",
+    "bio": "Led US through Great Depression and WWII. Died in office April 1945, weeks before victory."
+  },
+  {
+    "name": "Harry S. Truman",
+    "country": "US",
+    "role": "President",
+    "years": "1945",
+    "bio": "Became president upon FDR's death. Made decision to use atomic bombs."
+  },
+  {
+    "name": "Joseph Stalin",
+    "country": "SU",
+    "role": "General Secretary",
+    "years": "1922–1953",
+    "bio": "Led Soviet Union through Great Patriotic War. Suffered highest casualties but played decisive role in defeating Germany."
+  },
+  {
+    "name": "Adolf Hitler",
+    "country": "DE",
+    "role": "Führer",
+    "years": "1934–1945",
+    "bio": "Nazi dictator who initiated WWII. Committed suicide in Berlin bunker April 30, 1945."
+  },
+  {
+    "name": "Benito Mussolini",
+    "country": "IT",
+    "role": "Il Duce",
+    "years": "1922–1943",
+    "bio": "Fascist dictator who led Italy into WWII. Deposed 1943, executed by partisans 1945."
+  },
+  {
+    "name": "Emperor Hirohito",
+    "country": "JP",
+    "role": "Emperor",
+    "years": "1926–1989",
+    "bio": "Japanese emperor during WWII. Announced surrender August 15, 1945 via radio broadcast."
+  },
+  {
+    "name": "Charles de Gaulle",
+    "country": "FR",
+    "role": "Leader of Free France",
+    "years": "1940–1944",
+    "bio": "Led Free French forces from exile. Returned triumphantly to liberated Paris."
+  },
+  {
+    "name": "Dwight D. Eisenhower",
+    "country": "US",
+    "role": "Supreme Allied Commander",
+    "years": "1944–1945",
+    "bio": "Led Allied forces in Europe. Planned and executed D-Day invasion."
+  },
+  {
+    "name": "Georgy Zhukov",
+    "country": "SU",
+    "role": "Marshal",
+    "years": "1941–1945",
+    "bio": "Most successful Soviet military commander. Led defense of Moscow and capture of Berlin."
+  },
+  {
+    "name": "Bernard Montgomery",
+    "country": "UK",
+    "role": "Field Marshal",
+    "years": "1942–1945",
+    "bio": "Led British forces to victory at El Alamein. Commanded ground forces during D-Day."
+  },
+  {
+    "name": "Erwin Rommel",
+    "country": "DE",
+    "role": "Field Marshal",
+    "years": "1941–1944",
+    "bio": "'Desert Fox' - respected even by enemies for tactical brilliance. Forced to suicide 1944."
+  },
+  {
+    "name": "Douglas MacArthur",
+    "country": "US",
+    "role": "General",
+    "years": "1941–1945",
+    "bio": "Led Allied forces in Pacific Theater. Accepted Japanese surrender aboard USS Missouri."
+  },
+  {
+    "name": "Chiang Kai-shek",
+    "country": "CN",
+    "role": "Generalissimo",
+    "years": "1928–1975",
+    "bio": "Led Chinese Nationalist forces against Japan throughout the war."
+  },
+  {
+    "name": "Hideki Tojo",
+    "country": "JP",
+    "role": "Prime Minister",
+    "years": "1941–1944",
+    "bio": "Led Japan during most of Pacific War. Executed as war criminal 1948."
+  }
+]

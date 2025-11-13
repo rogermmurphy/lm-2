@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LM Quiz Battle Arena</title>
+<style>
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #fce7f3, #fff, #fce7f3);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.home-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 10px 16px;
+  background: rgba(236, 72, 153, 0.1);
+  border: 1px solid #ec4899;
+  border-radius: 12px;
+  color: #ec4899;
+  text-decoration: none;
+  font-weight: 600;
+  z-index: 100;
+  transition: all 0.3s;
+}
+.home-link:hover {
+  background: rgba(236, 72, 153, 0.2);
+  transform: translateY(-2px);
+}
+.container {
+  width: 100%;
+  max-width: 900px;
+  padding: 2rem;
+}
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+}
+.subtitle {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+.subject-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.subject-btn {
+  padding: 2rem;
+  border: 2px solid #fce7f3;
+  background: #fce7f3;
+  border-radius: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.subject-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+}
+.header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ff77b0, #a11a66);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border: 2px solid #ec4899;
+}
+.header-text {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #ec4899;
+}
+.header-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+.back-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #fce7f3;
+  background: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+.back-btn:hover {
+  background: #fce7f3;
+}
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #fce7f3;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 1rem;
+}
+.progress-fill {
+  height: 100%;
+  background: #ec4899;
+  transition: width 0.3s;
+}
+.progress-text {
+  text-align: right;
+  font-size: 0.75rem;
+  color: #ec4899;
+  margin-right: 0.5rem;
+}
+.quiz-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+.quiz-panel {
+  background: white;
+  border: 1px solid #fce7f3;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.panel-title {
+  font-weight: 600;
+  color: #1f2937;
+}
+.ai-badge {
+  padding: 0.25rem 0.5rem;
+  background: #ec4899;
+  color: white;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.timer {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+.timer-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ec4899;
+  margin-bottom: 0.5rem;
+}
+.timer-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ec4899;
+}
+.question {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 1rem 0;
+}
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.choice-btn {
+  padding: 0.75rem 1rem;
+  border: 2px solid #fce7f3;
+  background: white;
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+.choice-btn:hover:not(:disabled) {
+  transform: scale(1.02);
+  background: #fef2f2;
+}
+.choice-btn.selected {
+  border-color: #ec4899;
+  background: #fce7f3;
+}
+.choice-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.feedback {
+  text-align: center;
+  margin-top: 1rem;
+  color: #ec4899;
+  font-weight: 600;
+}
+.result-screen {
+  text-align: center;
+}
+.result-screen h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+.result-score {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+.result-winner {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+.summary {
+  text-align: left;
+  margin: 2rem 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.summary h3 {
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+.round-item {
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+.round-item.correct {
+  border: 2px solid #86efac;
+  background: #f0fdf4;
+}
+.round-item.wrong {
+  border: 2px solid #fca5a5;
+  background: #fef2f2;
+}
+.round-item p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+.result-btns {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+.result-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.replay-btn {
+  background: #ec4899;
+  color: white;
+  border: none;
+}
+.change-btn {
+  background: white;
+  border: 1px solid #fce7f3;
+  color: #1f2937;
+}
+.train-btn {
+  background: #a855f7;
+  color: white;
+  border: none;
+}
+.result-btn:hover {
+  filter: brightness(1.1);
+}
+</style>
+</head>
+<body>
+<a href="../../index.html" class="home-link">🏠 Back to Hub</a>
+
+<div class="container">
+  <div id="app"></div>
+</div>
+
+<script>
+const BANK = {
+  Math: [
+    { q: "5 × 3 = ?", choices: ["8", "15", "20"], answer: "15" },
+    { q: "12 ÷ 4 = ?", choices: ["2", "3", "4"], answer: "3" },
+    { q: "7 + 6 = ?", choices: ["12", "13", "14"], answer: "13" },
+    { q: "9 − 5 = ?", choices: ["3", "4", "5"], answer: "4" },
+    { q: "6 × 4 = ?", choices: ["24", "28", "16"], answer: "24" },
+    { q: "√81 = ?", choices: ["9", "8", "7"], answer: "9" },
+    { q: "2² + 3² = ?", choices: ["12", "13", "10"], answer: "13" },
+    { q: "10% of 250 = ?", choices: ["20", "25", "30"], answer: "25" },
+  ],
+  Science: [
+    { q: "Red Planet is…", choices: ["Mars", "Venus", "Jupiter"], answer: "Mars" },
+    { q: "H₂O is…", choices: ["Oxygen", "Hydrogen", "Water"], answer: "Water" },
+    { q: "Humans breathe in…", choices: ["CO₂", "O₂", "N₂"], answer: "O₂" },
+    { q: "Solid → Gas is…", choices: ["Condensation", "Sublimation", "Freezing"], answer: "Sublimation" },
+    { q: "Earth's core metal?", choices: ["Iron", "Copper", "Silver"], answer: "Iron" },
+    { q: "Plant food made by…", choices: ["Respiration", "Photosynthesis", "Fermentation"], answer: "Photosynthesis" },
+    { q: "Speed unit?", choices: ["m/s", "kg", "N"], answer: "m/s" },
+    { q: "Energy symbol?", choices: ["E", "F", "P"], answer: "E" },
+  ],
+};
+
+const LM_ACCURACY = { Math: 0.78, Science: 0.82 };
+const SUBJECTS = Object.keys(BANK);
+const TOTAL_ROUNDS = 8;
+
+let subject = null;
+let round = 0;
+let userScore = 0;
+let lmScore = 0;
+let timeLeft = 15;
+let finished = false;
+let userAnswer = null;
+let lmAnswer = null;
+let feedback = "";
+let history = [];
+let questions = [];
+let timerId = null;
+let lmTimerId = null;
+
+function render() {
+  const app = document.getElementById("app");
+  
+  if (!subject) {
+    app.innerHTML = `
+      <div class="card">
+        <h1>LM Quiz Battle Arena</h1>
+        <p class="subtitle">Choose your battleground. You vs <span style="font-weight:600; color:#ec4899;">LM</span>.</p>
+        <div class="subject-grid">
+          ${SUBJECTS.map(s => `<button class="subject-btn" onclick="startSubject('${s}')">${s}</button>`).join('')}
+        </div>
+      </div>
+    `;
+  } else if (finished) {
+    const youWin = userScore > lmScore;
+    app.innerHTML = `
+      <div class="card result-screen">
+        <h2>Battle Over</h2>
+        <p class="result-score">You scored ${userScore} vs LM ${lmScore}</p>
+        <p class="result-winner">${youWin ? "You win! 🎉" : "LM wins 😈"}</p>
+        
+        <div class="summary">
+          <h3>Round Summary</h3>
+          ${history.map((h, i) => `
+            <div class="round-item ${h.you === h.correct ? 'correct' : 'wrong'}">
+              <p style="font-weight:600;">${h.q}</p>
+              <p>✅ Correct: ${h.correct}</p>
+              <p>🧍 You: ${h.you || '(none)'}</p>
+              <p>🤖 LM: ${h.lm || '(none)'}</p>
+            </div>
+          `).join('')}
+        </div>
+        
+        <div class="result-btns">
+          <button class="result-btn replay-btn" onclick="replayGame()">Replay</button>
+          <button class="result-btn change-btn" onclick="resetAll()">Change Subject</button>
+          <button class="result-btn train-btn" onclick="trainAgain()">Train Me Again</button>
+        </div>
+      </div>
+    `;
+  } else {
+    const current = questions[round];
+    const progress = ((round) / TOTAL_ROUNDS) * 100;
+    
+    app.innerHTML = `
+      <div class="header-bar">
+        <div class="logo-area">
+          <div class="logo">😊</div>
+          <div>
+            <div class="header-text">Quiz Arena</div>
+            <div class="header-title">${subject} Battle</div>
+          </div>
+        </div>
+        <button class="back-btn" onclick="resetAll()">Subjects</button>
+      </div>
+      
+      <div style="margin-bottom: 1rem;">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${progress}%"></div>
+        </div>
+        <p class="progress-text">${round + 1} / ${TOTAL_ROUNDS} Questions</p>
+      </div>
+      
+      <div class="quiz-grid">
+        <div class="quiz-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">You</h3>
+          </div>
+          <div class="choices">
+            ${current.choices.map(c => `
+              <button class="choice-btn ${userAnswer === c ? 'selected' : ''}" 
+                      ${userAnswer !== null ? 'disabled' : ''}
+                      onclick="selectAnswer('${c}')">
+                ${c}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="quiz-panel">
+          <div class="timer">
+            <div class="timer-label">Time Left</div>
+            <div class="timer-value">${timeLeft}s</div>
+          </div>
+          <div class="question">Question ${round + 1}</div>
+          <div style="text-align:center; font-size:1rem;">${current.q}</div>
+          ${feedback ? `<div class="feedback">${feedback}</div>` : ''}
+        </div>
+        
+        <div class="quiz-panel" style="position: relative;">
+          <div class="panel-header">
+            <h3 class="panel-title">LM</h3>
+            <div class="logo" style="width:40px; height:40px; font-size:1.5rem;">😊</div>
+          </div>
+          <div class="choices">
+            ${current.choices.map(c => `
+              <button class="choice-btn ${lmAnswer === c ? 'selected' : ''}" disabled>
+                ${c}
+              </button>
+            `).join('')}
+          </div>
+          <div class="ai-badge" style="position: absolute; top: -0.75rem; right: 0.75rem;">AI</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function startSubject(s) {
+  subject = s;
+  questions = BANK[s].slice(0, TOTAL_ROUNDS);
+  round = 0;
+  userScore = 0;
+  lmScore = 0;
+  timeLeft = 15;
+  finished = false;
+  userAnswer = null;
+  lmAnswer = null;
+  feedback = "";
+  history = [];
+  render();
+  startTimer();
+  scheduleLM();
+}
+
+function resetAll() {
+  clearInterval(timerId);
+  clearTimeout(lmTimerId);
+  subject = null;
+  round = 0;
+  userScore = 0;
+  lmScore = 0;
+  timeLeft = 15;
+  finished = false;
+  userAnswer = null;
+  lmAnswer = null;
+  feedback = "";
+  history = [];
+  questions = [];
+  render();
+}
+
+function replayGame() {
+  startSubject(subject);
+}
+
+function trainAgain() {
+  const wrongQs = history.filter(h => h.you !== h.correct).map(h => h.q);
+  alert("LM will generate more questions like: " + wrongQs.join(", "));
+}
+
+function startTimer() {
+  clearInterval(timerId);
+  timerId = setInterval(() => {
+    if (!running || finished) return;
+    timeLeft--;
+    if (timeLeft === 0) {
+      feedback = "⏳ Time!";
+      setTimeout(() => advanceRound(), 700);
+    }
+    render();
+  }, 1000);
+}
+
+function scheduleLM() {
+  clearTimeout(lmTimerId);
+  const delay = 400 + Math.random() * 1000;
+  lmTimerId = setTimeout(() => {
+    const current = questions[round];
+    const acc = LM_ACCURACY[subject] ?? 0.78;
+    const willBeCorrect = Math.random() < acc;
+    if (willBeCorrect) {
+      lmAnswer = current.answer;
+    } else {
+      const wrongs = current.choices.filter(c => c !== current.answer);
+      lmAnswer = wrongs[Math.floor(Math.random() * wrongs.length)];
+    }
+    render();
+    checkBothAnswered();
+  }, delay);
+}
+
+function selectAnswer(choice) {
+  if (userAnswer !== null) return;
+  userAnswer = choice;
+  render();
+  checkBothAnswered();
+}
+
+function checkBothAnswered() {
+  if (userAnswer !== null && lmAnswer !== null) {
+    const current = questions[round];
+    const correctUser = userAnswer === current.answer;
+    const correctLm = lmAnswer === current.answer;
+    
+    if (correctUser) userScore++;
+    if (correctLm) lmScore++;
+    
+    history.push({
+      q: current.q,
+      choices: current.choices,
+      correct: current.answer,
+      you: userAnswer,
+      lm: lmAnswer
+    });
+    
+    feedback = correctUser ? "🎉 LM: Nice hit!" : "😈 LM: I'll get you next one…";
+    render();
+    setTimeout(() => advanceRound(), 700);
+  }
+}
+
+function advanceRound() {
+  if (round < TOTAL_ROUNDS - 1) {
+    round++;
+    timeLeft = 15;
+    userAnswer = null;
+    lmAnswer = null;
+    feedback = "";
+    render();
+    startTimer();
+    scheduleLM();
+  } else {
+    finished = true;
+    clearInterval(timerId);
+    clearTimeout(lmTimerId);
+    render();
+  }
+}
+
+let running = true;
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LM School Dash — Playable 3D</title>
+  <style>
+    :root{
+      --lm-pink:#FF66A3;
+      --lm-pink-deep:#b5035a;
+      --lm-purple:#37003C;
+      --glass:#0a0014;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    body{background:radial-gradient(1200px 800px at 75% 50%, #b5035a 0%, #37003C 55%, #0a0014 100%);}
+    .app{display:flex;height:100vh;width:100vw}
+    
+    .home-link {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      z-index: 100;
+      transition: all 0.3s;
+    }
+    .home-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    /* Left glass panel */
+    .panel{
+      width:26%;
+      min-width:280px;
+      color:#fff;
+      padding:28px 28px 20px;
+      background:rgba(10,0,20,0.82);
+      backdrop-filter: blur(10px);
+      border-right:1px solid rgba(255,255,255,0.08);
+      display:flex;flex-direction:column;gap:16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.45);
+    }
+    .brand{display:flex;align-items:center;gap:14px;}
+    .logo{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;overflow:hidden;
+      background:linear-gradient(145deg,#ff77b0,#a11a66);
+      box-shadow: 0 6px 20px rgba(255,102,163,.35), inset 0 0 18px rgba(255,255,255,.25);}
+    .logo img{width:100%;height:100%;object-fit:cover;display:block}
+    .title h1{margin:0;font-size:1.35rem;letter-spacing:.02em}
+    .title small{opacity:.7;letter-spacing:.18em;text-transform:uppercase}
+    /* Stats */
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 8px 24px rgba(0,0,0,.25);}
+    .label{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;opacity:.8}
+    .value{margin-top:6px;font-size:1.45rem;font-weight:800}
+    /* Controls list */
+    .controls{margin-top:8px}
+    .controls h3{margin:0 0 8px;font-size:.9rem;letter-spacing:.18em;text-transform:uppercase;opacity:.85}
+    .controls ul{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+    .controls li{display:flex;justify-content:space-between;gap:12px;font-size:.95rem;opacity:.95}
+    .kbd{font:600 .85rem ui-monospace,Consolas,Menlo,monospace;background:rgba(255,255,255,.08);
+         padding:4px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.12)}
+    /* Buttons */
+    .actions{display:flex;gap:10px;margin-top:6px}
+    .btn{flex:1; padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+      color:#fff; font-weight:700; letter-spacing:.06em; cursor:pointer;
+      transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
+      box-shadow: 0 8px 18px rgba(0,0,0,.25);}
+    .btn:hover{transform: translateY(-1px); border-color: rgba(255,102,163,.55);}
+    .btn.start{background:linear-gradient(180deg, #ff66a333, #ff66a31a)}
+    .btn.pause{background:linear-gradient(180deg, #ffffff22, #ffffff14)}
+    .btn.reset{background:linear-gradient(180deg, #ffffff22, #ffffff14)}
+    .hint{margin-top:auto;text-transform:uppercase;letter-spacing:.18em;
+          color:#e8d6e0a6;text-align:center;font-size:.78rem;animation:blink 1.6s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+    /* Right world canvas holder */
+    .world{flex:1; position:relative; overflow:hidden;}
+    .pill{position:absolute; top:20px; right:20px; display:flex; gap:10px; z-index:2;}
+    .ui-pill{display:flex; align-items:center; gap:8px; padding:8px 12px;
+      border-radius:999px; border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      color:#fff; font-weight:700; box-shadow:0 6px 16px rgba(0,0,0,.25);}
+    .orb{width:10px; height:10px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #ffd3e7, #ff66a3 45%, #b5035a 75%);}
+    .heart{width:12px;height:12px;background: conic-gradient(from 90deg, #ff99c5, #ff66a3, #b5035a);
+      clip-path: path('M10 30 C 20 5, 55 5, 55 30 C 55 55, 30 65, 30 80 C 30 65, 5 55, 5 30 C 5 5, 40 5, 50 30 Z');
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.4)); transform: scale(.18) translateY(-10px);}
+    #worldMount{position:absolute; inset:0;}
+
+    /* Pause overlay */
+    .overlay{position:absolute; inset:0; display:grid; place-items:center; color:#fff;
+      background: radial-gradient(800px 400px at 50% -10%, rgba(255,255,255,.08), transparent 60%);
+      font-size:1.4rem; letter-spacing:.04em; z-index:1; pointer-events:none; opacity:0; transition:opacity .2s ease;}
+    .overlay.show{opacity:1;}
+  </style>
+</head>
+<body>
+  <a href="../../index.html" class="home-link">🏠 Back to Hub</a>
+  
+  <div class="app">
+    <aside class="panel">
+      <div class="brand">
+        <div class="logo">
+          <span style="font-size:2.5rem;">😊</span>
+        </div>
+        <div class="title">
+          <h1>LM School Dash</h1>
+          <small>Official Playable • 3D</small>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="card">
+          <div class="label">XP</div>
+          <div class="value" id="xp">0000</div>
+        </div>
+        <div class="card">
+          <div class="label">Time</div>
+          <div class="value" id="time">00:00</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <h3>Controls</h3>
+        <ul>
+          <li><span class="kbd">↑ / Space</span> <span>Jump</span></li>
+          <li><span class="kbd">↓ / S</span> <span>Slide</span></li>
+          <li><span class="kbd">← / A</span> <span>Move Left</span></li>
+          <li><span class="kbd">→ / D</span> <span>Move Right</span></li>
+          <li><span class="kbd">P</span> <span>Pause</span></li>
+        </ul>
+      </div>
+
+      <div class="actions">
+        <button class="btn start" id="btnStart">Start</button>
+        <button class="btn pause" id="btnPause">Pause</button>
+        <button class="btn reset" id="btnReset">Reset</button>
+      </div>
+
+      <div class="hint" id="hint">Press any key to start</div>
+    </aside>
+
+    <main class="world">
+      <div class="pill">
+        <div class="ui-pill"><div class="orb"></div><span id="xpSmall">XP 0</span></div>
+        <div class="ui-pill"><div class="heart"></div><span id="lives">x3</span></div>
+      </div>
+      <div id="worldMount"></div>
+      <div class="overlay" id="pauseOverlay">Paused</div>
+    </main>
+  </div>
+
+  <!-- Three.js CDN -->
+  <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
+
+  <script>
+    // ======= UI Elements =======
+    const xpEl = document.getElementById('xp');
+    const xpSmall = document.getElementById('xpSmall');
+    const timeEl = document.getElementById('time');
+    const livesEl = document.getElementById('lives');
+    const hint = document.getElementById('hint');
+    const btnStart = document.getElementById('btnStart');
+    const btnPause = document.getElementById('btnPause');
+    const btnReset = document.getElementById('btnReset');
+    const pauseOverlay = document.getElementById('pauseOverlay');
+    const worldMount = document.getElementById('worldMount');
+
+    // ======= Game State =======
+    const LANES = [-2, 0, 2];
+    let currentLaneIndex = 1;
+    let speed = 0.2;
+    let running = false;
+    let paused = false;
+    let seconds = 0, xp = 0, lives = 3;
+    let invulnTime = 0;
+
+    // ======= Three.js Setup =======
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    worldMount.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x0a0014, 0.065);
+
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+    camera.position.set(0, 2, 6);
+
+    // Lighting
+    const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+    const dir = new THREE.DirectionalLight(0xff66a3, 0.6);
+    dir.position.set(5, 8, 5);
+    scene.add(ambient, dir);
+
+    // Floor & walls (repeating segments to fake endless hallway)
+    const segments = [];
+    const SEG_LEN = 8;
+    const SEG_COUNT = 6;
+
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x1b0a17, metalness: 0.2, roughness: 0.6, emissive: 0x320b23, emissiveIntensity: 0.25 });
+    const wallMatL = new THREE.MeshStandardMaterial({ color: 0x121027, metalness: 0.3, roughness: 0.6 });
+    const wallMatR = new THREE.MeshStandardMaterial({ color: 0x0f0b1a, metalness: 0.3, roughness: 0.6 });
+
+    function makeSegment(z) {
+      const group = new THREE.Group();
+      // floor
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(8, 0.1, SEG_LEN), floorMat);
+      floor.position.set(0, -0.05, 0);
+      floor.receiveShadow = true;
+      group.add(floor);
+      // left wall
+      const wallL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3, SEG_LEN), wallMatL);
+      wallL.position.set(-4, 1.4, 0);
+      group.add(wallL);
+      // right wall
+      const wallR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3, SEG_LEN), wallMatR);
+      wallR.position.set(4, 1.4, 0);
+      group.add(wallR);
+
+      group.position.z = z;
+      scene.add(group);
+      return group;
+    }
+    for (let i = 0; i < SEG_COUNT; i++) {
+      segments.push(makeSegment(-i * SEG_LEN));
+    }
+
+    // Player (LM proxy): capsule-ish box
+    const playerGeo = new THREE.CapsuleGeometry(0.5, 0.8, 4, 12);
+    const playerMat = new THREE.MeshStandardMaterial({ color: 0xff66a3, metalness: 0.3, roughness: 0.4, emissive: 0x72143f, emissiveIntensity: 0.35 });
+    const player = new THREE.Mesh(playerGeo, playerMat);
+    player.position.set(LANES[currentLaneIndex], 0.9, 0);
+    scene.add(player);
+
+    // XP orbs
+    const orbs = [];
+    const orbGeo = new THREE.SphereGeometry(0.2, 16, 16);
+    const orbMat = new THREE.MeshStandardMaterial({ color: 0xff77bb, emissive: 0xff2255, emissiveIntensity: 0.8, metalness: 0.2, roughness: 0.3 });
+
+    // Obstacles
+    const obstacles = [];
+    function spawnObstacle() {
+      const lane = LANES[Math.floor(Math.random() * 3)];
+      const type = Math.random() < 0.5 ? 'desk' : 'locker';
+      let mesh;
+      if (type === 'desk') {
+        // lower jumpable obstacle
+        mesh = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 0.8),
+          new THREE.MeshStandardMaterial({ color: 0x8b5a2b, metalness: 0.1, roughness: 0.8 }));
+        mesh.userData.action = 'jump';
+      } else {
+        // tall locker to sidestep
+        mesh = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.8, 1.0),
+          new THREE.MeshStandardMaterial({ color: 0x1a55cc, metalness: 0.4, roughness: 0.5 }));
+        mesh.userData.action = 'side';
+      }
+      mesh.position.set(lane, mesh.geometry.parameters.height / 2, -40);
+      mesh.userData.type = type;
+      obstacles.push(mesh);
+      scene.add(mesh);
+    }
+
+    function spawnOrb() {
+      const lane = LANES[Math.floor(Math.random() * 3)];
+      const orb = new THREE.Mesh(orbGeo, orbMat);
+      orb.position.set(lane, 1.2, -40);
+      orbs.push(orb);
+      scene.add(orb);
+    }
+
+    // Input handling
+    let targetX = LANES[currentLaneIndex];
+    let jumping = false, sliding = false;
+    let jumpT = 0, slideT = 0;
+
+    function moveLeft(){ currentLaneIndex = Math.max(0, currentLaneIndex-1); targetX = LANES[currentLaneIndex]; }
+    function moveRight(){ currentLaneIndex = Math.min(2, currentLaneIndex+1); targetX = LANES[currentLaneIndex]; }
+    function jump(){
+      if (jumping || sliding) return;
+      jumping = true; jumpT = 0;
+    }
+    function slide(){
+      if (jumping || sliding) return;
+      sliding = true; slideT = 0;
+    }
+
+    window.addEventListener('keydown', (e)=>{
+      const k = e.key.toLowerCase();
+      if (!running) startGame();
+      if (k==='arrowleft' || k==='a') moveLeft();
+      if (k==='arrowright' || k==='d') moveRight();
+      if (k==='arrowup' || k===' ') jump();
+      if (k==='arrowdown' || k==='s') slide();
+      if (k==='p') togglePause();
+    });
+
+    // UI buttons
+    btnStart.addEventListener('click', ()=> startGame());
+    btnPause.addEventListener('click', ()=> togglePause());
+    btnReset.addEventListener('click', ()=> resetGame());
+
+    function updateUI(){
+      xpEl.textContent = String(xp).padStart(4,'0');
+      xpSmall.textContent = 'XP ' + xp;
+      timeEl.textContent = formatTime(seconds);
+      livesEl.textContent = 'x' + lives;
+    }
+    function formatTime(s){
+      const m = Math.floor(s/60).toString().padStart(2,'0');
+      const r = (s%60).toString().padStart(2,'0');
+      return m+':'+r;
+    }
+
+    // Resize
+    function resize(){
+      const rect = worldMount.getBoundingClientRect();
+      renderer.setSize(rect.width, rect.height);
+      camera.aspect = rect.width / rect.height;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Timers
+    let lastTime = performance.now();
+    let acc = 0;
+    let spawnTimer = 0;
+    let orbTimer = 0;
+    let secondTick = 0;
+
+    function startGame(){
+      if (running && !paused) return;
+      if (!running){
+        seconds = 0; xp = 0; speed = 0.2; lives = 3;
+        clearAll();
+      }
+      running = true; paused = false; hint.style.opacity = 0;
+      pauseOverlay.classList.remove('show');
+    }
+    function togglePause(){
+      if (!running) return;
+      paused = !paused;
+      pauseOverlay.classList.toggle('show', paused);
+    }
+    function resetGame(){
+      running = false; paused = false; hint.style.opacity = 1;
+      pauseOverlay.classList.remove('show');
+      seconds = 0; xp = 0; lives = 3; speed = 0.2;
+      invulnTime = 0;
+      clearAll();
+      updateUI();
+    }
+
+    function clearAll(){
+      obstacles.forEach(o => scene.remove(o)); obstacles.length = 0;
+      orbs.forEach(o => scene.remove(o)); orbs.length = 0;
+      segments.forEach((seg, i) => seg.position.z = -i * SEG_LEN);
+      currentLaneIndex = 1; targetX = LANES[currentLaneIndex];
+      player.position.set(targetX, 0.9, 0);
+      player.scale.set(1,1,1);
+      jumping = sliding = false;
+    }
+
+    // Collision helpers (AABB on simple meshes)
+    function aabbIntersect(a, b){
+      a.geometry.computeBoundingBox();
+      b.geometry.computeBoundingBox();
+      a.updateMatrixWorld(); b.updateMatrixWorld();
+      const ab = a.geometry.boundingBox.clone().applyMatrix4(a.matrixWorld);
+      const bb = b.geometry.boundingBox.clone().applyMatrix4(b.matrixWorld);
+      return (ab.min.x <= bb.max.x && ab.max.x >= bb.min.x) &&
+             (ab.min.y <= bb.max.y && ab.max.y >= bb.min.y) &&
+             (ab.min.z <= bb.max.z && ab.max.z >= bb.min.z);
+    }
+
+    // Game loop
+    function loop(now){
+      requestAnimationFrame(loop);
+      const dt = Math.min(0.033, (now - lastTime) / 1000); // cap
+      lastTime = now;
+      if (!running || paused){ renderer.render(scene, camera); return; }
+
+      // Smooth lane switch
+      player.position.x += (targetX - player.position.x) * Math.min(1, 10 * dt);
+
+      // Jump (parabola)
+      if (jumping){
+        jumpT += dt * 2; // speed of jump cycle
+        const h = Math.sin(Math.PI * Math.min(1, jumpT)) * 1.5;
+        player.position.y = 0.9 + h;
+        if (jumpT >= 1){ jumping = false; player.position.y = 0.9; }
+      }
+
+      // Slide (squash character)
+      if (sliding){
+        slideT += dt * 2;
+        const f = (slideT < 0.5) ? (1 - slideT) : (slideT - 0.5);
+        player.scale.y = 1 - 0.35 * Math.min(1, slideT*2);
+        if (slideT >= 1){ sliding = false; player.scale.y = 1; }
+      }
+
+      // Move hallway segments toward camera
+      for (let seg of segments){
+        seg.position.z += speed;
+        if (seg.position.z > SEG_LEN){
+          seg.position.z -= SEG_COUNT * SEG_LEN;
+        }
+      }
+
+      // Spawn logic
+      spawnTimer += dt;
+      orbTimer += dt;
+      secondTick += dt;
+      if (spawnTimer > Math.max(0.7, 1.4 - speed)) { spawnTimer = 0; spawnObstacle(); }
+      if (orbTimer > 1.2) { orbTimer = 0; spawnOrb(); }
+      if (secondTick > 1){ secondTick = 0; seconds++; xp += 1; speed = Math.min(0.6, speed + 0.005); updateUI(); }
+
+      // Move obstacles/orbs
+      for (let i = obstacles.length - 1; i >= 0; i--){
+        const o = obstacles[i];
+        o.position.z += speed * 3.2;
+        // collision check near player
+        if (o.position.z > -0.5 && o.position.z < 1.5){
+          if (aabbIntersect(player, o) && invulnTime <= 0){
+            const needed = o.userData.action; // 'jump' for desk, 'side' for locker
+            const correct =
+              (needed === 'jump' && jumping) ||
+              (needed === 'side' && Math.abs(player.position.x - o.position.x) > 0.1);
+            if (!correct){
+              lives--;
+              invulnTime = 1.2;
+              player.material.emissiveIntensity = 1.0;
+              if (lives <= 0){ gameOver(); }
+              updateUI();
+            } else {
+              xp += 5; updateUI();
+            }
+          }
+        }
+        if (o.position.z > 6){
+          scene.remove(o); obstacles.splice(i,1);
+        }
+      }
+
+      // Orbs collection
+      for (let i = orbs.length - 1; i >= 0; i--){
+        const ob = orbs[i];
+        ob.position.z += speed * 3.2;
+        ob.rotation.y += dt * 2;
+        if (ob.position.z > -0.5 && aabbIntersect(player, ob)){
+          xp += 10; updateUI();
+          scene.remove(ob); orbs.splice(i,1);
+        } else if (ob.position.z > 6){
+          scene.remove(ob); orbs.splice(i,1);
+        }
+      }
+
+      // invulnerability flicker
+      if (invulnTime > 0){
+        invulnTime -= dt;
+        player.visible = Math.floor(invulnTime * 20) % 2 === 0;
+        if (invulnTime <= 0){ player.visible = true; player.material.emissiveIntensity = 0.35; }
+      }
+
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(loop);
+
+    function gameOver(){
+      running = false; paused = false;
+      pauseOverlay.textContent = 'Game Over — Reset to Try Again';
+      pauseOverlay.classList.add('show');
+    }
+
+    updateUI();
+    resize();
+  </script>
+</body>
+</html>

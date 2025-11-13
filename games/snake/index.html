@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LM Sparkle Snake — Dark Mode</title>
+<style>
+:root {
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --bg: #070b12;
+}
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: var(--bg);
+  color: #fff;
+  overflow: hidden;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+.home-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 10px 16px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid var(--purple);
+  border-radius: 12px;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  z-index: 100;
+  transition: all 0.3s;
+  box-shadow: 0 0 15px var(--purple);
+}
+.home-link:hover {
+  background: rgba(168, 85, 247, 0.3);
+  transform: translateY(-2px);
+}
+#container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+#lm-bubble {
+  max-width: 200px;
+  background: rgba(30, 20, 40, 0.8);
+  border: 1px solid rgba(236, 72, 153, 0.3);
+  border-radius: 16px;
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
+  animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+#lm-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ff77b0, #a11a66);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  box-shadow: 0 0 40px rgba(236, 72, 153, 0.6);
+  border: 3px solid var(--pink);
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 20px;
+}
+h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+.stats {
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+}
+.stat {
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(30, 20, 40, 0.7);
+  border: 1px solid rgba(100, 100, 120, 0.5);
+}
+.controls {
+  display: flex;
+  gap: 10px;
+}
+button {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+button:hover {
+  transform: translateY(-2px);
+}
+.pause-btn {
+  background: #6366f1;
+  color: white;
+}
+.restart-btn {
+  background: var(--pink);
+  color: white;
+}
+#canvas {
+  border-radius: 20px;
+  border: 2px solid rgba(100, 100, 150, 0.5);
+  box-shadow: 0 0 40px rgba(109, 156, 255, 0.2);
+}
+footer {
+  margin-top: 15px;
+  color: #aaa;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+<a href="../../index.html" class="home-link">🏠 Back to Hub</a>
+<div id="container">
+  <div style="text-align: center;">
+    <div id="lm-bubble">Let's roll!</div>
+    <div id="lm-avatar">😊</div>
+  </div>
+  
+  <div class="header">
+    <h1>🐍 LM Sparkle Snake</h1>
+    <div class="stats">
+      <div class="stat">Score: <b><span id="score">0</span></b></div>
+      <div class="stat">Best: <b><span id="best">0</span></b></div>
+    </div>
+    <div class="controls">
+      <button class="pause-btn" id="pauseBtn">Pause</button>
+      <button class="restart-btn" id="restartBtn">Restart</button>
+    </div>
+  </div>
+  
+  <canvas id="canvas" width="400" height="400"></canvas>
+  <footer>Use arrow keys (↑ ↓ ← →) or WASD to move • Space to pause</footer>
+</div>
+
+<script>
+const CELL = 20;
+const COLS = 20;
+const ROWS = 20;
+const WIDTH = COLS * CELL;
+const HEIGHT = ROWS * CELL;
+const START_SPEED_MS = 220;
+const MIN_SPEED_MS = 90;
+const SPEED_STEP = 6;
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const scoreSpan = document.getElementById("score");
+const bestSpan = document.getElementById("best");
+const pauseBtn = document.getElementById("pauseBtn");
+const restartBtn = document.getElementById("restartBtn");
+const bubble = document.getElementById("lm-bubble");
+
+let snake = [[5, 5]];
+let dir = [1, 0];
+let nextDir = [1, 0];
+let food = [10, 10];
+let running = true;
+let speed = START_SPEED_MS;
+let score = 0;
+let best = 0;
+let gameOver = false;
+let intervalId = null;
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function nextFood() {
+  while (true) {
+    const fx = randInt(0, COLS - 1);
+    const fy = randInt(0, ROWS - 1);
+    if (!snake.some(([x, y]) => x === fx && y === fy)) return [fx, fy];
+  }
+}
+
+function outOfBounds(x, y) {
+  return x < 0 || x >= COLS || y < 0 || y >= ROWS;
+}
+
+function drawGrid() {
+  const grd = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
+  grd.addColorStop(0, "#0b0f17");
+  grd.addColorStop(1, "#0e1220");
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  
+  ctx.strokeStyle = "rgba(120,130,180,0.15)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= COLS; x++) {
+    ctx.beginPath();
+    ctx.moveTo(x * CELL + 0.5, 0);
+    ctx.lineTo(x * CELL + 0.5, HEIGHT);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= ROWS; y++) {
+    ctx.beginPath();
+    ctx.moveTo(0, y * CELL + 0.5);
+    ctx.lineTo(WIDTH, y * CELL + 0.5);
+    ctx.stroke();
+  }
+  
+  ctx.strokeStyle = "#6d9cff";
+  ctx.lineWidth = 4;
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = "#6d9cff";
+  ctx.strokeRect(2, 2, WIDTH - 4, HEIGHT - 4);
+  ctx.shadowBlur = 0;
+}
+
+function drawCell(x, y, color, glow) {
+  const px = x * CELL, py = y * CELL;
+  ctx.fillStyle = color;
+  ctx.shadowColor = glow;
+  ctx.shadowBlur = 12;
+  ctx.fillRect(px + 2, py + 2, CELL - 4, CELL - 4);
+  ctx.shadowBlur = 0;
+}
+
+function drawFood(x, y) {
+  const px = x * CELL + CELL / 2;
+  const py = y * CELL + CELL / 2;
+  ctx.beginPath();
+  ctx.fillStyle = "#89f7a1";
+  ctx.shadowColor = "#89f7a1";
+  ctx.shadowBlur = 16;
+  ctx.arc(px, py, CELL * 0.33, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
+function draw() {
+  drawGrid();
+  drawFood(food[0], food[1]);
+  snake.forEach(([x, y], i) => {
+    const isHead = i === snake.length - 1;
+    drawCell(x, y, isHead ? "#f5c6ff" : "#a78bfa", "#a78bfa");
+  });
+}
+
+function update() {
+  if (!running || gameOver) return;
+  
+  dir = [...nextDir];
+  const head = snake[snake.length - 1];
+  const nx = head[0] + dir[0];
+  const ny = head[1] + dir[1];
+  
+  if (outOfBounds(nx, ny)) {
+    gameOver = true;
+    running = false;
+    best = Math.max(best, score);
+    bestSpan.textContent = best;
+    bubble.textContent = "Ouch! Wall!";
+    return;
+  }
+  
+  if (snake.some(([x, y]) => x === nx && y === ny)) {
+    gameOver = true;
+    running = false;
+    best = Math.max(best, score);
+    bestSpan.textContent = best;
+    bubble.textContent = "Ouch! Try again?";
+    return;
+  }
+  
+  const grown = [...snake, [nx, ny]];
+  
+  if (nx === food[0] && ny === food[1]) {
+    snake = grown;
+    food = nextFood();
+    score++;
+    scoreSpan.textContent = score;
+    speed = Math.max(MIN_SPEED_MS, speed - SPEED_STEP);
+    bubble.textContent = "Yum! +1";
+    clearInterval(intervalId);
+    intervalId = setInterval(update, speed);
+  } else {
+    grown.shift();
+    snake = grown;
+  }
+  
+  draw();
+}
+
+function restart() {
+  snake = [[5, 5]];
+  dir = [1, 0];
+  nextDir = [1, 0];
+  food = nextFood();
+  running = true;
+  speed = START_SPEED_MS;
+  score = 0;
+  gameOver = false;
+  scoreSpan.textContent = score;
+  bubble.textContent = "Let's roll!";
+  clearInterval(intervalId);
+  intervalId = setInterval(update, speed);
+  draw();
+}
+
+function togglePause() {
+  running = !running;
+  pauseBtn.textContent = running ? "Pause" : "Resume";
+  bubble.textContent = running ? "Let's roll!" : "Paused";
+}
+
+document.addEventListener("keydown", (e) => {
+  const k = e.key.toLowerCase();
+  
+  if (k === " " || k === "spacebar") {
+    e.preventDefault();
+    togglePause();
+    return;
+  }
+  
+  if (k === "enter" && gameOver) {
+    restart();
+    return;
+  }
+  
+  const dirs = {
+    arrowup: [0, -1], arrowdown: [0, 1], arrowleft: [-1, 0], arrowright: [1, 0],
+    w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0]
+  };
+  
+  if (k in dirs) {
+    const [dx, dy] = dirs[k];
+    const [cx, cy] = dir;
+    if (dx !== -cx || dy !== -cy) {
+      nextDir = [dx, dy];
+    }
+  }
+});
+
+pauseBtn.addEventListener("click", togglePause);
+restartBtn.addEventListener("click", restart);
+
+// Initialize
+food = nextFood();
+draw();
+intervalId = setInterval(update, speed);
+</script>
+</body>
+</html>

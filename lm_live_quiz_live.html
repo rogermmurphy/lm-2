@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LM Live Quiz Battle - Themed Edition</title>
+    <!-- React and Babel -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom neon glow */
+        .neon-border {
+            border: 2px solid rgba(147, 51, 234, 0.7);
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.8), 0 0 30px rgba(91, 33, 182, 0.6);
+        }
+        .backdrop-filter {
+            backdrop-filter: blur(6px);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-cover bg-center text-white" style="background-image: url('ea3d4d76-3dde-43a0-8be4-c05ba3172a6b.png');">
+<div id="root"></div>
+<script type="text/babel">
+// LM Live Quiz Battle - Themed Edition
+const { useState, useEffect } = React;
+
+function App() {
+  // States
+  const [phase, setPhase] = useState('lobby'); // 'lobby', 'live', 'end'
+  const [players, setPlayers] = useState([]);
+  const [questions] = useState([
+    {
+      question: 'What is the chemical symbol for Potassium?',
+      options: ['P', 'K', 'Po', 'Pt'],
+      answer: 'K',
+    },
+    {
+      question: 'Which gas is most abundant in the Earth\'s atmosphere?',
+      options: ['Oxygen', 'Hydrogen', 'Nitrogen', 'Carbon Dioxide'],
+      answer: 'Nitrogen',
+    },
+    {
+      question: 'What is the pH level of a neutral solution?',
+      options: ['0', '7', '14', '10'],
+      answer: '7',
+    },
+    {
+      question: 'What element is commonly used in light bulb filaments?',
+      options: ['Tungsten', 'Silver', 'Copper', 'Iron'],
+      answer: 'Tungsten',
+    },
+    {
+      question: 'Which acid is present in vinegar?',
+      options: ['Acetic Acid', 'Citric Acid', 'Sulfuric Acid', 'Hydrochloric Acid'],
+      answer: 'Acetic Acid',
+    },
+  ]);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [timer, setTimer] = useState(15);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [scoreboard, setScoreboard] = useState({});
+
+  // Helper to generate bot players
+  const generateBots = (number) => {
+    const botNames = [
+      'QuizBot', 'ChemBot', 'SciFiMaster', 'Botzilla', 'Atomizer', 'NeonNerd',
+      'MoleculeMuncher', 'ProfessorBot', 'ElementalWizard', 'ParticlePal'
+    ];
+    const bots = [];
+    for (let i = 0; i < number; i++) {
+      const name = botNames[Math.floor(Math.random() * botNames.length)] + ' ' + (Math.floor(Math.random()*99));
+      bots.push({ name, isBot: true });
+    }
+    return bots;
+  };
+
+  // Lobby: Add new player
+  const addPlayer = () => {
+    const newName = prompt('Enter student name:');
+    if (newName) {
+      setPlayers([...players, { name: newName, isBot: false }]);
+    }
+  };
+
+  // Start the game
+  const startGame = () => {
+    let updatedPlayers = [...players];
+    // Add bots if fewer than 6
+    if (updatedPlayers.length < 6) {
+      const botsNeeded = 6 - updatedPlayers.length;
+      updatedPlayers = updatedPlayers.concat(generateBots(botsNeeded));
+    }
+    setPlayers(updatedPlayers);
+    // Initialize scoreboard
+    const initScores = {};
+    updatedPlayers.forEach((p) => (initScores[p.name] = 0));
+    setScoreboard(initScores);
+    setPhase('live');
+    setTimer(15);
+    setCurrentQuestion(0);
+    setShowAnswer(false);
+  };
+
+  // Countdown Timer effect
+  useEffect(() => {
+    if (phase === 'live' && timer > 0 && !showAnswer) {
+      const interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+    if (phase === 'live' && timer === 0 && !showAnswer) {
+      // Time's up, reveal answer automatically
+      revealAnswer();
+    }
+  }, [phase, timer, showAnswer]);
+
+  // Reveal answer and award points
+  const revealAnswer = () => {
+    setShowAnswer(true);
+    const correctOption = questions[currentQuestion].answer;
+    // Award points: random for bots (half chance), none for players (for now)
+    const updatedScores = { ...scoreboard };
+    players.forEach((p) => {
+      if (p.isBot) {
+        // Bot answers randomly; 50% chance correct
+        const isCorrect = Math.random() < 0.5;
+        if (isCorrect) updatedScores[p.name] += 100;
+      } else {
+        // No automatic points for real players
+      }
+    });
+    setScoreboard(updatedScores);
+  };
+
+  // Proceed to next question
+  const nextQuestion = () => {
+    if (currentQuestion + 1 < questions.length) {
+      setCurrentQuestion(currentQuestion + 1);
+      setTimer(15);
+      setShowAnswer(false);
+    } else {
+      setPhase('end');
+    }
+  };
+
+  // Reset game
+  const resetGame = () => {
+    setPhase('lobby');
+    setPlayers([]);
+    setScoreboard({});
+    setCurrentQuestion(0);
+    setTimer(15);
+    setShowAnswer(false);
+  };
+
+  // Render components based on phase
+  return (
+    <div className="flex flex-col items-center justify-start min-h-screen pt-10 backdrop-filter">
+      <div className="w-full max-w-4xl p-6 neon-border rounded-2xl bg-purple-900/70">
+        {/* Header */}
+        <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center">LM Live Quiz Battle</h1>
+        {phase === 'lobby' && (
+          <Lobby players={players} onAddPlayer={addPlayer} onStart={startGame} />
+        )}
+        {phase === 'live' && (
+          <LiveGame
+            players={players}
+            question={questions[currentQuestion]}
+            questionIndex={currentQuestion}
+            totalQuestions={questions.length}
+            timer={timer}
+            showAnswer={showAnswer}
+            revealAnswer={revealAnswer}
+            nextQuestion={nextQuestion}
+            scoreboard={scoreboard}
+          />
+        )}
+        {phase === 'end' && (
+          <EndGame scoreboard={scoreboard} onReset={resetGame} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Lobby({ players, onAddPlayer, onStart }) {
+  return (
+    <div className="space-y-6">
+      <p className="text-lg">Add students (minimum 6 total players to start; bots will fill the rest).</p>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {players.map((p, idx) => (
+          <div
+            key={idx}
+            className="p-3 bg-purple-700/50 rounded-lg text-center neon-border shadow-lg"
+          >
+            <span className="font-medium">{p.name}</span>
+            <span className="block text-xs italic text-purple-200">{p.isBot ? 'Bot' : 'Player'}</span>
+          </div>
+        ))}
+        {/* Show empty slots up to 6 */}
+        {players.length < 6 && Array.from({ length: 6 - players.length }).map((_, idx) => (
+          <div
+            key={`slot-${idx}`}
+            className="p-3 bg-purple-600/30 rounded-lg text-center border-2 border-dashed border-purple-400/50 text-purple-300"
+          >
+            Empty
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-center space-x-4">
+        <button
+          onClick={onAddPlayer}
+          className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg shadow-md"
+        >
+          Add Student
+        </button>
+        <button
+          onClick={onStart}
+          className="px-4 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg shadow-md"
+        >
+          Go Live!
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LiveGame({ players, question, questionIndex, totalQuestions, timer, showAnswer, revealAnswer, nextQuestion, scoreboard }) {
+  // Sorted scoreboard list
+  const sortedScores = Object.entries(scoreboard).sort((a, b) => b[1] - a[1]);
+  return (
+    <div className="space-y-6">
+      {/* Question Info */}
+      <div className="text-center">
+        <h2 className="text-2xl font-semibold mb-2">Question {questionIndex + 1} of {totalQuestions}</h2>
+        <p className="text-xl mb-4">{question.question}</p>
+        <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+          {question.options.map((opt, idx) => {
+            const isCorrect = showAnswer && opt === question.answer;
+            return (
+              <div
+                key={idx}
+                className={`p-3 rounded-lg cursor-pointer text-center ${showAnswer ? (isCorrect ? 'bg-green-600/70 neon-border' : 'bg-red-700/50') : 'bg-purple-600/50 hover:bg-purple-500/60 neon-border'}`}
+              >
+                {opt}
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-4">
+          {showAnswer ? (
+            <>
+              <p className="text-green-300">Correct answer: <span className="font-semibold">{question.answer}</span></p>
+              <button
+                onClick={nextQuestion}
+                className="mt-3 px-3 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg"
+              >Next Question</button>
+            </>
+          ) : (
+            <>
+              <p className="text-lg font-bold">Time left: {timer}s</p>
+              <button
+                onClick={revealAnswer}
+                className="mt-3 px-3 py-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg"
+              >Reveal Answer</button>
+            </>
+          )}
+        </div>
+      </div>
+      {/* Leaderboard */}
+      <div className="mt-6">
+        <h3 className="text-xl font-semibold mb-2 text-center">Leaderboard</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {sortedScores.map(([name, score], idx) => (
+            <div
+              key={name}
+              className={`p-2 rounded-lg ${idx === 0 ? 'bg-yellow-500/70' : idx === 1 ? 'bg-gray-400/70' : idx === 2 ? 'bg-amber-500/70' : 'bg-purple-600/50'} neon-border`}
+            >
+              <span className="font-medium">{idx + 1}. {name}</span>
+              <span className="block text-sm">{score} pts</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EndGame({ scoreboard, onReset }) {
+  const sortedScores = Object.entries(scoreboard).sort((a, b) => b[1] - a[1]);
+  return (
+    <div className="text-center space-y-4">
+      <h2 className="text-2xl font-bold">Game Over!</h2>
+      <p className="text-lg">Final Scores:</p>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-md mx-auto mt-4">
+        {sortedScores.map(([name, score], idx) => (
+          <div key={name} className="p-3 bg-purple-700/60 neon-border rounded-lg">
+            <span className="font-medium">{idx + 1}. {name}</span>
+            <span className="block text-sm">{score} pts</span>
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={onReset}
+        className="mt-4 px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg"
+      >Play Again</button>
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>

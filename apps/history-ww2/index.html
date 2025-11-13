@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive WWII History Hub with world map and timeline covering 1939-1945">
+  <title>WWII History Hub | Learning Monster</title>
+  
+  <!-- CSS Modules -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/map.css">
+  <link rel="stylesheet" href="css/timeline.css">
+  <link rel="stylesheet" href="css/modal.css">
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-animation" aria-hidden="true"></div>
+  
+  <!-- Header -->
+  <header role="banner">
+    <div class="header-content">
+      <div class="logo-section">
+        <div class="lm-logo" aria-label="Learning Monster">
+          <img src="../../LM mask.png" alt="LM">
+        </div>
+        <div class="header-title">
+          <h1>🌍 WWII History Hub</h1>
+          <p>Interactive Map & Timeline (1939-1945)</p>
+        </div>
+      </div>
+      
+      <div class="mode-toggle" role="group" aria-label="View mode selection">
+        <button class="mode-btn active" data-mode="both" aria-pressed="true">
+          📍 Both
+        </button>
+        <button class="mode-btn" data-mode="map" aria-pressed="false">
+          🗺️ Map
+        </button>
+        <button class="mode-btn" data-mode="timeline" aria-pressed="false">
+          📅 Timeline
+        </button>
+      </div>
+      
+      <a href="../../index.html" class="home-btn" aria-label="Return to Learning Monster home">
+        🏠 Home
+      </a>
+    </div>
+  </header>
+  
+  <!-- Legend -->
+  <div class="legend" role="group" aria-label="Map legend">
+    <div class="legend-item" role="button" tabindex="0" data-alliance="allies">
+      <div class="legend-color allies" aria-hidden="true"></div>
+      <span class="legend-label">Allied Powers</span>
+    </div>
+    <div class="legend-item" role="button" tabindex="0" data-alliance="axis">
+      <div class="legend-color axis" aria-hidden="true"></div>
+      <span class="legend-label">Axis Powers</span>
+    </div>
+    <div class="legend-item" role="button" tabindex="0" data-alliance="neutral">
+      <div class="legend-color neutral" aria-hidden="true"></div>
+      <span class="legend-label">Neutral Nations</span>
+    </div>
+  </div>
+  
+  <!-- Main Content -->
+  <main role="main">
+    <!-- Map Section -->
+    <section class="section" id="mapSection" aria-labelledby="mapTitle">
+      <h2 class="section-title" id="mapTitle">🗺️ Interactive World Map</h2>
+      
+      <div class="filter-bar">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input 
+            type="search" 
+            id="searchInput" 
+            class="search-input" 
+            placeholder="Search countries or events..."
+            aria-label="Search countries or events"
+          >
+        </div>
+      </div>
+      
+      <div class="map-container" role="img" aria-label="World map showing WWII nations">
+        <div id="mapContainer" class="world-map">
+          <div class="map-loading">Loading map...</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Timeline Section -->
+    <section class="section" id="timelineSection" aria-labelledby="timelineTitle">
+      <h2 class="section-title" id="timelineTitle">📅 Timeline of Events (1939-1945)</h2>
+      
+      <div class="filter-bar">
+        <div class="filter-chips" role="group" aria-label="Filter by event type">
+          <button class="filter-chip" data-type="all" aria-pressed="false">
+            All Events
+          </button>
+          <button class="filter-chip type-battle" data-type="battle" aria-pressed="false">
+            ⚔️ Battles
+          </button>
+          <button class="filter-chip type-leader" data-type="leader" aria-pressed="false">
+            👤 Leaders
+          </button>
+          <button class="filter-chip type-event" data-type="major-event" aria-pressed="false">
+            ⭐ Major Events
+          </button>
+        </div>
+      </div>
+      
+      <div class="timeline-container">
+        <div id="timelineContainer" aria-label="Timeline scroll container">
+          <div class="map-loading">Loading timeline...</div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <!-- LM Assistant -->
+  <aside class="lm-assistant" aria-label="Learning Monster assistant">
+    <div class="assistant-bubble" id="assistantBubble" role="status" aria-live="polite">
+      <div class="bubble-text" id="bubbleText">Click me for fun WWII facts!</div>
+    </div>
+    <button 
+      class="assistant-avatar" 
+      id="assistantAvatar"
+      aria-label="Click for fun WWII facts"
+    >
+      <img src="../../LM mask.png" alt="LM">
+    </button>
+  </aside>
+  
+  <!-- Modal -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div 
+      class="modal-content" 
+      id="modalContent" 
+      tabindex="-1"
+      role="document"
+    >
+      <button class="modal-close" id="modalClose" aria-label="Close modal">&times;</button>
+      <h2 class="modal-title" id="modalTitle">Loading...</h2>
+      <div class="modal-info" id="modalInfo"></div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+  
+  <!-- Screen Reader Announcer -->
+  <div 
+    id="announcer" 
+    class="sr-only" 
+    role="status" 
+    aria-live="polite" 
+    aria-atomic="true"
+  ></div>
+  
+  <!-- JavaScript Modules (load in dependency order) -->
+  <script src="js/data.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/timeline.js"></script>
+  <script src="js/assistant.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

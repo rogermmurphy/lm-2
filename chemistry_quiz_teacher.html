@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chemistry Quiz - Teacher View</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useMemo } = React;
+
+    const MIN_PLAYERS = 6;
+    const QUESTION_TIME = 12;
+
+    const BOT_NAMES = ["Quizzilla", "Mr. Ionic", "Covalent Kid", "pHantom", "Neon Nova", "Proton Pete", "Valence Vicky"];
+
+    const CHEM_QUESTIONS = [
+      { id: 1, front: "What is Avogadro's number?", correct: "6.022 × 10^23", options: ["6.022 × 10^23", "3.14 × 10^8", "1.602 × 10^-19", "9.81 m/s^2"] },
+      { id: 2, front: "Which molecular geometry does CO₂ have?", correct: "Linear", options: ["Linear", "Bent", "Trigonal pyramidal", "Tetrahedral"] },
+      { id: 3, front: "Which bond is the most polar?", correct: "H–F", options: ["H–H", "C–H", "H–F", "C–C"] },
+      { id: 4, front: "What is the pH of a 1.0×10^-3 M strong acid?", correct: "pH = 3", options: ["pH = 11", "pH = 3", "pH = 7", "pH = 1"] },
+      { id: 5, front: "Which intermolecular force is strongest?", correct: "Hydrogen bonding", options: ["London dispersion", "Dipole–dipole", "Hydrogen bonding", "Ion–induced dipole"] },
+    ];
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function App() {
+      const [phase, setPhase] = useState("lobby");
+      const [players, setPlayers] = useState([]);
+      const [gameDeck] = useState(shuffle(CHEM_QUESTIONS));
+      const [qIndex, setQIndex] = useState(0);
+      const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
+      const [answers, setAnswers] = useState({});
+      const [roundResults, setRoundResults] = useState(null);
+
+      const currentQ = gameDeck[qIndex];
+
+      const addStudent = () => {
+        const name = prompt("Enter student name:");
+        if (name) {
+          setPlayers(prev => [...prev, { id: Math.random().toString(36), name, score: 0, isBot: false }]);
+        }
+      };
+
+      const fillBotsIfNeeded = () => {
+        const need = Math.max(0, MIN_PLAYERS - players.length);
+        if (need === 0) return;
+        const bots = Array.from({ length: need }, (_, i) => ({
+          id: Math.random().toString(36),
+          name: BOT_NAMES[i % BOT_NAMES.length] || `Bot ${i + 1}`,
+          score: 0,
+          isBot: true,
+        }));
+        setPlayers(prev => [...prev, ...bots]);
+      };
+
+      const startGame = () => {
+        fillBotsIfNeeded();
+        setPhase("playing");
+        setQIndex(0);
+        setTimeLeft(QUESTION_TIME);
+        setAnswers({});
+      };
+
+      // Timer
+      useEffect(() => {
+        if (phase !== "playing") return;
+        
+        const timer = setInterval(() => {
+          setTimeLeft(t => {
+            if (t <= 1) {
+              handleReveal();
+              return QUESTION_TIME;
+            }
+            return t - 1;
+          });
+        }, 1000);
+
+        // Simulate answers
+        const timeout = setTimeout(() => {
+          const newAnswers = {};
+          players.forEach(p => {
+            const willAnswer = Math.random() < 0.95;
+            if (!willAnswer) return;
+            const correct = Math.random() < (p.isBot ? 0.55 : 0.6);
+            const pick = correct ? currentQ.correct : currentQ.options[Math.floor(Math.random() * currentQ.options.length)];
+            newAnswers[p.id] = { option: pick, timeTaken: Math.floor(1 + Math.random() * (QUESTION_TIME - 2)) };
+          });
+          setAnswers(newAnswers);
+        }, 300);
+
+        return () => { clearInterval(timer); clearTimeout(timeout); };
+      }, [phase, qIndex]);
+
+      const handleReveal = () => {
+        const counts = {};
+        currentQ.options.forEach(opt => counts[opt] = 0);
+        let correctCount = 0;
+
+        const updated = players.map(p => {
+          const a = answers[p.id];
+          if (!a) return p;
+          counts[a.option] = (counts[a.option] || 0) + 1;
+          const isCorrect = a.option === currentQ.correct;
+          if (isCorrect) {
+            const bonus = Math.max(0, Math.floor(400 - (a.timeTaken * (400 / QUESTION_TIME))));
+            correctCount++;
+            return { ...p, score: p.score + 1000 + bonus };
+          }
+          return p;
+        });
+
+        setPlayers(updated);
+        setRoundResults({ counts, correct: currentQ.correct, correctCount });
+        setPhase("reveal");
+      };
+
+      const nextQuestion = () => {
+        if (qIndex + 1 < gameDeck.length) {
+          setQIndex(qIndex + 1);
+          setTimeLeft(QUESTION_TIME);
+          setAnswers({});
+          setRoundResults(null);
+          setPhase("playing");
+        } else {
+          setPhase("summary");
+        }
+      };
+
+      const sortedLeaders = useMemo(() => [...players].sort((a, b) => b.score - a.score), [players]);
+
+      return (
+        <div className="min-h-screen w-full bg-[#0b0b12] text-gray-100">
+          {/* Top bar */}
+          <div className="sticky top-0 z-20 border-b border-white/10 bg-[#0b0b12]/80 backdrop-blur">
+            <div className="mx-auto flex max-w-7xl items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600"></div>
+                <h1 className="text-xl font-semibold">LM Chemistry Quiz Battle</h1>
+              </div>
+              <div className="flex gap-2">
+                {phase === "lobby" && (
+                  <button onClick={startGame} className="px-4 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500">Start Game</button>
+                )}
+                {phase !== "lobby" && phase !== "summary" && (
+                  <button onClick={() => setPhase("summary")} className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500">End Game</button>
+                )}
+                <button onClick={() => window.location.href = 'techer.html'} className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15">Dashboard</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="mx-auto max-w-7xl p-4 grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div className="md:col-span-8">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                {phase === "lobby" && (
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4">Lobby</h2>
+                    <p className="text-sm text-slate-300 mb-4">
+                      {players.length < MIN_PLAYERS ? `Need ${MIN_PLAYERS - players.length} more players (bots will auto-fill)` : 'Ready to start!'}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {players.map(p => (
+                        <span key={p.id} className="px-3 py-1 rounded-xl bg-white/10 text-sm">
+                          {p.name} {p.isBot ? '🤖' : ''}
+                        </span>
+                      ))}
+                    </div>
+                    <button onClick={addStudent} className="px-4 py-2 bg-indigo-600 rounded-xl hover:bg-indigo-500">Add Student</button>
+                  </div>
+                )}
+
+                {phase === "playing" && currentQ && (
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm text-slate-300">Question {qIndex + 1}/{gameDeck.length}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-48 h-2 bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-fuchsia-500 to-purple-600" style={{ width: `${(timeLeft / QUESTION_TIME) * 100}%` }}></div>
+                        </div>
+                        <span className="text-sm">{timeLeft}s</span>
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-6">{currentQ.front}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {currentQ.options.map((opt, i) => (
+                        <div key={i} className="border border-white/10 bg-white/5 rounded-xl p-3 text-sm">{opt}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {phase === "reveal" && currentQ && roundResults && (
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4">Answer Reveal</h2>
+                    <h3 className="text-lg mb-4">{currentQ.front}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                      {currentQ.options.map((opt, i) => {
+                        const count = roundResults.counts[opt] || 0;
+                        const correct = opt === roundResults.correct;
+                        const total = Object.values(roundResults.counts).reduce((a, b) => a + b, 0);
+                        const pct = total ? Math.round((count / total) * 100) : 0;
+                        return (
+                          <div key={i} className={`rounded-xl p-3 border ${correct ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10 bg-white/5'}`}>
+                            <div className="flex justify-between mb-1">
+                              <span className="font-medium text-sm">{opt}</span>
+                              <span className="text-xs text-slate-300">{count} votes</span>
+                            </div>
+                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                              <div className={`h-full ${correct ? 'bg-emerald-500' : 'bg-white/20'}`} style={{ width: `${pct}%` }}></div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <p className="text-emerald-400 mb-4">✓ Correct: {roundResults.correct} · {roundResults.correctCount} students got it right</p>
+                    <button onClick={nextQuestion} className="px-6 py-3 bg-indigo-600 rounded-xl hover:bg-indigo-500">Next Question →</button>
+                  </div>
+                )}
+
+                {phase === "summary" && (
+                  <div>
+                    <h2 className="text-xl font-semibold mb-6">🎉 Game Summary</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      {sortedLeaders.slice(0, 3).map((p, i) => (
+                        <div key={p.id} className="rounded-xl bg-gradient-to-br from-yellow-400/10 to-white/5 border border-yellow-400/20 p-4">
+                          <div className="text-3xl mb-2">{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}</div>
+                          <p className="font-semibold">{p.name}</p>
+                          <p className="text-sm text-slate-300">Score: {p.score}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                      <button onClick={() => window.location.href = 'techer.html'} className="px-4 py-2 bg-white/10 rounded-xl hover:bg-white/15">Back to Dashboard</button>
+                      <button onClick={() => { setQIndex(0); setPlayers([]); setPhase("lobby"); }} className="px-6 py-3 bg-fuchsia-600 rounded-xl hover:bg-fuchsia-500">Play Again</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right sidebar - Leaderboard */}
+            <div className="md:col-span-4">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <h3 className="font-semibold mb-3">Leaderboard</h3>
+                <div className="space-y-2">
+                  {sortedLeaders.slice(0, 10).map((p, i) => (
+                    <div key={p.id} className="flex items-center justify-between bg-white/5 px-3 py-2 rounded-xl">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'bg-yellow-400 text-black' : i === 1 ? 'bg-gray-300 text-black' : i === 2 ? 'bg-amber-600 text-black' : 'bg-white/10'}`}>
+                          {i + 1}
+                        </span>
+                        <span className="text-sm">{p.name} {p.isBot ? '🤖' : ''}</span>
+                      </div>
+                      <span className="text-sm font-semibold">{p.score}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* LM Assistant */}
+              <div className="mt-4 rounded-2xl border border-white/10 bg-gradient-to-br from-fuchsia-500/10 to-purple-700/10 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600"></div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-200">
+                      {phase === "lobby" && "Ready to start? Add students or I'll fill with bots!"}
+                      {phase === "playing" && "Timer is running... stay focused!"}
+                      {phase === "reveal" && "Great reveal! Who got it right?"}
+                      {phase === "summary" && "Amazing game! Export to Planner?"}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">Players: {players.length} (min {MIN_PLAYERS})</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

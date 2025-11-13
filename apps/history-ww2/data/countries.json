@@ -1,0 +1,142 @@
+[
+  {
+    "id": "DE",
+    "name": "Germany",
+    "side": "Axis",
+    "joined": "1939-09-01",
+    "notes": "Nazi Germany initiated WWII by invading Poland. Led aggressive expansion across Europe until defeated in 1945.",
+    "leaders": ["Adolf Hitler", "Hermann Göring"],
+    "relatedEvents": ["poland_1939", "france_1940", "barbarossa_1941", "stalingrad_1942", "surrender_1945"],
+    "casualties": "6-7 million military, 1-2 million civilian"
+  },
+  {
+    "id": "US",
+    "name": "United States",
+    "side": "Allies",
+    "joined": "1941-12-07",
+    "notes": "Entered after Pearl Harbor. Became 'Arsenal of Democracy' with massive industrial production. Led Pacific and Western European campaigns.",
+    "leaders": ["Franklin D. Roosevelt", "Harry S. Truman", "Dwight D. Eisenhower"],
+    "relatedEvents": ["pearl_1941", "midway_1942", "dday_1944", "atomic_1945", "vj_1945"],
+    "casualties": "416,800 military deaths"
+  },
+  {
+    "id": "UK",
+    "name": "United Kingdom",
+    "side": "Allies",
+    "joined": "1939-09-03",
+    "notes": "Declared war on Germany after Poland invasion. Stood alone against Axis 1940-1941. Critical role in intelligence and North Africa.",
+    "leaders": ["Winston Churchill", "Bernard Montgomery"],
+    "relatedEvents": ["war_declaration_1939", "battle_britain_1940", "el_alamein_1942", "dday_1944"],
+    "casualties": "450,000 total deaths"
+  },
+  {
+    "id": "SU",
+    "name": "Soviet Union",
+    "side": "Allies",
+    "joined": "1941-06-22",
+    "notes": "Bore brunt of Nazi aggression on Eastern Front. Suffered highest casualties but played decisive role in defeating Germany.",
+    "leaders": ["Joseph Stalin", "Georgy Zhukov"],
+    "relatedEvents": ["barbarossa_1941", "stalingrad_1942", "kursk_1943", "berlin_1945"],
+    "casualties": "27 million total deaths"
+  },
+  {
+    "id": "JP",
+    "name": "Japan",
+    "side": "Axis",
+    "joined": "1940-09-27",
+    "notes": "Pursued aggressive expansion in Asia-Pacific. Attack on Pearl Harbor brought US into war. Surrendered after atomic bombings.",
+    "leaders": ["Emperor Hirohito", "Hideki Tojo"],
+    "relatedEvents": ["pearl_1941", "midway_1942", "atomic_1945", "vj_1945"],
+    "casualties": "3.1 million total deaths"
+  },
+  {
+    "id": "FR",
+    "name": "France",
+    "side": "Allies",
+    "joined": "1939-09-03",
+    "notes": "Declared war on Germany but fell in June 1940. Free French forces and Resistance continued fight. Liberated in 1944.",
+    "leaders": ["Charles de Gaulle", "Philippe Pétain"],
+    "relatedEvents": ["war_declaration_1939", "france_1940", "paris_1944"],
+    "casualties": "600,000 total deaths"
+  },
+  {
+    "id": "IT",
+    "name": "Italy",
+    "side": "Axis",
+    "joined": "1940-06-10",
+    "notes": "Under Mussolini, joined Germany. Suffered defeats in North Africa and Greece. Surrendered 1943 and switched sides.",
+    "leaders": ["Benito Mussolini", "Victor Emmanuel III"],
+    "relatedEvents": ["italy_entry_1940", "italy_surrender_1943"],
+    "casualties": "500,000 total deaths"
+  },
+  {
+    "id": "CN",
+    "name": "China",
+    "side": "Allies",
+    "joined": "1937-07-07",
+    "notes": "Fought Japan from 1937. Second Sino-Japanese War merged into WWII. Tied down massive Japanese forces throughout war.",
+    "leaders": ["Chiang Kai-shek", "Mao Zedong"],
+    "relatedEvents": ["china_japan_1937"],
+    "casualties": "15-20 million total deaths"
+  },
+  {
+    "id": "CA",
+    "name": "Canada",
+    "side": "Allies",
+    "joined": "1939-09-10",
+    "notes": "Significant contributions to Allied war effort. Participated in major European campaigns. Over 1 million served.",
+    "leaders": ["William Lyon Mackenzie King"],
+    "relatedEvents": ["dday_1944"],
+    "casualties": "45,000 military deaths"
+  },
+  {
+    "id": "AU",
+    "name": "Australia",
+    "side": "Allies",
+    "joined": "1939-09-03",
+    "notes": "Entered alongside Britain. Crucial role in Pacific Theater defending against Japanese expansion.",
+    "leaders": ["John Curtin"],
+    "relatedEvents": ["pearl_1941"],
+    "casualties": "40,000 total deaths"
+  },
+  {
+    "id": "PL",
+    "name": "Poland",
+    "side": "Allies",
+    "joined": "1939-09-01",
+    "notes": "Invasion sparked WWII. Despite occupation, Polish forces fought on all fronts through government-in-exile.",
+    "leaders": ["Władysław Sikorski"],
+    "relatedEvents": ["poland_1939"],
+    "casualties": "6 million total deaths (17% of population)"
+  },
+  {
+    "id": "ES",
+    "name": "Spain",
+    "side": "Neutral",
+    "joined": null,
+    "notes": "Officially neutral under Franco's fascist regime, though sympathized with Axis. Avoided direct participation.",
+    "leaders": ["Francisco Franco"],
+    "relatedEvents": [],
+    "casualties": "Neutral - no major WWII casualties"
+  },
+  {
+    "id": "SE",
+    "name": "Sweden",
+    "side": "Neutral",
+    "joined": null,
+    "notes": "Maintained armed neutrality. Traded with both sides. Provided humanitarian refuge including Danish Jews.",
+    "leaders": ["Gustaf V"],
+    "relatedEvents": [],
+    "casualties": "Neutral - no major WWII casualties"
+  },
+  {
+    "id": "BR",
+    "name": "Brazil",
+    "side": "Allies",
+    "joined": "1942-08-22",
+    "notes": "Only South American nation to send combat troops. Brazilian Expeditionary Force fought in Italy.",
+    "leaders": ["Getúlio Vargas"],
+    "relatedEvents": [],
+    "casualties": "2,000 military deaths"
+  }
+]

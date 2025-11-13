@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Element &amp; Molecule Explorer</title>
+  <style>
+    :root {
+      /* Pastel colour palette for a Little‑Monster vibe */
+      --lm-purple: #a68de4;
+      --lm-pink: #f4b7c3;
+      --lm-blue: #8ecae6;
+      --lm-cream: #f6f0fa;
+      --lm-yellow: #f9e79f;
+      --lm-green: #c5e1a5;
+    }
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--lm-cream) 0%, var(--lm-blue) 100%);
+      color: #333;
+      margin: 20px;
+    }
+    h1 {
+      color: var(--lm-purple);
+      margin-bottom: 0.5em;
+      font-size: 2rem;
+    }
+    .input-group {
+      margin-bottom: 1em;
+    }
+    input[type="text"] {
+      padding: 8px 12px;
+      font-size: 16px;
+      width: 300px;
+      max-width: 80%;
+      border: 1px solid var(--lm-purple);
+      border-radius: 6px;
+      background: #ffffff;
+      color: #333;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+      margin-left: 8px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: none;
+      background: var(--lm-purple);
+      color: #fff;
+      transition: background 0.2s ease;
+    }
+    button:hover {
+      background: #8e7cc3;
+    }
+    #info {
+      margin-top: 20px;
+    }
+    .section {
+      background: rgba(255,255,255,0.8);
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .section h2 {
+      margin-top: 0;
+      color: var(--lm-purple);
+      font-size: 1.5rem;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    table, th, td {
+      border: 1px solid #e0e0e0;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: var(--lm-purple);
+      color: #fff;
+      font-weight: 600;
+    }
+    td {
+      background-color: rgba(255,255,255,0.9);
+    }
+    canvas {
+      border: 1px solid #ccc;
+      background: #fff;
+      border-radius: 12px;
+    }
+    .note {
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* Styles for the interactive periodic table */
+    #periodic-table-section {
+      overflow-x: auto;
+    }
+    /* Periodic table grid now includes a left column for period labels and a top row for group labels (19 columns total) */
+    .ptable {
+      display: grid;
+      grid-template-columns: repeat(19, 1fr);
+      gap: 2px;
+      margin-top: 10px;
+    }
+    /* Header labels (group numbers) and row labels (period numbers) */
+    .group-label,
+    .row-label {
+      border: 1px solid #e0e0e0;
+      background-color: rgba(255,255,255,0.9);
+      padding: 4px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 6px;
+      color: var(--lm-purple);
+      cursor: default;
+    }
+    /* Default element cell styling; specific categories override the background colour */
+    .cell {
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: center;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: rgba(255,255,255,0.8);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    .cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    /* Blank cells (used for spacing) */
+    .blank {
+      background-color: transparent;
+      border: none;
+      cursor: default;
+    }
+    /* Colour coding for periodic table categories */
+    .cell.alkali-metal {
+      background-color: #ffd6d6;
+    }
+    .cell.alkaline-earth-metal {
+      background-color: #fff2d5;
+    }
+    .cell.transition-metal {
+      background-color: #e7f7f7;
+    }
+    .cell.post-transition-metal {
+      background-color: #f7efc6;
+    }
+    .cell.metalloid {
+      background-color: #dcf5dc;
+    }
+    .cell.non-metal {
+      background-color: #f9f9e8;
+    }
+    .cell.halogen {
+      background-color: #fffbdc;
+    }
+    .cell.noble-gas {
+      background-color: #e9d8ed;
+    }
+    .cell.lanthanide {
+      background-color: #f0f0ff;
+    }
+    .cell.actinide {
+      background-color: #ffe6e6;
+    }
+
+    /* Legend styles for periodic table colour key */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+    }
+    .legend-box {
+      width: 16px;
+      height: 16px;
+      border: 1px solid #ccc;
+      margin-right: 4px;
+      border-radius: 3px;
+    }
+    .legend-box.alkali-metal { background-color: #FFC1C1; }
+    .legend-box.alkaline-earth-metal { background-color: #FFE4B5; }
+    .legend-box.transition-metal { background-color: #E0FFFF; }
+    .legend-box.post-transition-metal { background-color: #F0E68C; }
+    .legend-box.metalloid { background-color: #CCFFCC; }
+    .legend-box.non-metal { background-color: #F5F5DC; }
+    .legend-box.halogen { background-color: #FFFACD; }
+    .legend-box.noble-gas { background-color: #D8BFD8; }
+    .legend-box.lanthanide { background-color: #E6E6FA; }
+    .legend-box.actinide { background-color: #FFE4E1; }
+    /* Link-style button for molecule list */
+    .link-button {
+      background: none;
+      border: none;
+      color: #007BFF;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+    }
+    .link-button:hover {
+      text-decoration: none;
+    }
+    .back-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background: var(--lm-purple);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      transition: background 0.2s ease;
+    }
+    .back-button:hover {
+      background: #8e7cc3;
+    }
+  </style>
+</head>
+<body>
+  <a href="../../index.html" class="back-button">← Back to Learning Monster Hub</a>
+  
+  <h1>🧪 Element &amp; Molecule Explorer</h1>
+  <p>Enter an element or molecule by symbol, name or formula (e.g., <em>H</em>, <em>O</em>, <em>H₂O</em>, <em>water</em>, <em>2‑methylpropane</em>). The tool will display protons, electrons, neutrons and, for supported molecules, geometry and polarity.</p>
+  <div class="input-group">
+    <input id="searchInput" type="text" placeholder="Enter symbol, name or formula" onkeypress="if(event.key === 'Enter') lookup()" />
+    <button onclick="lookup()">Lookup</button>
+  </div>
+  <div id="info"></div>
+  <canvas id="moleculeCanvas" width="500" height="450"></canvas>
+  <div class="section" id="periodic-table-section">
+    <h2>Periodic Table</h2>
+    <div id="periodic-table" class="ptable"></div>
+  </div>
+  <!-- Legend for periodic table colour coding -->
+  <div class="legend">
+    <div class="legend-item"><span class="legend-box alkali-metal"></span> Alkali metal</div>
+    <div class="legend-item"><span class="legend-box alkaline-earth-metal"></span> Alkaline earth metal</div>
+    <div class="legend-item"><span class="legend-box transition-metal"></span> Transition metal</div>
+    <div class="legend-item"><span class="legend-box post-transition-metal"></span> Post-transition metal</div>
+    <div class="legend-item"><span class="legend-box metalloid"></span> Metalloid</div>
+    <div class="legend-item"><span class="legend-box non-metal"></span> Non-metal</div>
+    <div class="legend-item"><span class="legend-box halogen"></span> Halogen</div>
+    <div class="legend-item"><span class="legend-box noble-gas"></span> Noble gas</div>
+    <div class="legend-item"><span class="legend-box lanthanide"></span> Lanthanide</div>
+    <div class="legend-item"><span class="legend-box actinide"></span> Actinide</div>
+  </div>
+  <div class="section" id="molecule-list-section">
+    <h2>Molecules, Geometries and Polarities</h2>
+    <table id="moleculeTable">
+      <thead>
+        <tr><th>Molecule</th><th>VSEPR geometry</th><th>Polarity</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <!-- Molecule builder section -->
+  <div class="section" id="molecule-builder-section">
+    <h2>Molecule Builder</h2>
+    <p>Enter a molecular formula or common name to draw the molecule.</p>
+    <div class="input-group">
+      <input id="builderInput" type="text" placeholder="Enter formula or name" onkeypress="if(event.key === 'Enter') builderLookup()" />
+      <button onclick="builderLookup()">Build</button>
+    </div>
+  </div>
+
+  <!-- VSEPR shape explorer section -->
+  <div class="section" id="shape-explorer-section">
+    <h2>VSEPR Shape Explorer</h2>
+    <p>Select the number of bonding pairs and lone pairs on the central atom to explore the geometry.</p>
+    <div class="input-group" style="gap: 10px; flex-wrap: wrap;">
+      <label style="display:flex; align-items: center; gap:4px;">Bond pairs:
+        <select id="bondPairsSelect">
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </label>
+      <label style="display:flex; align-items: center; gap:4px;">Lone pairs:
+        <select id="lonePairsSelect">
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+      </label>
+      <button onclick="showShape()">Show shape</button>
+    </div>
+    <div id="shapeInfo" style="margin-top: 10px;"></div>
+    <canvas id="shapeCanvas" width="350" height="350" style="border:1px solid #ddd; margin-top: 10px;"></canvas>
+  </div>
+  <script>
+    // Element data for all 118 elements
+    const elements = {
+      H: { name: 'Hydrogen', atomicNumber: 1, atomicMass: 1.008, shells: [1] },
+      He: { name: 'Helium', atomicNumber: 2, atomicMass: 4.003, shells: [2] },
+      Li: { name: 'Lithium', atomicNumber: 3, atomicMass: 6.941, shells: [2,1] },
+      Be: { name: 'Beryllium', atomicNumber: 4, atomicMass: 9.012, shells: [2,2] },
+      B: { name: 'Boron', atomicNumber: 5, atomicMass: 10.81, shells: [2,3] },
+      C: { name: 'Carbon', atomicNumber: 6, atomicMass: 12.01, shells: [2,4] },
+      N: { name: 'Nitrogen', atomicNumber: 7, atomicMass: 14.01, shells: [2,5] },
+      O: { name: 'Oxygen', atomicNumber: 8, atomicMass: 16.00, shells: [2,6] },
+      F: { name: 'Fluorine', atomicNumber: 9, atomicMass: 19.00, shells: [2,7] },
+      Ne: { name: 'Neon', atomicNumber: 10, atomicMass: 20.18, shells: [2,8] },
+      Na: { name: 'Sodium', atomicNumber: 11, atomicMass: 22.99, shells: [2,8,1] },
+      Mg: { name: 'Magnesium', atomicNumber: 12, atomicMass: 24.31, shells: [2,8,2] },
+      Al: { name: 'Aluminum', atomicNumber: 13, atomicMass: 26.98, shells: [2,8,3] },
+      Si: { name: 'Silicon', atomicNumber: 14, atomicMass: 28.09, shells: [2,8,4] },
+      P: { name: 'Phosphorus', atomicNumber: 15, atomicMass: 30.97, shells: [2,8,5] },
+      S: { name: 'Sulfur', atomicNumber: 16, atomicMass: 32.07, shells: [2,8,6] },
+      Cl: { name: 'Chlorine', atomicNumber: 17, atomicMass: 35.45, shells: [2,8,7] },
+      Ar: { name: 'Argon', atomicNumber: 18, atomicMass: 39.95, shells: [2,8,8] },
+      K: { name: 'Potassium', atomicNumber: 19, atomicMass: 39.10, shells: [2,8,8,1] },
+      Ca: { name: 'Calcium', atomicNumber: 20, atomicMass: 40.08, shells: [2,8,8,2] },
+      Sc: { name: 'Scandium', atomicNumber: 21, atomicMass: 44.96, shells: [2,8,9,2] },
+      Ti: { name: 'Titanium', atomicNumber: 22, atomicMass: 47.87, shells: [2,8,10,2] },
+      V: { name: 'Vanadium', atomicNumber: 23, atomicMass: 50.94, shells: [2,8,11,2] },
+      Cr: { name: 'Chromium', atomicNumber: 24, atomicMass: 51.996, shells: [2,8,13,1] },
+      Mn: { name: 'Manganese', atomicNumber: 25, atomicMass: 54.94, shells: [2,8,13,2] },
+      Fe: { name: 'Iron', atomicNumber: 26, atomicMass: 55.85, shells: [2,8,14,2] },
+      Co: { name: 'Cobalt', atomicNumber: 27, atomicMass: 58.93, shells: [2,8,15,2] },
+      Ni: { name: 'Nickel', atomicNumber: 28, atomicMass: 58.69, shells: [2,8,16,2] },
+      Cu: { name: 'Copper', atomicNumber: 29, atomicMass: 63.55, shells: [2,8,18,1] },
+      Zn: { name: 'Zinc', atomicNumber: 30, atomicMass: 65.38, shells: [2,8,18,2] },
+      Ga: { name: 'Gallium', atomicNumber: 31, atomicMass: 69.72, shells: [2,8,18,3] },
+      Ge: { name: 'Germanium', atomicNumber: 32, atomicMass: 72.63, shells: [2,8,18,4] },
+      As: { name: 'Arsenic', atomicNumber: 33, atomicMass: 74.92, shells: [2,8,18,5] },
+      Se: { name: 'Selenium', atomicNumber: 34, atomicMass: 78.97, shells: [2,8,18,6] },
+      Br: { name: 'Bromine', atomicNumber: 35, atomicMass: 79.90, shells: [2,8,18,7] },
+      Kr: { name: 'Krypton', atomicNumber: 36, atomicMass: 83.80, shells: [2,8,18,8] },
+      Rb: { name: 'Rubidium', atomicNumber: 37, atomicMass: 85.47, shells: [2,8,18,8,1] },
+      Sr: { name: 'Strontium', atomicNumber: 38, atomicMass: 87.62, shells: [2,8,18,8,2] },
+      Y: { name: 'Yttrium', atomicNumber: 39, atomicMass: 88.91, shells: [2,8,18,9,2] },
+      Zr: { name: 'Zirconium', atomicNumber: 40, atomicMass: 91.22, shells: [2,8,18,10,2] },
+      Nb: { name: 'Niobium', atomicNumber: 41, atomicMass: 92.91, shells: [2,8,18,12,1] },
+      Mo: { name: 'Molybdenum', atomicNumber: 42, atomicMass: 95.95, shells: [2,8,18,13,1] },
+      Tc: { name: 'Technetium', atomicNumber: 43, atomicMass: 98.00, shells: [2,8,18,14,1] },
+      Ru: { name: 'Ruthenium', atomicNumber: 44, atomicMass: 101.07, shells: [2,8,18,15,1] },
+      Rh: { name: 'Rhodium', atomicNumber: 45, atomicMass: 102.91, shells: [2,8,18,16,1] },
+      Pd: { name: 'Palladium', atomicNumber: 46, atomicMass: 106.42, shells: [2,8,18,18,0] },
+      Ag: { name: 'Silver', atomicNumber: 47, atomicMass: 107.87, shells: [2,8,18,18,1] },
+      Cd: { name: 'Cadmium', atomicNumber: 48, atomicMass: 112.41, shells: [2,8,18,18,2] },
+      In: { name: 'Indium', atomicNumber: 49, atomicMass: 114.82, shells: [2,8,18,18,3] },
+      Sn: { name: 'Tin', atomicNumber: 50, atomicMass: 118.71, shells: [2,8,18,18,4] },
+      Sb: { name: 'Antimony', atomicNumber: 51, atomicMass: 121.76, shells: [2,8,18,18,5] },
+      Te: { name: 'Tellurium', atomicNumber: 52, atomicMass: 127.60, shells: [2,8,18,18,6] },
+      I: { name: 'Iodine', atomicNumber: 53, atomicMass: 126.90, shells: [2,8,18,18,7] },
+      Xe: { name: 'Xenon', atomicNumber: 54, atomicMass: 131.29, shells: [2,8,18,18,8] },
+      Cs: { name: 'Cesium', atomicNumber: 55, atomicMass: 132.91, shells: [2,8,18,18,8,1] },
+      Ba: { name: 'Barium', atomicNumber: 56, atomicMass: 137.33, shells: [2,8,18,18,8,2] },
+      La: { name: 'Lanthanum', atomicNumber: 57, atomicMass: 138.91, shells: [2,8,18,18,9,2] },
+      Ce: { name: 'Cerium', atomicNumber: 58, atomicMass: 140.12, shells: [2,8,18,19,9,2] },
+      Pr: { name: 'Praseodymium', atomicNumber: 59, atomicMass: 140.91, shells: [2,8,18,21,8,2] },
+      Nd: { name: 'Neodymium', atomicNumber: 60, atomicMass: 144.24, shells: [2,8,18,22,8,2] },
+      Pm: { name: 'Promethium', atomicNumber: 61, atomicMass: 145, shells: [2,8,18,23,8,2] },
+      Sm: { name: 'Samarium', atomicNumber: 62, atomicMass: 150.36, shells: [2,8,18,24,8,2] },
+      Eu: { name: 'Europium', atomicNumber: 63, atomicMass: 151.96, shells: [2,8,18,25,8,2] },
+      Gd: { name: 'Gadolinium', atomicNumber: 64, atomicMass: 157.25, shells: [2,8,18,25,9,2] },
+      Tb: { name: 'Terbium', atomicNumber: 65, atomicMass: 158.93, shells: [2,8,18,27,8,2] },
+      Dy: { name: 'Dysprosium', atomicNumber: 66, atomicMass: 162.50, shells: [2,8,18,28,8,2] },
+      Ho: { name: 'Holmium', atomicNumber: 67, atomicMass: 164.93, shells: [2,8,18,29,8,2] },
+      Er: { name: 'Erbium', atomicNumber: 68, atomicMass: 167.26, shells: [2,8,18,30,8,2] },
+      Tm: { name: 'Thulium', atomicNumber: 69, atomicMass: 168.93, shells: [2,8,18,31,8,2] },
+      Yb: { name: 'Ytterbium', atomicNumber: 70, atomicMass: 173.04, shells: [2,8,18,32,8,2] },
+      Lu: { name: 'Lutetium', atomicNumber: 71, atomicMass: 174.97, shells: [2,8,18,32,9,2] },
+      Hf: { name: 'Hafnium', atomicNumber: 72, atomicMass: 178.49, shells: [2,8,18,32,10,2] },
+      Ta: { name: 'Tantalum', atomicNumber: 73, atomicMass: 180.95, shells: [2,8,18,32,11,2] },
+      W: { name: 'Tungsten', atomicNumber: 74, atomicMass: 183.84, shells: [2,8,18,32,12,2] },
+      Re: { name: 'Rhenium', atomicNumber: 75, atomicMass: 186.21, shells: [2,8,18,32,13,2] },
+      Os: { name: 'Osmium', atomicNumber: 76, atomicMass: 190.23, shells: [2,8,18,32,14,2] },
+      Ir: { name: 'Iridium', atomicNumber: 77, atomicMass: 192.22, shells: [2,8,18,32,15,2] },
+      Pt: { name: 'Platinum', atomicNumber: 78, atomicMass: 195.08, shells: [2,8,18,32,17,1] },
+      Au: { name: 'Gold', atomicNumber: 79, atomicMass: 196.97, shells: [2,8,18,32,18,1] },
+      Hg: { name: 'Mercury', atomicNumber: 80, atomicMass: 200.59, shells: [2,8,18,32,18,2] },
+      Tl: { name: 'Thallium', atomicNumber: 81, atomicMass: 204.38, shells: [2,8,18,32,18,3] },
+      Pb: { name: 'Lead', atomicNumber: 82, atomicMass: 207.2, shells: [2,8,18,32,18,4] },
+      Bi: { name: 'Bismuth', atomicNumber: 83, atomicMass: 208.98, shells: [2,8,18,32,18,5] },
+      Po: { name: 'Polonium', atomicNumber: 84, atomicMass: 209, shells: [2,8,18,32,18,6] },
+      At: { name: 'Astatine', atomicNumber: 85, atomicMass: 210, shells: [2,8,18,32,18,7] },
+      Rn: { name: 'Radon', atomicNumber: 86, atomicMass: 222, shells: [2,8,18,32,18,8] },
+      Fr: { name: 'Francium', atomicNumber: 87, atomicMass: 223, shells: [2,8,18,32,18,8,1] },
+      Ra: { name: 'Radium', atomicNumber: 88, atomicMass: 226, shells: [2,8,18,32,18,8,2] },
+      Ac: { name: 'Actinium', atomicNumber: 89, atomicMass: 227, shells: [2,8,18,32,18,9,2] },
+      Th: { name: 'Thorium', atomicNumber: 90, atomicMass: 232.04, shells: [2,8,18,32,18,10,2] },
+      Pa: { name: 'Protactinium', atomicNumber: 91, atomicMass: 231.04, shells: [2,8,18,32,20,9,2] },
+      U: { name: 'Uranium', atomicNumber: 92, atomicMass: 238.03, shells: [2,8,18,32,21,9,2] },
+      Np: { name: 'Neptunium', atomicNumber: 93, atomicMass: 237, shells: [2,8,18,32,22,9,2] },
+      Pu: { name: 'Plutonium', atomicNumber: 94, atomicMass: 244, shells: [2,8,18,32,24,8,2] },
+      Am: { name: 'Americium', atomicNumber: 95, atomicMass: 243, shells: [2,8,18,32,25,8,2] },
+      Cm: { name: 'Curium', atomicNumber: 96, atomicMass: 247, shells: [2,8,18,32,25,9,2] },
+      Bk: { name: 'Berkelium', atomicNumber: 97, atomicMass: 247, shells: [2,8,18,32,27,8,2] },
+      Cf: { name: 'Californium', atomicNumber: 98, atomicMass: 251, shells: [2,8,18,32,28,8,2] },
+      Es: { name: 'Einsteinium', atomicNumber: 99, atomicMass: 252, shells: [2,8,18,32,29,8,2] },
+      Fm: { name: 'Fermium', atomicNumber: 100, atomicMass: 257, shells: [2,8,18,32,30,8,2] },
+      Md: { name: 'Mendelevium', atomicNumber: 101, atomicMass: 258, shells: [2,8,18,32,31,8,2] },
+      No: { name: 'Nobelium', atomicNumber: 102, atomicMass: 259, shells: [2,8,18,32,32,8,2] },
+      Lr: { name: 'Lawrencium', atomicNumber: 103, atomicMass: 266, shells: [2,8,18,32,32,8,3] },
+      Rf: { name: 'Rutherfordium', atomicNumber: 104, atomicMass: 267, shells: [2,8,18,32,32,10,2] },
+      Db: { name: 'Dubnium', atomicNumber: 105, atomicMass: 268, shells: [2,8,18,32,32,11,2] },
+      Sg: { name: 'Seaborgium', atom

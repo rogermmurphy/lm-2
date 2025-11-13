@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Little Monster Advanced Calculator Suite</title>
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #ffc6ff, #d4b8ff);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+h1 {
+  text-align: center;
+  color: #7a3cff;
+  margin-bottom: 20px;
+}
+
+.home-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 8px 16px;
+  background: #7a3cff;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.home-link:hover {
+  background: #6a2cef;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.tabs button {
+  border: none;
+  background: #e9d9ff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #3a0066;
+}
+.tabs button.active {
+  background: #7a3cff;
+  color: white;
+}
+
+/* Panel */
+.tab-content {
+  display: none;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  margin: 0 auto;
+  max-width: 720px;
+}
+.tab-content.active {
+  display: block;
+}
+
+/* Calculator styles */
+#calcDisplay {
+  width: 100%;
+  height: 50px;
+  border: none;
+  background: #f2e6ff;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 1.4em;
+  text-align: right;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+.calc-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.calc-buttons button {
+  padding: 14px;
+  font-size: 1em;
+  border: none;
+  border-radius: 8px;
+  background: #e9d9ff;
+  cursor: pointer;
+  font-weight: 600;
+  color: #3a0066;
+}
+.calc-buttons button.op {
+  background: #b28dff;
+  color: white;
+}
+.calc-buttons button.func {
+  background: #c9a1ff;
+  color: white;
+}
+.calc-buttons button.equal {
+  background: #7a3cff;
+  color: white;
+  grid-column: span 2;
+}
+.calc-buttons button.clear {
+  background: #ffb3c2;
+  color: #5a0a1a;
+}
+
+/* Graph styles */
+.graph-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.graph-inputs label {
+  font-weight: 600;
+  color: #3a0066;
+  margin-right: 4px;
+}
+.graph-inputs input[type="number"], .graph-inputs input[type="text"] {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #e0d4ff;
+  background: #faf7ff;
+  width: 120px;
+  box-sizing: border-box;
+}
+.graph-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.graph-actions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #b28dff;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+#graphCanvas {
+  width: 100%;
+  max-width: 600px;
+  height: 360px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Solver styles */
+#solverControls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+#matrixInputs {
+  margin-bottom: 10px;
+}
+.mrow {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.mrow input[type="number"] {
+  width: 60px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #e0d4ff;
+  background: #faf7ff;
+  box-sizing: border-box;
+}
+.mrow span {
+  margin: 0 4px;
+}
+#solverResult {
+  font-weight: 600;
+  color: #3a0066;
+  margin-top: 8px;
+}
+#solverError {
+  color: #9b1c1c;
+  background: #ffe5e5;
+  border-radius: 6px;
+  padding: 4px 6px;
+  margin-top: 8px;
+}
+
+/* Formulas styles */
+#formulaSearch {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e0d4ff;
+  background: #f7f3ff;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+.formulaList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.formulaCard {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 10px;
+  background: #faf7ff;
+}
+.formulaCard .cat {
+  font-size: .75rem;
+  color: #6c4fa3;
+}
+.formulaCard .fname {
+  font-weight: 700;
+  margin: 4px 0;
+  color: #3a0066;
+}
+.formulaCard .fexpr {
+  background: #fff;
+  border: 1px dashed #e5dbff;
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin: 6px 0;
+}
+.formulaCard button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: #b28dff;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Equation solver styles */
+#eqsolver input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e0d4ff;
+  background: #f7f3ff;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+#eqsolver button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #b28dff;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+#eqsolver #eqResult {
+  margin-top: 8px;
+  font-weight: 600;
+  color: #3a0066;
+}
+#eqsolver #eqError {
+  display: none;
+  margin-top: 8px;
+  color: #9b1c1c;
+  background: #ffe5e5;
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+</style>
+</head>
+<body>
+<a href="../../index.html" class="home-link">🏠 Back to Main Hub</a>
+<h1>Little Monster — Advanced Calculator Suite</h1>
+<div class="tabs">
+  <button class="active" data-target="calc">Calculator</button>
+  <button data-target="graph">Graph</button>
+  <button data-target="solve">Solve x, y, z</button>
+  <button data-target="formulas">Formulas</button>
+  <button data-target="eqsolver">Equation Solver</button>
+</div>
+
+<div id="calc" class="tab-content active">
+  <input id="calcDisplay" type="text" readonly value="" />
+  <div class="calc-buttons">
+    <!-- Row of functions -->
+    <button class="func" data-val="sin(" >sin</button>
+    <button class="func" data-val="cos(" >cos</button>
+    <button class="func" data-val="tan(" >tan</button>
+    <button class="func" data-val="sqrt(" >√</button>
+    
+    <!-- Row of parentheses and power and divide-->
+    <button data-val="(" >(</button>
+    <button data-val=")" >)</button>
+    <button class="func" data-val="^" >^</button>
+    <button class="op" data-val="/" >÷</button>
+
+    <!-- Row of digits 7-9 and multiply -->
+    <button data-val="7">7</button>
+    <button data-val="8">8</button>
+    <button data-val="9">9</button>
+    <button class="op" data-val="*">×</button>
+
+    <!-- Row of digits 4-6 and minus -->
+    <button data-val="4">4</button>
+    <button data-val="5">5</button>
+    <button data-val="6">6</button>
+    <button class="op" data-val="-">−</button>
+
+    <!-- Row of digits 1-3 and plus -->
+    <button data-val="1">1</button>
+    <button data-val="2">2</button>
+    <button data-val="3">3</button>
+    <button class="op" data-val="+">+</button>
+
+    <!-- Row of 0, dot, pi, e -->
+    <button data-val="0">0</button>
+    <button data-val=".">.</button>
+    <button class="func" data-val="π">π</button>
+    <button class="func" data-val="e">e</button>
+
+    <!-- Row of clear, backspace, percent, equal-->
+    <button class="clear" data-val="C">C</button>
+    <button class="clear" data-val="DEL">⌫</button>
+    <button data-val="%">%</button>
+    <button class="equal" data-val="=">=</button>
+  </div>
+</div>
+
+<div id="graph" class="tab-content">
+  <div class="graph-inputs">
+    <label>y = </label>
+    <input type="text" id="graphExpr" value="sin(x) + x/4" placeholder="e.g., sin(x) + x^2/4" style="flex-grow:1;" />
+  </div>
+  <div class="graph-inputs">
+    <label>Xmin</label><input type="number" id="xmin" value="-10" />
+    <label>Xmax</label><input type="number" id="xmax" value="10" />
+    <label>Ymin</label><input type="number" id="ymin" value="-5" />
+    <label>Ymax</label><input type="number" id="ymax" value="5" />
+  </div>
+  <div class="graph-actions">
+    <button id="plotBtn">Plot</button>
+    <button id="zoomInBtn">Zoom In</button>
+    <button id="zoomOutBtn">Zoom Out</button>
+    <button id="resetGraphBtn">Reset</button>
+  </div>
+  <canvas id="graphCanvas" width="600" height="360"></canvas>
+  <p style="color:#6c4fa3;font-size:0.8rem;margin-top:8px;">Use sin, cos, tan, log, ln, √, ^, π, e — variable is <strong>x</strong>.</p>
+</div>
+
+<div id="solve" class="tab-content">
+  <div id="solverControls">
+    <label for="sizeSelect">Size:</label>
+    <select id="sizeSelect">
+      <option value="2">2 × 2</option>
+      <option value="3" selected>3 × 3</option>
+    </select>
+    <button id="solveBtn">Solve</button>
+  </div>
+  <div id="matrixInputs"></div>
+  <div id="solverResult"></div>
+  <div id="solverError"></div>
+</div>
+
+<div id="formulas" class="tab-content">
+  <input type="text" id="formulaSearch" placeholder="Search any formula… e.g., quadratic, volume, sine" />
+  <div id="formulasList" class="formulaList"></div>
+</div>
+
+<div id="eqsolver" class="tab-content">
+  <input type="text" id="equationInput" placeholder="Enter equation, e.g., 2-x=7 or x^3-27x^2+75x-9" />
+  <button id="solveEqBtn">Solve</button>
+  <div id="eqResult"></div>
+  <div id="eqError"></div>
+</div>
+
+<script>
+// Tab switching
+const tabButtons = document.querySelectorAll('.tabs button');
+const tabContents = document.querySelectorAll('.tab-content');
+tabButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabButtons.forEach(b => b.classList.remove('active'));
+    tabContents.forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).classList.add('active');
+  });
+});
+
+// Safe evaluation function
+function safeEval(expr, scope = {}) {
+  let replaced = expr
+    .replace(/π/g, Math.PI.toString())
+    .replace(/\be\b/g, Math.E.toString())
+    .replace(/√/g, 'Math.sqrt')
+    .replace(/sin\(/g, 'Math.sin(')
+    .replace(/cos\(/g, 'Math.cos(')
+    .replace(/tan\(/g, 'Math.tan(')
+    .replace(/log\(/g, 'Math.log10(')
+    .replace(/ln\(/g, 'Math.log(')
+    .replace(/\^/g, '**');
+  const vars = { ...scope };
+  const args = Object.keys(vars);
+  const vals = Object.values(vars);
+  try {
+    const fn = new Function(...args, "return " + replaced);
+    return fn(...vals);
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Calculator logic
+const calcDisplay = document.getElementById('calcDisplay');
+const calcButtons = document.querySelectorAll('.calc-buttons button');
+calcButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const val = btn.dataset.val;
+    if (val === '=') {
+      try {
+        let expr = calcDisplay.value;
+        expr = expr.replace(/(\d+(\.\d+)?)%/g, '($1/100)');
+        const result = safeEval(expr);
+        calcDisplay.value = result;
+      } catch {
+        calcDisplay.value = 'Error';
+      }
+    } else if (val === 'C') {
+      calcDisplay.value = '';
+    } else if (val === 'DEL') {
+      calcDisplay.value = calcDisplay.value.slice(0, -1);
+    } else if (val === '^') {
+      calcDisplay.value += '^';
+    } else {
+      calcDisplay.value += val;
+    }
+  });
+});
+
+// Graph logic
+const graphCanvas = document.getElementById('graphCanvas');
+const plotBtn = document.getElementById('plotBtn');
+const zoomInBtn = document.getElementById('zoomInBtn');
+const zoomOutBtn = document.getElementById('zoomOutBtn');
+const resetGraphBtn = document.getElementById('resetGraphBtn');
+
+function drawGraph() {
+  const expr = document.getElementById('graphExpr').value;
+  let xmin = parseFloat(document.getElementById('xmin').value);
+  let xmax = parseFloat(document.getElementById('xmax').value);
+  let ymin = parseFloat(document.getElementById('ymin').value);
+  let ymax = parseFloat(document.getElementById('ymax').value);
+  const ctx = graphCanvas.getContext('2d');
+  const width = graphCanvas.width;
+  const height = graphCanvas.height;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
+  function toX(x) { return (x - xmin) / (xmax - xmin) * width; }
+  function toY(y) { return height - (y - ymin) / (ymax - ymin) * height; }
+  ctx.strokeStyle = '#eee';
+  ctx.lineWidth = 1;
+  const xStep = niceStep((xmax - xmin) / 10);
+  for (let x = Math.ceil(xmin / xStep) * xStep; x <= xmax; x += xStep) {
+    const px = toX(x);
+    ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, height); ctx.stroke();
+    ctx.fillStyle = '#6b5e7a'; ctx.font = '10px sans-serif';
+    ctx.fillText(formatNum(x), px + 2, height - 4);
+  }
+  const yStep = niceStep((ymax - ymin) / 8);
+  for (let y = Math.ceil(ymin / yStep) * yStep; y <= ymax; y += yStep) {
+    const py = toY(y);
+    ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(width, py); ctx.stroke();
+    ctx.fillStyle = '#6b5e7a'; ctx.font = '10px sans-serif';
+    ctx.fillText(formatNum(y), 2, py - 2);
+  }
+  ctx.strokeStyle = '#b28dff'; ctx.lineWidth = 1.5;
+  if (xmin < 0 && xmax > 0) {
+    const px0 = toX(0);
+    ctx.beginPath(); ctx.moveTo(px0, 0); ctx.lineTo(px0, height); ctx.stroke();
+  }
+  if (ymin < 0 && ymax > 0) {
+    const py0 = toY(0);
+    ctx.beginPath(); ctx.moveTo(0, py0); ctx.lineTo(width, py0); ctx.stroke();
+  }
+  ctx.strokeStyle = '#7a3cff'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  let first = true;
+  for (let px = 0; px < width; px++) {
+    const x = xmin + (px / width) * (xmax - xmin);
+    let y;
+    try {
+      y = safeEval(expr, { x });
+      if (!isFinite(y)) {
+        first = true; continue;
+      }
+    } catch {
+      first = true; continue;
+    }
+    const py = toY(y);
+    if (first) {
+      ctx.moveTo(px, py); first = false;
+    } else {
+      ctx.lineTo(px, py);
+    }
+  }
+  ctx.stroke();
+}
+
+function niceStep(range) {
+  const raw = range;
+  const pow10 = Math.pow(10, Math.floor(Math.log10(raw)));
+  const n = raw / pow10;
+  const step = n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10;
+  return step * pow10;
+}
+function formatNum(n) {
+  const abs = Math.abs(n);
+  if (abs < 1e-6 || abs >= 1e6) return n.toExponential(0).replace('+','');
+  return n.toFixed(0);
+}
+plotBtn.addEventListener('click', drawGraph);
+zoomInBtn.addEventListener('click', () => {
+  const xminEl = document.getElementById('xmin');
+  const xmaxEl = document.getElementById('xmax');
+  const yminEl = document.getElementById('ymin');
+  const ymaxEl = document.getElementById('ymax');
+  let xmin = parseFloat(xminEl.value);
+  let xmax = parseFloat(xmaxEl.value);
+  let ymin = parseFloat(yminEl.value);
+  let ymax = parseFloat(ymaxEl.value);
+  const cx = (xmin + xmax) / 2;
+  const cy = (ymin + ymax) / 2;
+  const factor = 0.7;
+  const newXRange = (xmax - xmin) * factor;
+  const newYRange = (ymax - ymin) * factor;
+  xminEl.value = cx - newXRange / 2;
+  xmaxEl.value = cx + newXRange / 2;
+  yminEl.value = cy - newYRange / 2;
+  ymaxEl.value = cy + newYRange / 2;
+  drawGraph();
+});
+zoomOutBtn.addEventListener('click', () => {
+  const xminEl = document.getElementById('xmin');
+  const xmaxEl = document.getElementById('xmax');
+  const yminEl = document.getElementById('ymin');
+  const ymaxEl = document.getElementById('ymax');
+  let xmin = parseFloat(xminEl.value);
+  let xmax = parseFloat(xmaxEl.value);
+  let ymin = parseFloat(yminEl.value);
+  let ymax = parseFloat(ymaxEl.value);
+  const cx = (xmin + xmax) / 2;
+  const cy = (ymin + ymax) / 2;
+  const factor = 1.3;
+  const newXRange = (xmax - xmin) * factor;
+  const newYRange = (ymax - ymin) * factor;
+  xminEl.value = cx - newXRange / 2;
+  xmaxEl.value = cx + newXRange / 2;
+  yminEl.value = cy - newYRange / 2;
+  ymaxEl.value = cy + newYRange / 2;
+  drawGraph();
+});
+resetGraphBtn.addEventListener('click', () => {
+  document.getElementById('xmin').value = -10;
+  document.getElementById('xmax').value = 10;
+  document.getElementById('ymin').value = -5;
+  document.getElementById('ymax').value = 5;
+  drawGraph();
+});
+setTimeout(drawGraph, 100);
+
+// Solver logic
+const sizeSelect = document.getElementById('sizeSelect');
+const matrixInputs = document.getElementById('matrixInputs');
+const solveBtn = document.getElementById('solveBtn');
+function buildMatrixInputs(size) {
+  matrixInputs.innerHTML = '';
+  for (let i = 0; i < size; i++) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'mrow';
+    for (let j = 0; j < size; j++) {
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.step = 'any';
+      input.value = i === j ? 1 : 0;
+      rowDiv.appendChild(input);
+      const varSpan = document.createElement('span');
+      varSpan.textContent = ['x','y','z'][j];
+      rowDiv.appendChild(varSpan);
+      if (j < size - 1) {
+        const plus = document.createElement('span');
+        plus.textContent = '+';
+        rowDiv.appendChild(plus);
+      }
+    }
+    const equal = document.createElement('span');
+    equal.textContent = '=';
+    rowDiv.appendChild(equal);
+    const bInput = document.createElement('input');
+    bInput.type = 'number';
+    bInput.step = 'any';
+    bInput.value = 0;
+    bInput.className = 'const';
+    rowDiv.appendChild(bInput);
+    matrixInputs.appendChild(rowDiv);
+  }
+}
+buildMatrixInputs(parseInt(sizeSelect.value));
+
+sizeSelect.addEventListener('change', (e) => {
+  const size = parseInt(e.target.value);
+  buildMatrixInputs(size);
+  document.getElementById('solverResult').textContent = '';
+  document.getElementById('solverError').textContent = '';
+});
+
+function solveLinearSystem(A, b) {
+  const n = A.length;
+  const M = A.map((row, i) => row.concat(b[i]));
+  for (let col = 0; col < n; col++) {
+    let pivot = col;
+    for (let r = col + 1; r < n; r++) {
+      if (Math.abs(M[r][col]) > Math.abs(M[pivot][col])) {
+        pivot = r;
+      }
+    }
+    if (Math.abs(M[pivot][col]) < 1e-12) return null;
+    if (pivot !== col) {
+      const tmp = M[pivot];
+      M[pivot] = M[col];
+      M[col] = tmp;
+    }
+    const div = M[col][col];
+    for (let j = col; j <= n; j++) {
+      M[col][j] /= div;
+    }
+    for (let r = col + 1; r < n; r++) {
+      const factor = M[r][col];
+      for (let j = col; j <= n; j++) {
+        M[r][j] -= factor * M[col][j];
+      }
+    }
+  }
+  const x = Array(n).fill(0);
+  for (let i = n - 1; i >= 0; i--) {
+    let sum = M[i][n];
+    for (let j = i + 1; j < n; j++) {
+      sum -= M[i][j] * x[j];
+    }
+    x[i] = sum / M[i][i];
+  }
+  return x;
+}
+
+solveBtn.addEventListener('click', () => {
+  const size = parseInt(sizeSelect.value);
+  const A = [];
+  const bVec = [];
+  const rows = matrixInputs.querySelectorAll('.mrow');
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input[type="number"]');
+    const coeffs = [];
+    for (let i = 0; i < size; i++) {
+      coeffs.push(parseFloat(inputs[i].value) || 0);
+    }
+    A.push(coeffs);
+    bVec.push(parseFloat(inputs[inputs.length-1].value) || 0);
+  });
+  const sol = solveLinearSystem(A, bVec);
+  const resultDiv = document.getElementById('solverResult');
+  const errorDiv = document.getElementById('solverError');
+  if (!sol) {
+    resultDiv.textContent = '';
+    errorDiv.textContent = 'No unique solution (matrix singular or inconsistent).';
+  } else {
+    errorDiv.textContent = '';
+    if (size === 2) {
+      resultDiv.innerHTML = '<b>x</b> = ' + sol[0].toFixed(6) + ', <b>y</b> = ' + sol[1].toFixed(6);
+    } else if (size === 3) {
+      resultDiv.innerHTML = '<b>x</b> = ' + sol[0].toFixed(6) + ', <b>y</b> = ' + sol[1].toFixed(6) + ', <b>z</b> = ' + sol[2].toFixed(6);
+    }
+  }
+});
+
+// Formulas logic
+const formulas = [
+  { name: 'Quadratic Formula', category: 'Algebra', expr: 'x = [-b ± √(b^2 - 4ac)] / (2a)' },
+  { name: 'Slope-Intercept', category: 'Algebra', expr: 'y = mx + b' },
+  { name: 'Point-Slope', category: 'Algebra', expr: 'y - y1 = m(x - x1)' },
+  { name: 'Area of Circle', category: 'Geometry', expr: 'A = πr^2' },
+  { name: 'Circumference of Circle', category: 'Geometry', expr: 'C = 2πr' },
+  { name: 'Volume of Cube', category: 'Geometry', expr: 'V = s^3' },
+  { name: 'Volume of Rectangular Prism', category: 'Geometry', expr: 'V = l · w · h' },
+  { name: 'Volume of Cylinder', category: 'Geometry', expr: 'V = πr^2h' },
+  { name: 'Pythagorean Theorem', category: 'Geometry', expr: 'a^2 + b^2 = c^2' },
+  { name: 'SOH-CAH-TOA', category: 'Trigonometry', expr: 'sin=opp/hyp, cos=adj/hyp, tan=opp/adj' },
+  { name: 'Law of Sines', category: 'Trigonometry', expr: 'sin A / a = sin B / b = sin C / c' },
+  { name: 'Law of Cosines', category: 'Trigonometry', expr: 'c^2 = a^2 + b^2 - 2ab cos C' },
+  { name: 'Derivative Power Rule', category: 'Calculus', expr: 'd/dx (x^n) = n x^(n-1)' },
+  { name: 'Integral Power Rule', category: 'Calculus', expr: '∫ x^n dx = x^(n+1)/(n+1) + C' },
+  { name: "Newton's 2nd Law", category: 'Physics', expr: 'F = m a' },
+  { name: 'Kinetic Energy', category: 'Physics', expr: 'KE = 1/2 m v^2' },
+  { name: "Ohm's Law", category: 'Physics', expr: 'V = I R' },
+  { name: 'Ideal Gas Law', category: 'Chemistry', expr: 'PV = nRT' },
+  { name: 'Molarity', category: 'Chemistry', expr: 'M = moles / liters' }
+];
+const formulaSearch = document.getElementById('formulaSearch');
+const formulasList = document.getElementById('formulasList');
+function renderFormulas(filter='') {
+  formulasList.innerHTML = '';
+  const q = filter.trim().toLowerCase();
+  const filtered = formulas.filter(f =>
+    f.name.toLowerCase().includes(q) ||
+    f.category.toLowerCase().includes(q) ||
+    f.expr.toLowerCase().includes(q)
+  );
+  if (filtered.length === 0) {
+    const div = document.createElement('div');
+    div.className = 'formulaCard';
+    div.textContent = 'No matches. Try another term.';
+    formulasList.appendChild(div);
+  } else {
+    filtered.forEach(f => {
+      const card = document.createElement('div');
+      card.className = 'formulaCard';
+      const cat = document.createElement('div'); cat.className = 'cat'; cat.textContent = f.category;
+      const fname = document.createElement('div'); fname.className = 'fname'; fname.textContent = f.name;
+      const fexpr = document.createElement('div'); fexpr.className = 'fexpr'; fexpr.textContent = f.expr;
+      const copyBtn = document.createElement('button'); copyBtn.textContent = 'Copy';
+      copyBtn.addEventListener('click', () => {
+        const text = `${f.name}: ${f.expr}`;
+        navigator.clipboard.writeText(text).then(() => {
+          alert('Copied!');
+        });
+      });
+      card.appendChild(cat);
+      card.appendChild(fname);
+      card.appendChild(fexpr);
+      card.appendChild(copyBtn);
+      formulasList.appendChild(card);
+    });
+  }
+}
+renderFormulas();
+formulaSearch.addEventListener('input', (e) => {
+  renderFormulas(e.target.value);
+});
+
+// Equation solver logic
+function solveEquationStr(eqStr) {
+  const eq = eqStr.replace(/\s+/g,'');
+  if (eq === '') return [];
+  const parts = eq.split('=');
+  const lhs = parts[0];
+  const rhs = parts[1] || '0';
+  const f = x => {
+    return safeEval(lhs, { x }) - safeEval(rhs, { x });
+  };
+  const roots = [];
+  let lastX = null;
+  let lastY = null;
+  const minX = -50;
+  const maxX = 50;
+  const step = (maxX - minX) / 400;
+  for (let x = minX; x <= maxX; x += step) {
+    let y;
+    try {
+      y = f(x);
+    } catch (err) {
+      lastX = null;
+      lastY = null;
+      continue;
+    }
+    if (lastX !== null) {
+      if (y === 0 || lastY === 0 || (y > 0 && lastY < 0) || (y < 0 && lastY > 0)) {
+        let a = lastX;
+        let b = x;
+        let fa = lastY;
+        let fb = y;
+        for (let i = 0; i < 30; i++) {
+          const mid = (a + b) / 2;
+          const fm = f(mid);
+          if (fa * fm <= 0) {
+            b = mid;
+            fb = fm;
+          } else {
+            a = mid;
+            fa = fm;
+          }
+        }
+        const root = (a + b) / 2;
+        const dup = roots.some(r => Math.abs(r - root) < 1e-4);
+        if (!dup) roots.push(root);
+      }
+    }
+    lastX = x;
+    lastY = y;
+  }
+  roots.sort((a, b) => a - b);
+  return roots.map(r => parseFloat(r.toFixed(6)));
+}
+
+document.getElementById('solveEqBtn').addEventListener('click', () => {
+  const eqInput = document.getElementById('equationInput');
+  const eq = eqInput.value;
+  const resultDiv = document.getElementById('eqResult');
+  const errorDiv = document.getElementById('eqError');
+  if (!eq) {
+    resultDiv.textContent = '';
+    errorDiv.style.display = 'block';
+    errorDiv.textContent = 'Please enter an equation.';
+    return;
+  }
+  errorDiv.style.display = 'none';
+  try {
+    const roots = solveEquationStr(eq);
+    if (roots.length === 0) {
+      resultDiv.textContent = 'No real solution found in range [-50,50].';
+    } else if (roots.length === 1) {
+      resultDiv.innerHTML = '<b>x</b> ≈ ' + roots[0];
+    } else {
+      resultDiv.innerHTML = 'Solutions: ' + roots.map(r => '<b>x</b> ≈ ' + r).join(', ');
+    }
+  } catch (err) {
+    resultDiv.textContent = '';
+    errorDiv.style.display = 'block';
+    errorDiv.textContent = 'Error solving equation.';
+  }
+});
+</script>
+</body>
+</html>

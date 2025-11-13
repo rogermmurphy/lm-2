@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LM Library</title>
+<style>
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(180deg, #f3e8ff, #fce7f3);
+  color: #1f2937;
+  min-height: 100vh;
+}
+.home-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 10px 16px;
+  background: rgba(236, 72, 153, 0.1);
+  border: 1px solid #ec4899;
+  border-radius: 12px;
+  color: #ec4899;
+  text-decoration: none;
+  font-weight: 600;
+  z-index: 100;
+  transition: all 0.3s;
+}
+.home-link:hover {
+  background: rgba(236, 72, 153, 0.2);
+  transform: translateY(-2px);
+}
+header {
+  background: white;
+  border-bottom: 2px solid #fce7f3;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.logo {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(145deg, #ff77b0, #a11a66);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  border: 3px solid #ec4899;
+  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+}
+.header-text h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+}
+.header-text p {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #fce7f3;
+  background: white;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab-btn.active {
+  background: #ec4899;
+  color: white;
+  border-color: #ec4899;
+}
+.tab-btn:hover:not(.active) {
+  border-color: #ec4899;
+}
+.tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+.item-card {
+  background: white;
+  border: 1px solid #fce7f3;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.item-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(236, 72, 153, 0.2);
+}
+.item-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+.item-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.item-meta {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+.item-preview {
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.5;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+}
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border: 2px dashed #fce7f3;
+  border-radius: 20px;
+}
+.empty-state h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
+}
+.empty-state p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+.empty-btn {
+  padding: 0.75rem 1.5rem;
+  background: #ec4899;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 0.5rem;
+}
+.empty-btn:hover {
+  background: #db2777;
+}
+.tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #f3e8ff;
+  border: 1px solid #d8b4fe;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #7e22ce;
+  margin-right: 0.5rem;
+  margin-top: 0.5rem;
+}
+</style>
+</head>
+<body>
+<a href="../../index.html" class="home-link">🏠 Back to Hub</a>
+
+<header>
+  <div class="header-content">
+    <div class="logo">📚</div>
+    <div class="header-text">
+      <h1>LM Library</h1>
+      <p>Your saved notes, videos, and transcripts all in one place</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('notes')">📝 Notes</button>
+    <button class="tab-btn" onclick="switchTab('videos')">🎥 Videos</button>
+    <button class="tab-btn" onclick="switchTab('transcripts')">📄 Transcripts</button>
+    <button class="tab-btn" onclick="switchTab('flashcards')">🎴 Flashcards</button>
+  </div>
+  
+  <div id="notes" class="tab-content active">
+    <div class="empty-state">
+      <h3>📝 No Saved Notes Yet</h3>
+      <p>Your notes from English Hub and subject pages will appear here once you save them.</p>
+      <button class="empty-btn" onclick="window.open('../english-hub/index.html', '_blank')">Go to English Hub</button>
+      <button class="empty-btn" onclick="window.open('../learning-monster/index.html#subjects-page', '_blank')">Go to Subjects</button>
+    </div>
+  </div>
+  
+  <div id="videos" class="tab-content">
+    <div style="margin-bottom: 2rem;">
+      <button class="empty-btn" onclick="document.getElementById('videoUpload').click()">
+        ➕ Upload New Video
+      </button>
+      <input type="file" id="videoUpload" accept="video/*" style="display:none;" onchange="handleVideoUpload(event)">
+    </div>
+    <div id="videoGrid" class="grid">
+      <!-- User's uploaded videos will appear here -->
+    </div>
+  </div>
+  
+  <div id="transcripts" class="tab-content">
+    <div class="empty-state">
+      <h3>📄 No Transcripts Yet</h3>
+      <p>Lecture transcripts from your recordings will appear here.</p>
+      <button class="empty-btn" onclick="window.open('../learning-monster/index.html#subjects-page', '_blank')">Start Recording</button>
+    </div>
+  </div>
+  
+  <div id="flashcards" class="tab-content">
+    <div class="grid">
+      <div class="item-card" onclick="window.open('../../games/flashcards/index.html', '_blank')">
+        <div class="item-icon">🎴</div>
+        <div class="item-title">Math Flashcards</div>
+        <div class="item-meta">3 cards • Last studied: Today</div>
+        <div class="item-preview">
+          Practice basic math concepts including derivatives, algebra, and arithmetic.
+        </div>
+        <div class="tag">Math</div>
+      </div>
+      
+      <div class="item-card" onclick="window.open('../../games/flashcards/index.html', '_blank')">
+        <div class="item-icon">🔬</div>
+        <div class="item-title">Science Flashcards</div>
+        <div class="item-meta">3 cards • Last studied: Today</div>
+        <div class="item-preview">
+          Review scientific concepts including chemistry, physics, and biology fundamentals.
+        </div>
+        <div class="tag">Science</div>
+      </div>
+      
+      <div class="item-card" onclick="window.open('../../games/flashcards/index.html', '_blank')">
+        <div class="item-icon">📜</div>
+        <div class="item-title">History Flashcards</div>
+        <div class="item-meta">3 cards • Last studied: Today</div>
+        <div class="item-preview">
+          Study important historical dates, places, and events.
+        </div>
+        <div class="tag">History</div>
+      </div>
+      
+      <div class="item-card" onclick="window.open('../../games/flashcards/index.html', '_blank')">
+        <div class="item-icon">✍️</div>
+        <div class="item-title">English Flashcards</div>
+        <div class="item-meta">3 cards • Last studied: Today</div>
+        <div class="item-preview">
+          Master English concepts including literary terms and writing fundamentals.
+        </div>
+        <div class="tag">English</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="videoModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:1000; padding:2rem;">
+  <div style="max-width:1200px; margin:0 auto; height:100%; display:flex; flex-direction:column;">
+    <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+      <h2 style="color:white; margin:0;" id="videoModalTitle"></h2>
+      <button onclick="closeVideoModal()" style="background:#ec4899; color:white; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;">✕ Close</button>
+    </div>
+    <video id="videoPlayer" controls style="width:100%; max-height:calc(100vh - 8rem); background:black; border-radius:12px;">
+      <source id="videoSource" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+</div>
+
+<script>
+// Load saved videos from localStorage
+let savedVideos = JSON.parse(localStorage.getItem('lmLibraryVideos') || '[]');
+
+function switchTab(tabName) {
+  // Update buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Update content
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.classList.remove('active');
+  });
+  document.getElementById(tabName).classList.add('active');
+  
+  // Load videos when switching to videos tab
+  if (tabName === 'videos') {
+    displayVideos();
+  }
+}
+
+function handleVideoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Validate file is a video
+  if (!file.type.startsWith('video/')) {
+    alert('Please select a valid video file');
+    return;
+  }
+  
+  // Get file details
+  const fileName = file.name;
+  const fileSize = (file.size / (1024 * 1024)).toFixed(2); // Convert to MB
+  const fileType = file.type;
+  
+  // Create object URL for the video
+  const videoURL = URL.createObjectURL(file);
+  
+  // Prompt for video title
+  const videoTitle = prompt('Enter a title for your video:', fileName.replace(/\.[^/.]+$/, ''));
+  if (!videoTitle) return;
+  
+  // Prompt for description (optional)
+  const videoDescription = prompt('Enter a description (optional):', 'My uploaded video') || 'My uploaded video';
+  
+  // Create video entry
+  const videoEntry = {
+    id: Date.now(),
+    title: videoTitle,
+    description: videoDescription,
+    fileName: fileName,
+    fileSize: fileSize,
+    fileType: fileType,
+    url: videoURL,
+    uploadDate: new Date().toISOString(),
+    thumbnail: '🎥'
+  };
+  
+  // Save to localStorage
+  savedVideos.push(videoEntry);
+  localStorage.setItem('lmLibraryVideos', JSON.stringify(savedVideos));
+  
+  // Display updated videos
+  displayVideos();
+  
+  alert('Video uploaded successfully!');
+}
+
+function displayVideos() {
+  const videoGrid = document.getElementById('videoGrid');
+  
+  if (savedVideos.length === 0) {
+    videoGrid.innerHTML = `
+      <div class="empty-state">
+        <h3>🎥 No Videos Yet</h3>
+        <p>Click "Upload New Video" above to add your first video to the library.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  videoGrid.innerHTML = savedVideos.map(video => `
+    <div class="item-card" onclick="playVideo(${video.id})">
+      <div class="item-icon">😊🎥</div>
+      <div class="item-title">${video.title}</div>
+      <div class="item-meta">${video.fileSize} MB • ${new Date(video.uploadDate).toLocaleDateString()}</div>
+      <div class="item-preview">${video.description}</div>
+      <div class="tag">${video.fileType.split('/')[1].toUpperCase()}</div>
+      <div class="tag" style="background: linear-gradient(145deg, #ff77b0, #a11a66); color: white; border: none;">LM Video</div>
+      <button onclick="event.stopPropagation(); deleteVideo(${video.id})" style="margin-top:0.75rem; padding:0.5rem 1rem; background:#ef4444; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🗑️ Delete</button>
+    </div>
+  `).join('');
+}
+
+function playVideo(videoId) {
+  const video = savedVideos.find(v => v.id === videoId);
+  if (!video) return;
+  
+  document.getElementById('videoModalTitle').textContent = video.title;
+  document.getElementById('videoSource').src = video.url;
+  document.getElementById('videoPlayer').load();
+  document.getElementById('videoModal').style.display = 'block';
+}
+
+function closeVideoModal() {
+  document.getElementById('videoModal').style.display = 'none';
+  document.getElementById('videoPlayer').pause();
+}
+
+function deleteVideo(videoId) {
+  if (!confirm('Are you sure you want to delete this video?')) return;
+  
+  savedVideos = savedVideos.filter(v => v.id !== videoId);
+  localStorage.setItem('lmLibraryVideos', JSON.stringify(savedVideos));
+  displayVideos();
+}
+
+// Display videos on page load if on videos tab
+window.addEventListener('load', () => {
+  displayVideos();
+});
+</script>
+</body>
+</html>

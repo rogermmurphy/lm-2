@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LM 2048 — Neon UI</title>
+<style>
+  :root {
+    --purple: #a855f7;
+    --pink: #ec4899;
+    --bg: #0b0b0b;
+    --tile-bg: #1a1a1a;
+  }
+  body {
+    margin: 0;
+    height: 100vh;
+    background: var(--bg);
+    color: #fff;
+    font-family: "Poppins", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .home-link {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 10px 16px;
+    background: rgba(168, 85, 247, 0.2);
+    border: 1px solid var(--purple);
+    border-radius: 12px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    z-index: 100;
+    transition: all 0.3s;
+    box-shadow: 0 0 15px var(--purple);
+  }
+  .home-link:hover {
+    background: rgba(168, 85, 247, 0.3);
+    transform: translateY(-2px);
+  }
+  h1 {
+    font-size: 2.5rem;
+    color: var(--purple);
+    text-shadow: 0 0 10px var(--purple), 0 0 20px var(--purple);
+    margin-bottom: 0.5rem;
+  }
+  #score {
+    background: #111;
+    border: 1px solid var(--purple);
+    border-radius: 10px;
+    box-shadow: 0 0 15px var(--purple);
+    padding: 6px 20px;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+  }
+  #game {
+    display: grid;
+    grid-template-columns: repeat(4, 100px);
+    gap: 10px;
+    background: #111;
+    border: 2px solid var(--purple);
+    border-radius: 15px;
+    box-shadow: 0 0 25px var(--purple), inset 0 0 20px #5b21b6;
+    padding: 12px;
+    transition: all 0.2s ease;
+  }
+  .tile {
+    width: 100px;
+    height: 100px;
+    background: var(--tile-bg);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 28px;
+    color: #fff;
+    border: 1px solid rgba(168,85,247,0.3);
+    box-shadow: inset 0 0 12px rgba(168,85,247,0.6),
+                0 0 8px rgba(168,85,247,0.4);
+    transition: 0.2s;
+  }
+  .tile[data-value="0"] { color: transparent; }
+  .tile[data-value="2"]  { background: #2e2e2e; }
+  .tile[data-value="4"]  { background: #3f3f46; }
+  .tile[data-value="8"]  { background: #6d28d9; }
+  .tile[data-value="16"] { background: #7e22ce; }
+  .tile[data-value="32"] { background: #8b5cf6; }
+  .tile[data-value="64"] { background: #a855f7; }
+  .tile[data-value="128"]{ background: #c084fc; color:#111; }
+  .tile[data-value="256"]{ background: #f472b6; color:#111; }
+  .tile[data-value="512"]{ background: #ec4899; color:#111; }
+  .tile[data-value="1024"]{ background: #e879f9; color:#111; }
+  .tile[data-value="2048"]{ background: #facc15; color:#111; }
+  footer {
+    margin-top: 1.2rem;
+    color: #aaa;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+  <a href="../../index.html" class="home-link">🏠 Back to Hub</a>
+  <h1>🧩 LM 2048</h1>
+  <div id="score">Score: <span id="scoreValue">0</span></div>
+  <div id="game"></div>
+  <footer>Use arrow keys to move tiles 🎮</footer>
+
+<script>
+const size=4;
+let board=[],score=0;
+function createBoard(){
+  board=Array(size).fill().map(()=>Array(size).fill(0));
+  addNumber();addNumber();draw();
+}
+function addNumber(){
+  const empty=[];
+  for(let i=0;i<size;i++)
+    for(let j=0;j<size;j++)
+      if(board[i][j]===0)empty.push({i,j});
+  if(!empty.length)return;
+  const {i,j}=empty[Math.floor(Math.random()*empty.length)];
+  board[i][j]=Math.random()>0.5?2:4;
+}
+function draw(){
+  const game=document.getElementById("game");
+  game.innerHTML="";
+  for(let i=0;i<size;i++){
+    for(let j=0;j<size;j++){
+      const val=board[i][j];
+      const tile=document.createElement("div");
+      tile.className="tile";
+      tile.dataset.value=val;
+      tile.textContent=val||"";
+      game.appendChild(tile);
+    }
+  }
+  document.getElementById("scoreValue").textContent=score;
+}
+document.addEventListener("keydown",e=>{
+  let moved=false;
+  if(e.key==="ArrowLeft")moved=moveLeft();
+  else if(e.key==="ArrowRight")moved=moveRight();
+  else if(e.key==="ArrowUp")moved=moveUp();
+  else if(e.key==="ArrowDown")moved=moveDown();
+  if(moved){addNumber();draw();}
+});
+function moveLeft(){
+  let moved=false;
+  for(let i=0;i<size;i++){
+    let row=board[i].filter(x=>x!==0);
+    for(let j=0;j<row.length-1;j++){
+      if(row[j]===row[j+1]){
+        row[j]*=2;
+        score+=row[j];
+        row[j+1]=0;
+      }
+    }
+    row=row.filter(x=>x!==0);
+    while(row.length<size)row.push(0);
+    if(row.toString()!==board[i].toString())moved=true;
+    board[i]=row;
+  }
+  return moved;
+}
+function rotate(){
+  const newB=board[0].map((_,i)=>board.map(r=>r[i]).reverse());
+  for(let i=0;i<size;i++)board[i]=newB[i];
+}
+function moveRight(){
+  for(let i=0;i<size;i++)board[i].reverse();
+  const m=moveLeft();
+  for(let i=0;i<size;i++)board[i].reverse();
+  return m;
+}
+function moveUp(){
+  rotate();const m=moveLeft();
+  rotate();rotate();rotate();
+  return m;
+}
+function moveDown(){
+  rotate();rotate();rotate();
+  const m=moveLeft();rotate();
+  return m;
+}
+createBoard();
+</script>
+</body>
+</html>

@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LM History Hub - WWII Edition | Learning Monster</title>
+  <style>
+    :root {
+      --lm-pink: #ff62b0;
+      --lm-purple: #6b46c1;
+      --lm-dark: #1f1d29;
+      --lm-darker: #0a0014;
+      --allies-color: #3b82f6;
+      --axis-color: #ef4444;
+      --neutral-color: #6b7280;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0014 0%, #1f1d29 100%);
+      color: #e5e7eb;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Background Animation */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.2;
+    }
+    
+    .bg-animation::before,
+    .bg-animation::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+    }
+    
+    .bg-animation::before {
+      width: 600px;
+      height: 600px;
+      background: var(--lm-pink);
+      top: 10%;
+      left: -10%;
+      animation: float 12s ease-in-out infinite;
+    }
+    
+    .bg-animation::after {
+      width: 500px;
+      height: 500px;
+      background: var(--lm-purple);
+      bottom: 10%;
+      right: -10%;
+      animation: float 15s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(50px, -50px); }
+    }
+    
+    /* Header */
+    header {
+      background: rgba(31, 29, 41, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 2px solid rgba(255, 98, 176, 0.3);
+      padding: 1.5rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(255, 98, 176, 0.2);
+    }
+    
+    .header-content {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+    
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
+    .lm-logo {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(145deg, var(--lm-pink), #a11a66);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(255, 98, 176, 0.5);
+      overflow: hidden;
+    }
+    
+    .lm-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    
+    .header-title h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--lm-pink), var(--lm-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .header-title p {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+    
+    .mode-toggle {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.5rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 98, 176, 0.2);
+    }
+    
+    .mode-btn {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: #9ca3af;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .mode-btn.active {
+      background: linear-gradient(135deg, var(--lm-pink), var(--lm-purple));
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 98, 176, 0.4);
+    }
+    
+    .mode-btn:hover:not(.active) {
+      background: rgba(255, 98, 176, 0.1);
+      color: white;
+    }
+    
+    .home-btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 98, 176, 0.3);
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .home-btn:hover {
+      background: rgba(255, 98, 176, 0.2);
+      border-color: var(--lm-pink);
+      box-shadow: 0 4px 15px rgba(255, 98, 176, 0.3);
+    }
+    
+    /* Legend */
+    .legend {
+      max-width: 1600px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+    }
+    
+    .legend-color {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px currentColor;
+    }
+    
+    .legend-color.allies { background: var(--allies-color); }
+    .legend-color.axis { background: var(--axis-color); }
+    .legend-color.neutral { background: var(--neutral-color); }
+    
+    .legend-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    /* Main Content */
+    main {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    /* Map Section */
+    .map-section {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 98, 176, 0.2);
+      border-radius: 24px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--lm-pink), var(--lm-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .map-container {
+      width: 100%;
+      height: 600px;
+      background: rgba(10, 0, 20, 0.5);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .world-map {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .world-map svg {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    
+    .country {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      stroke: rgba(255, 255, 255, 0.3);
+      stroke-width: 0.5;
+    }
+    
+    .country:hover {
+      filter: brightness(1.3);
+      stroke: white;
+      stroke-width: 1;
+    }
+    
+    .country.allies { fill: var(--allies-color); }
+    .country.axis { fill: var(--axis-color); }
+    .country.neutral { fill: var(--neutral-color); }
+    
+    /* Timeline Section */
+    .timeline-section {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 98, 176, 0.2);
+      border-radius: 24px;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .timeline-container {
+      position: relative;
+      padding: 2rem 0;
+    }
+    
+    .timeline-scroll {
+      display: flex;
+      gap: 2rem;
+      overflow-x: auto;
+      padding: 2rem 0;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 98, 176, 0.5) rgba(255, 255, 255, 0.05);
+    }
+    
+    .timeline-scroll::-webkit-scrollbar {
+      height: 8px;
+    }
+    
+    .timeline-scroll::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+    
+    .timeline-scroll::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, var(--lm-pink), var(--lm-purple));
+      border-radius: 10px;
+    }
+    
+    .timeline-year {
+      min-width: 300px;
+      position: relative;
+    }
+    
+    .year-marker {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--lm-pink), var(--lm-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    .event-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .event-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 98, 176, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .event-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(135deg, var(--lm-pink), var(--lm-purple));
+    }
+    
+    .event-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--lm-pink);
+      box-shadow: 0 12px 30px rgba(255, 98, 176, 0.3);
+    }
+    
+    .event-date {
+      font-size: 0.85rem;
+      color: var(--lm-pink);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .event-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.5rem;
+    }
+    
+    .event-description {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      line-height: 1.6;
+    }
+    
+    .event-type {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: rgba(255, 98, 176, 0.2);
+      border: 1px solid var(--lm-pink);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--lm-pink);
+      margin-top: 0.75rem;
+    }
+    
+    /* LM Mascot */
+    .lm-mascot {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 1000;
+      animation: bounce 3s ease-in-out infinite;
+    }
+    
+    .mascot-bubble {
+      position: absolute;
+      bottom: 100%;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: 2px solid var(--lm-pink);
+      border-radius: 16px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1rem;
+      min-width: 250px;
+      max-width: 300px;
+      box-shadow: 0 8px 30px rgba(255, 98, 176, 0.4);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    
+    .mascot-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      right: 20px;
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 10px solid var(--lm-pink);
+    }
+    
+    .mascot-bubble.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+    
+    .bubble-text {
+      color: #1f1d29;
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+    
+    .mascot-avatar {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(145deg, var(--lm-pink), #a11a66);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(255, 98, 176, 0.5);
+      transition: transform 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .mascot-avatar:hover {
+      transform: scale(1.1);
+    }
+    
+    .mascot-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .modal.show {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: rgba(31, 29, 41, 0.95);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 98, 176, 0.3);
+      border-radius: 24px;
+      padding: 2.5rem;
+      max-width: 700px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(255, 98, 176, 0.4);
+      animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-close:hover {
+      background: var(--lm-pink);
+      transform: rotate(90deg);
+    }
+    
+    .modal-title {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--lm-pink), var(--lm-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+    }
+    
+    .modal-info {
+      color: #9ca3af;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .modal-body {
+      color: #e5e7eb;
+      line-height: 1.8;
+      font-size: 1rem;
+    }
+    
+    .modal-body h3 {
+      color: var(--lm-pink);
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      font-size: 1.25rem;
+    }
+    
+    .modal-body ul {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .modal-body li {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Hidden class for mode toggle */
+    .hidden {
+      display: none !important;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .mode-toggle {
+        width: 100%;
+      }
+      
+      .mode-btn {
+        flex: 1;
+        padding: 0.75rem;
+      }
+      
+      .map-container {
+        height: 400px;
+      }
+      
+      .timeline-year {
+        min-width: 250px;
+      }
+      
+      .lm-mascot {
+        bottom: 1rem;
+        right: 1rem;
+      }
+      
+      .mascot-avatar {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .modal-content {
+        padding: 1.5rem;
+        margin: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animation"></div>
+  
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <div class="logo-section">
+        <div class="lm-logo">
+          <img src="../../LM mask.png" alt="LM">
+        </div>
+        <div class="header-title">
+          <h1>🌍 WWII History Hub</h1>
+          <p>Interactive Map & Timeline (1939-1945)</p>
+        </div>
+      </div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="both">📍 Both</button>
+        <button class="mode-btn" data-mode="map">🗺️ Map</button>
+        <button class="mode-btn" data-mode="timeline">📅 Timeline</button>
+      </div>
+      <a href="../../index.html" class="home-btn">🏠 Home</a>
+    </div>
+  </header>
+  
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-color allies"></div>
+      <span class="legend-label">Allied Powers</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color axis"></div>
+      <span class="legend-label">Axis Powers</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color neutral"></div>
+      <span class="legend-label">Neutral Nations</span>
+    </div>
+  </div>
+  
+  <!-- Main Content -->
+  <main>
+    <!-- Map Section -->
+    <section class="map-section" id="mapSection">
+      <h2 class="section-title">🗺️ Interactive World Map</h2>
+      <div class="map-container">
+        <div class="world-map">
+          <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+            <!-- Simplified World Map (Major WWII Nations) -->
+            <!-- USA -->
+            <path class="country allies" data-country="usa" d="M 50 150 L 200 150 L 200 280 L 50 280 Z" />
+            <text x="125" y="220" fill="white" font-size="12" text-anchor="middle" pointer-events="none">USA</text>
+            
+            <!-- UK -->
+            <path class="country allies" data-country="uk" d="M 420 100 L 470 100 L 470 150 L 420 150 Z" />
+            <text x="445" y="130" fill="white" font-size="10" text-anchor="middle" pointer-events="none">UK</text>
+            
+            <!-- France -->
+            <path class="country allies" data-country="france" d="M 440 160 L 490 160 L 490 210 L 440 210 Z" />
+            <text x="465" y="190" fill="white" font-size="10" text-anchor="middle" pointer-events="none">France</text>
+            
+            <!-- Germany -->
+            <path class="country axis" data-country="germany" d="M 500 120 L 570 120 L 570 180 L 500 180 Z" />
+            <text x="535" y="155" fill="white" font-size="12" text-anchor="middle" pointer-events="none">Germany</text>
+            
+            <!-- Italy -->
+            <path class="country axis" data-country="italy" d="M 520 200 L 560 200 L 560 260 L 520 260 Z" />
+            <text x="540" y="235" fill="white" font-size="10" text-anchor="middle" pointer-events="none">Italy</text>
+            
+            <!-- Soviet Union -->
+            <path class="country allies" data-country="ussr" d="M 580 80 L 850 80 L 850 250 L 580 250 Z" />
+            <text x="715" y="170" fill="white" font-size="14" text-anchor="middle" pointer-events="none">Soviet Union</text>
+            
+            <!-- Japan -->
+            <path class="country axis" data-country="japan" d="M 880 150 L 950 150 L 950 220 L 880 220 Z" />
+            <text x="915" y="190" fill="white" font-size="12" text-anchor="middle" pointer-events="none">Japan</text>
+            
+            <!-- China -->
+            <path class="country allies" data-country="china" d="M 750 180 L 850 180 L 850 280 L 750 280 Z" />
+            <text x="800" y="235" fill="white" font-size="12" text-anchor="middle" pointer-events="none">China</text>
+            
+            <!-- Australia -->
+            <path class="country allies" data-country="australia" d="M 800 350 L 900 350 L 900 430 L 800 430 Z" />
+            <text x="850" y="395" fill="white" font-size="11" text-anchor="middle" pointer-events="none">Australia</text>
+            
+            <!-- Canada -->
+            <path class="country allies" data-country="canada" d="M 80 40 L 250 40 L 250 120 L 80 120 Z" />
+            <text x="165" y="85" fill="white" font-size="12" text-anchor="middle" pointer-events="none">Canada</text>
+            
+            <!-- Poland -->
+            <path class="country allies" data-country="poland" d="M 550 110 L 590 110 L 590 140 L 550 140 Z" />
+            <text x="570" y="130" fill="white" font-size="9" text-anchor="middle" pointer-events="none">Poland</text>
+            
+            <!-- Spain (Neutral) -->
+            <path class="country neutral" data-country="spain" d="M 400 190 L 450 190 L 450 230 L 400 230 Z" />
+            <text x="425" y="215" fill="white" font-size="9" text-anchor="middle" pointer-events="none">Spain</text>
+            
+            <!-- Sweden (Neutral) -->
+            <path class="country neutral" data-country="sweden" d="M 510 60 L 540 60 L 540 100 L 510 100 Z" />
+            <text x="525" y="85" fill="white" font-size="8" text-anchor="middle" pointer-events="none">Sweden</text>
+            
+            <!-- Brazil -->
+            <path class="country allies" data-country="brazil" d="M 250 300 L 350 300 L 350 420 L 250 420 Z" />
+            <text x="300" y="365" fill="white" font-size="11" text-anchor="middle" pointer-events="none">Brazil</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Timeline Section -->
+    <section class="timeline-section" id="timelineSection">
+      <h2 class="section-title">📅 Timeline of Events (1939-1945)</h2>
+      <div class="timeline-container">
+        <div class="timeline-scroll" id="timelineScroll">
+          <!-- 1939 -->
+          <div class="timeline-year">
+            <div class="year-marker">1939</div>
+            <div class="event-cards">
+              <div class="event-card" data-event="poland-invasion">
+                <div class="event-date">September 1, 1939</div>
+                <div class="event-title">🇩🇪 Germany Invades Poland</div>
+                <div class="event-description">Hitler's forces attack Poland, marking the official start of World War II in Europe.</div>
+                <span class="event-type">Battle</span>
+              </div>
+              <div class="event-card" data-event="war-declaration">
+                <div class="event-date">September 3, 1939</div>
+                <div class="event-title">⚔️ Britain & France Declare War</div>
+                <div class="event-description">Following Germany's invasion, Britain and France declare war on Germany.</div>
+                <span class="event-type">Political</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 1940 -->
+          <div class="timeline-year">
+            <div class="year-marker">1940</div>
+            <div class="event-cards">
+              <div class="event-card" data-event="france-falls">
+                <div class="event-date">June 22, 1940</div>
+                <div class="event-title">🇫🇷 Fall of France</div>
+                <div class="event-description">France surrenders to Germany. The Vichy government is established.</div>
+                <span class="event-type">Major Event</span>
+              </div>
+              <div class="event-card" data-event="battle-britain">
+                <div class="event-date">July - October 1940</div>
+                <div class="event-title">✈️ Battle of Britain</div>
+                <div class="event-description">The RAF successfully defends Britain against German Luftwaffe attacks.</div>
+                <span class="event-type">Battle</span>
+              </div>
+              <div class="event-card" data-event="tripartite-pact">
+                <div class="event-date">September 27, 1940</div>
+                <div class="event-title">🤝 Tripartite Pact Signed</div>
+                <div class="event-description">Germany, Italy, and Japan form the Axis alliance.</div>
+                <span class="event-type">Political</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 1941 -->
+          <div class="timeline-year">
+            <div class="year-marker">1941</div>
+            <div class="event-cards">
+              <div class="event-card" data-event="operation-barbarossa">
+                <div class="event-date">June 22, 1941</div>
+                <div class="event-title">⚔️ Operation Barbarossa</div>
+                <div class="event-description">Germany invades the Soviet Union, opening the Eastern Front.</div>
+                <span class="event-type">Battle</span>
+              </div>
+              <div class="event-card" data-event="pearl-harbor">
+                <div class="event-date">December 7, 1941</div>
+                <div class="event-title">💣 Attack on Pearl Harbor</div>
+                <div class="event-description">Japan attacks Pearl Harbor, bringing the USA into the war.</div>
+                <span class="event-type">Major Event</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 1942 -->
+          <div class="timeline-year">
+            <div class="year-marker">1942</div>
+            <div class="event-cards">
+              <div class="event-card" data-event="midway">
+                <div class="event-date">June 4-7, 1942</div>
+                <div class="event-title">🌊 Battle of Midway</div>
+                <div class="event-description">US Navy defeats Japan in a crucial Pacific battle.</div>
+                <span class="event-type">Battle</span>
+              </div>
+              <div class="event-card" data-event="stalingrad">
+                <div class="event-date">August 1942 - February 1943</div>
+                <div class="event-title">❄️ Battle of Stalingrad</div>
+                <div class="event-description">Soviet forces halt German advance in brutal urban warfare.</div>
+                <span class="event-type">Battle</span>
+              </div>
+              <div class="event-card" data-event="el-alamein">
+                <div class="event-date">October 23 - November 11, 1942</div>
+                <div class="event-title">🏜️ Battle of El Alamein</div>
+                <div class="event-description">British victory in North Africa turns the tide against Axis forces.</div>
+                <span class="event-type">Battle</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 1943 -->
+          <div class="timeline-year">
+            <div class="year-marker">1943</div>
+            <div class="event-cards">
+              <div class="event-card" data-event="stalingrad-victory">
+                <div class="event-date">February 2, 1943</div>
+                <div class="event-title">🏆 German Surrender at Stalingrad</div>
+                <div class="event-description">Complete Soviet victory marks a turning point on the Eastern Front.</div>
+                <span class="event-type">Major Event</span>
+              </div>
+              <div class="event-card" data-event="italy-invasion">
+                <div class="event-date">July 10, 1943</div>
+                <div class="event-title">🇮🇹 Allied Invasion of Italy</div>
+                <div class="event-description">Allies land in Sicily, beginning the Italian Campaign.</div>
+                <span class="event-type">Battle</span>
+              </div>
+              <div class="event-card" data-event="italy-surrender">
+                <div class="event-date">September 8, 1943</div>
+                <div class="event-title">🏳️ Italy Surrenders</div>
+                <div class="event-description">Italy switches sides and joins the Allies.</div>
+                <span class="event-type">Political</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 1944 -->
+          <div class="timeline-year">
+            <div class="year-marker">1944</div>
+            <div class="event-cards">
+              <div class="event-card" data-event="d-day">
+                <div class="event-date">June 6, 1944</div>
+                <div class="event-title">🌊 D-Day (Operation Overlord)</div>
+                <div class="event-description">Massive Allied invasion of Normandy opens Western Front.</div>
+                <span class="event-type">Major Event</span>
+              </div>
+              <div class="event-card" data-event="paris-liberated">
+                <div class="event-date">August 25, 1944</div>
+                <div class="event-title">🗼 Liberation of Paris</div>
+                <div class="event-description">Allied forces liberate Paris from German occupation.</div>
+                <span class="event-type">Major Event</span>
+              </div>
+              <div class="event-card" data-event="bulge">
+                <div class="event-date">December 16, 1944 - January 25, 1945</div>
+                <div class="event-title">❄️ Battle of the Bulge</div>
+                <div class="event-description">Germany's last major offensive in the West is repelled.</div>
+                <span class="event-type">Battle</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 1945 -->
+          <div class="timeline-year">
+            <div class="year-marker">1945</div>
+            <div class="event-cards">
+              <div class="event-card" data-event="yalta">
+                <div class="event-date">February 4-11, 1945</div>
+                <div class="event-title">🤝 Yalta Conference</div>
+                <div class="event-description">Allied leaders meet to plan post-war Europe.</div>
+                <span class="event-type">Political</span>
+              </div>
+              <div class="event-card" data-event="hitler-death">
+                <div class="event-date">April 30, 1945</div>
+                <div class="event-title">💀 Hitler's Death</div>
+                <div class="event-description">Adolf Hitler commits suicide in his Berlin bunker.</div>
+                <span class="event-type">Leader</span>
+              </div>
+              <div class="event-card" data-event="ve-day">
+                <div class="event-date">May 8, 1945</div>
+                <div class="event-title">🎉 Victory in Europe (V-E Day)</div>
+                <div class="event-description">Germany surrenders unconditionally, ending the war in Europe.</div>
+                <span class="event-type">Major Event</span>
+              </div>
+              <div class="event-card" data-event="atomic-bombs">
+                <div class="event-date">August 6 & 9, 1945</div>
+                <div class="event-title">☢️ Atomic Bombs Dropped</div>
+                <div class="event-description">USA drops atomic bombs on Hiroshima and Nagasaki.</div>
+                <span class="event-type">Major Event</span>
+              </div>
+              <div class="event-card" data-event="vj-day">
+                <div class="event-date">August 15, 1945</div>
+                <div class="event-title">🎊 Victory over Japan (V-J Day)</div>
+                <div class="event-description">Japan surrenders, ending World War II.</div>
+                <span class="event-type">Major Event</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <!-- LM Mascot -->
+  <div class="lm-mascot">
+    <div class="mascot-bubble" id="mascotBubble">
+      <div class="bubble-text" id="bubbleText">Click me for fun WWII facts!</div>
+    </div>
+    <div class="mascot-avatar" id="mascotAvatar">
+      <img src="../../LM mask.png" alt="LM">
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <h2 class="modal-title" id="modalTitle">Title</h2>
+      <div class="modal-info" id="modalInfo"></div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+  
+  <script>
+    // Data for countries and events
+    const countryData = {
+      usa: {
+        title: '🇺🇸 United States of America',
+        info: 'Allied Power • Entered War: December 1941',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>The United States initially maintained neutrality but provided aid to Allied nations through the Lend-Lease Act. After the attack on Pearl Harbor in December 1941, the US fully entered the war.</p>
+          
+          <h3>Major Contributions</h3>
+          <ul>
+            <li>Massive industrial production ("Arsenal of Democracy")</li>
+            <li>D-Day invasion and liberation of Western Europe</li>
+            <li>Island-hopping campaign in the Pacific</li>
+            <li>Development and use of atomic weapons</li>
+            <li>16 million Americans served in the military</li>
+          </ul>
+          
+          <h3>Key Leaders</h3>
+          <ul>
+            <li>President Franklin D. Roosevelt (1933-1945)</li>
+            <li>President Harry S. Truman (1945)</li>
+            <li>General Dwight D. Eisenhower</li>
+            <li>General Douglas MacArthur</li>
+          </ul>
+        `
+      },
+      uk: {
+        title: '🇬🇧 United Kingdom',
+        info: 'Allied Power • At War: September 1939 - May 1945',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>Britain declared war on Germany following the invasion of Poland. Under Winston Churchill's leadership, Britain stood alone against Nazi Germany during 1940-1941 and played a crucial role in eventual Allied victory.</p>
+          
+          <h3>Major Contributions</h3>
+          <ul>
+            <li>Battle of Britain - defended against German air attacks</li>
+            <li>North African Campaign victories</li>
+            <li>D-Day invasion planning and execution</li>
+            <li>Intelligence operations and code-breaking at Bletchley Park</li>
+            <li>Naval supremacy in the Atlantic</li>
+          </ul>
+          
+          <h3>Key Leaders</h3>
+          <ul>
+            <li>Prime Minister Winston Churchill</li>
+            <li>Field Marshal Bernard Montgomery</li>
+            <li>Air Chief Marshal Hugh Dowding</li>
+          </ul>
+        `
+      },
+      france: {
+        title: '🇫🇷 France',
+        info: 'Allied Power • Occupied: June 1940 - August 1944',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>France declared war on Germany in September 1939. Despite initial resistance, France fell to Germany in June 1940. The French Resistance continued to fight, and Free French forces under Charles de Gaulle joined the Allies.</p>
+          
+          <h3>Major Events</h3>
+          <ul>
+            <li>Battle of France (May-June 1940)</li>
+            <li>Vichy France collaboration government</li>
+            <li>French Resistance operations</li>
+            <li>Liberation of Paris (August 1944)</li>
+            <li>Free French forces in North Africa and Italy</li>
+          </ul>
+          
+          <h3>Key Leaders</h3>
+          <ul>
+            <li>General Charles de Gaulle (Free France)</li>
+            <li>Marshal Philippe Pétain (Vichy France)</li>
+          </ul>
+        `
+      },
+      germany: {
+        title: '🇩🇪 Nazi Germany',
+        info: 'Axis Power • Surrendered: May 8, 1945',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>Nazi Germany, under Adolf Hitler's dictatorship, initiated World War II by invading Poland in 1939. Germany's aggressive expansion and genocidal policies led to the deadliest conflict in human history.</p>
+          
+          <h3>Major Campaigns</h3>
+          <ul>
+            <li>Blitzkrieg tactics in Poland and France</li>
+            <li>Battle of Britain air campaign (failed)</li>
+            <li>Operation Barbarossa - invasion of Soviet Union</li>
+            <li>Holocaust and systematic genocide</li>
+            <li>Defense of "Fortress Europe"</li>
+          </ul>
+          
+          <h3>Key Leaders</h3>
+          <ul>
+            <li>Führer Adolf Hitler</li>
+            <li>Field Marshal Erwin Rommel</li>
+            <li>Reichsmarschall Hermann Göring</li>
+          </ul>
+          
+          <h3>Defeat</h3>
+          <p>Germany surrendered unconditionally on May 8, 1945, after Hitler's suicide and the fall of Berlin to Soviet forces.</p>
+        `
+      },
+      italy: {
+        title: '🇮🇹 Italy',
+        info: 'Axis Power • Surrendered: September 1943',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>Under Benito Mussolini's fascist regime, Italy entered WWII as Germany's ally in June 1940. After military failures and Allied invasion, Italy surrendered in 1943 and switched sides.</p>
+          
+          <h3>Major Campaigns</h3>
+          <ul>
+            <li>Invasion of France (June 1940)</li>
+            <li>Failed invasion of Greece</li>
+            <li>North African Campaign</li>
+            <li>Allied invasion of Sicily and mainland</li>
+            <li>Italian Civil War (1943-1945)</li>
+          </ul>
+          
+          <h3>Key Leaders</h3>
+          <ul>
+            <li>Dictator Benito Mussolini</li>
+            <li>King Victor Emmanuel III</li>
+            <li>Marshal Pietro Badoglio</li>
+          </ul>
+        `
+      },
+      ussr: {
+        title: '🇷🇺 Soviet Union',
+        info: 'Allied Power • At War: June 1941 - May 1945',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>The Soviet Union bore the brunt of Nazi Germany's aggression on the Eastern Front. Despite massive initial losses, the Soviets eventually defeated Germany and played the decisive role in Allied victory.</p>
+          
+          <h3>Major Battles</h3>
+          <ul>
+            <li>Operation Barbarossa defense (1941)</li>
+            <li>Siege of Leningrad (872 days)</li>
+            <li>Battle of Stalingrad (turning point)</li>
+            <li>Battle of Kursk (largest tank battle)</li>
+            <li>Liberation of Eastern Europe and capture of Berlin</li>
+          </ul>
+          
+          <h3>Key Leaders</h3>
+          <ul>
+            <li>Premier Joseph Stalin</li>
+            <li>Marshal Georgy Zhukov</li>
+            <li>Marshal Konstantin Rokossovsky</li>
+          </ul>
+          
+          <h3>Casualties</h3>
+          <p>The Soviet Union suffered the highest casualties of any nation in WWII, with an estimated 27 million deaths.</p>
+        `
+      },
+      japan: {
+        title: '🇯🇵 Japan',
+        info: 'Axis Power • Surrendered: August 15, 1945',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>Imperial Japan pursued aggressive expansion across Asia and the Pacific. The attack on Pearl Harbor brought the United States into the war. Japan fought until atomic bombings and Soviet invasion led to surrender.</p>
+          
+          <h3>Major Campaigns</h3>
+          <ul>
+            <li>Attack on Pearl Harbor (December 7, 1941)</li>
+            <li>Conquest of Southeast Asia and Pacific islands</li>
+            <li>Battle of Midway (turning point)</li>
+            <li>Island-hopping campaign defeats</li>
+            <li>Atomic bombings of Hiroshima and Nagasaki</li>
+          </ul>
+          
+          <h3>Key Leaders</h3>
+          <ul>
+            <li>Emperor Hirohito</li>
+            <li>Prime Minister Hideki Tojo</li>
+            <li>Admiral Isoroku Yamamoto</li>
+          </ul>
+        `
+      },
+      china: {
+        title: '🇨🇳 China',
+        info: 'Allied Power • At War: 1937 - 1945',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>China fought the longest of any Allied nation, resisting Japanese invasion from 1937. The Second Sino-Japanese War merged into WWII, with China tying down massive Japanese forces.</p>
+          
+          <h3>Major Events</h3>
+          <ul>
+            <li>Marco Polo Bridge Incident (1937)</li>
+            <li>Rape of Nanjing (1937-1938)</li>
+            <li>Battle of Wuhan</li>
+            <li>US aid through "Flying Tigers"</li>
+            <li>Continued resistance despite heavy losses</li>
+          </ul>
+          
+          <h3>Key Leaders</h3>
+          <ul>
+            <li>Generalissimo Chiang Kai-shek (Nationalists)</li>
+            <li>Mao Zedong (Communists)</li>
+          </ul>
+        `
+      },
+      australia: {
+        title: '🇦🇺 Australia',
+        info: 'Allied Power • At War: September 1939 - August 1945',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>Australia immediately entered the war alongside Britain and played a crucial role in the Pacific Theater, defending against Japanese expansion.</p>
+          
+          <h3>Major Contributions</h3>
+          <ul>
+            <li>North African Campaign alongside British forces</li>
+            <li>Defense of Australia against Japanese invasion threat</li>
+            <li>New Guinea Campaign</li>
+            <li>Pacific island operations with US forces</li>
+            <li>1 million Australians served out of 7 million population</li>
+          </ul>
+        `
+      },
+      canada: {
+        title: '🇨🇦 Canada',
+        info: 'Allied Power • At War: September 1939 - August 1945',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>Canada made significant contributions to the Allied war effort despite its small population, participating in major campaigns in Europe and providing crucial resources.</p>
+          
+          <h3>Major Contributions</h3>
+          <ul>
+            <li>Battle of the Atlantic convoy protection</li>
+            <li>D-Day invasion at Juno Beach</li>
+            <li>Liberation of Netherlands</li>
+            <li>Major industrial production</li>
+            <li>Over 1 million Canadians served</li>
+          </ul>
+        `
+      },
+      poland: {
+        title: '🇵🇱 Poland',
+        info: 'Allied Power • Invaded: September 1939',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>Poland's invasion sparked World War II. Despite heroic resistance, Poland was occupied by Germany and Soviet Union but continued fighting through government-in-exile and resistance forces.</p>
+          
+          <h3>Major Events</h3>
+          <ul>
+            <li>September Campaign (1939)</li>
+            <li>Warsaw Ghetto Uprising (1943)</li>
+            <li>Warsaw Uprising (1944)</li>
+            <li>Polish forces in exile fought on all fronts</li>
+            <li>6 million Polish citizens died (17% of population)</li>
+          </ul>
+        `
+      },
+      spain: {
+        title: '🇪🇸 Spain',
+        info: 'Neutral Nation',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>Spain remained officially neutral throughout WWII, though Francisco Franco's fascist regime sympathized with Axis powers. The Spanish Civil War (1936-1939) had just ended.</p>
+          
+          <h3>Wartime Status</h3>
+          <ul>
+            <li>Officially neutral but pro-Axis sympathies</li>
+            <li>Sent "Blue Division" volunteers to fight USSR</li>
+            <li>Provided some resources to Germany</li>
+            <li>Allowed Allied intelligence operations</li>
+            <li>Avoided direct participation in war</li>
+          </ul>
+        `
+      },
+      sweden: {
+        title: '🇸🇪 Sweden',
+        info: 'Neutral Nation',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>Sweden maintained armed neutrality throughout WWII, though made concessions to both sides. Provided refuge to many war refugees, including Danish Jews.</p>
+          
+          <h3>Wartime Status</h3>
+          <ul>
+            <li>Maintained neutrality through military preparedness</li>
+            <li>Traded with both Allied and Axis powers</li>
+            <li>Provided humanitarian aid and refuge</li>
+            <li>Intelligence operations for both sides</li>
+            <li>Diplomatic efforts to protect civilians</li>
+          </ul>
+        `
+      },
+      brazil: {
+        title: '🇧🇷 Brazil',
+        info: 'Allied Power • Entered War: August 1942',
+        content: `
+          <h3>Role in WWII</h3>
+          <p>Brazil was the only South American nation to send combat troops to fight in WWII, joining the Allies after German U-boats sank Brazilian merchant ships.</p>
+          
+          <h3>Major Contributions</h3>
+          <ul>
+            <li>Brazilian Expeditionary Force fought in Italy</li>
+            <li>Naval and air patrols in South Atlantic</li>
+            <li>Provided crucial resources (rubber, minerals)</li>
+            <li>Strategic air bases for Allied operations</li>
+            <li>25,000+ troops deployed to Italy</li>
+          </ul>
+        `
+      }
+    };
+    
+    const eventData = {
+      'poland-invasion': {
+        title: '🇩🇪 Germany Invades Poland',
+        info: 'September 1, 1939 • Start of WWII',
+        content: `
+          <p>On September 1, 1939, German forces launched a massive invasion of Poland using Blitzkrieg ("lightning war") tactics, combining rapid armor and air power. This marked the beginning of World War II.</p>
+          
+          <h3>Key Facts</h3>
+          <ul>
+            <li>1.5 million German troops invaded</li>
+            <li>First use of coordinated tank and air attacks</li>
+            <li>Poland fought bravely but was outmatched</li>
+            <li>Soviet Union invaded from the east on September 17</li>
+            <li>Poland surrendered on October 6, 1939</li>
+          </ul>
+          
+          <h3>Significance</h3>
+          <p>Britain and France declared war on Germany on September 3, 1939, officially starting World War II in Europe.</p>
+        `
+      },
+      'pearl-harbor': {
+        title: '💣 Attack on Pearl Harbor',
+        info: 'December 7, 1941 • "A Date Which Will Live in Infamy"',
+        content: `
+          <p>Japan launched a surprise military strike on the US naval base at Pearl Harbor, Hawaii. The attack brought the United States into World War II.</p>
+          
+          <h3>The Attack</h3>
+          <ul>
+            <li>353 Japanese aircraft in two waves</li>
+            <li>8 US battleships damaged or destroyed</li>
+            <li>2,403 Americans killed, 1,178 wounded</li>
+            <li>Attack lasted less than 2 hours</li>
+            <li>US aircraft carriers were at sea (not damaged)</li>
+          </ul>
+          
+          <h3>Aftermath</h3>
+          <p>The next day, December 8, 1941, President Franklin D. Roosevelt declared war on Japan. Germany and Italy declared war on the US on December 11, fully bringing America into WWII.</p>
+        `
+      },
+      'd-day': {
+        title: '🌊 D-Day (Operation Overlord)',
+        info: 'June 6, 1944 • Largest amphibious invasion in history',
+        content: `
+          <p>Allied forces launched Operation Overlord, invading Nazi-occupied France at Normandy beaches. This massive operation opened the Western Front and began the liberation of Western Europe.</p>
+          
+          <h3>The Invasion</h3>
+          <ul>
+            <li>156,000 Allied troops landed on D-Day</li>
+            <li>5 beach landing zones: Utah, Omaha, Gold, Juno, Sword</li>
+            <li>Airborne troops dropped behind enemy lines</li>
+            <li>Heaviest fighting at Omaha Beach</li>
+            <li>10,000 Allied casualties on first day</li>
+          </ul>
+          
+          <h3>Significance</h3>
+          <p>D-Day was the beginning of the end for Nazi Germany. Within a year, Allied forces would liberate France, cross into Germany, and force unconditional surrender.</p>
+        `
+      },
+      've-day': {
+        title: '🎉 Victory in Europe (V-E Day)',
+        info: 'May 8, 1945 • End of War in Europe',
+        content: `
+          <p>Germany surrendered unconditionally, ending World War II in Europe. Celebrations erupted across Allied nations as six years of devastating war in Europe came to an end.</p>
+          
+          <h3>Events Leading to Surrender</h3>
+          <ul>
+            <li>Soviet forces captured Berlin</li>
+            <li>Adolf Hitler committed suicide on April 30</li>
+            <li>German military leaders signed surrender documents</li>
+            <li>Fighting officially ended at 11:01 PM on May 8</li>
+            <li>War in Pacific continued until August</li>
+          </ul>
+          
+          <h3>Cost of War in Europe</h3>
+          <p>World War II in Europe resulted in an estimated 40-50 million deaths, including 6 million Jews killed in the Holocaust.</p>
+        `
+      },
+      'vj-day': {
+        title: '🎊 Victory over Japan (V-J Day)',
+        info: 'August 15, 1945 • End of World War II',
+        content: `
+          <p>Japan announced its surrender, ending World War II. The formal surrender ceremony took place on September 2, 1945, aboard the USS Missouri in Tokyo Bay.</p>
+          
+          <h3>Events Leading to Surrender</h3>
+          <ul>
+            <li>Atomic bombs dropped on Hiroshima (Aug 6) and Nagasaki (Aug 9)</li>
+            <li>Soviet Union declared war on Japan (Aug 8)</li>
+            <li>Emperor Hirohito announced surrender via radio (Aug 15)</li>
+            <li>Formal surrender signed September 2, 1945</li>
+            <li>World War II officially ended</li>
+          </ul>
+          
+          <h3>Legacy</h3>
+          <p>WWII resulted in 70-85 million deaths worldwide, reshaped the global order, led to the United Nations, and ushered in the atomic age and Cold War.</p>
+        `
+      }
+    };
+    
+    // Fun Facts for LM Mascot
+    const funFacts = [
+      "Did you know? The shortest serving soldier in WWII was just 12 years old!",
+      "WWII tanks could go up to 30 mph. Today's tanks can reach 45 mph!",
+      "The code-breakers at Bletchley Park shortened the war by an estimated 2 years!",
+      "Carrier pigeons delivered 95% of their messages successfully during WWII!",
+      "The Battle of Stalingrad involved more participants than any other battle in history!",
+      "WWII was the deadliest conflict in human history with 70-85 million casualties.",
+      "The US built a Liberty ship every 42 days on average during WWII!",
+      "Women played crucial roles: pilots, code-breakers, factory workers, and more!",
+      "The Enigma machine had 159 quintillion possible settings!",
+      "D-Day required 5,000 ships and 11,000 aircraft!",
+      "The Battle of Midway turned the tide in the Pacific after just 3 days!",
+      "The Manhattan Project cost $2 billion (equivalent to $30 billion today)!",
+      "Over 16 million Americans served in WWII out of a population of 130 million.",
+      "The Soviet Union lost more people in WWII than any other nation - 27 million!",
+      "Rosie the Riveter became an icon representing women in the workforce!"
+    ];
+    
+    let currentFactIndex = 0;
+    
+    // Mode Toggle Functionality
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    const mapSection = document.getElementById('mapSection');
+    const timelineSection = document.getElementById('timelineSection');
+    
+    modeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const mode = btn.dataset.mode;
+        
+        if (mode === 'both') {
+          mapSection.classList.remove('hidden');
+          timelineSection.classList.remove('hidden');
+        } else if (mode === 'map') {
+          mapSection.classList.remove('hidden');
+          timelineSection.classList.add('hidden');
+        } else if (mode === 'timeline') {
+          mapSection.classList.add('hidden');
+          timelineSection.classList.remove('hidden');
+        }
+      });
+    });
+    
+    // Country Click Handler
+    const countries = document.querySelectorAll('.country');
+    const modal = document.getElementById('modal');
+    const modalClose = document.getElementById('modalClose');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalInfo = document.getElementById('modalInfo');
+    const modalBody = document.getElementById('modalBody');
+    
+    countries.forEach(country => {
+      country.addEventListener('click', () => {
+        const countryKey = country.dataset.country;
+        const data = countryData[countryKey];
+        
+        if (data) {
+          modalTitle.textContent = data.title;
+          modalInfo.textContent = data.info;
+          modalBody.innerHTML = data.content;
+          modal.classList.add('show');
+        }
+      });
+    });
+    
+    // Event Click Handler
+    const eventCards = document.querySelectorAll('.event-card');
+    
+    eventCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const eventKey = card.dataset.event;
+        const data = eventData[eventKey];
+        
+        if (data) {
+          modalTitle.textContent = data.title;
+          modalInfo.textContent = data.info;
+          modalBody.innerHTML = data.content;
+          modal.classList.add('show');
+        }
+      });
+    });
+    
+    // Modal Close Handler
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('show');
+    });
+    
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('show');
+      }
+    });
+    
+    // LM Mascot Handler
+    const mascotAvatar = document.getElementById('mascotAvatar');
+    const mascotBubble = document.getElementById('mascotBubble');
+    const bubbleText = document.getElementById('bubbleText');
+    
+    mascotAvatar.addEventListener('click', () => {
+      bubbleText.textContent = funFacts[currentFactIndex];
+      mascotBubble.classList.add('show');
+      
+      currentFactIndex = (currentFactIndex + 1) % funFacts.length;
+      
+      setTimeout(() => {
+        mascotBubble.classList.remove('show');
+      }, 5000);
+    });
+    
+    // Auto-show fun fact on scroll
+    let lastScrollTime = Date.now();
+    const timelineScroll = document.getElementById('timelineScroll');
+    
+    timelineScroll.addEventListener('scroll', () => {
+      const now = Date.now();
+      if (now - lastScrollTime > 10000) { // Every 10 seconds of scrolling
+        bubbleText.textContent = funFacts[currentFactIndex];
+        mascotBubble.classList.add('show');
+        currentFactIndex = (currentFactIndex + 1) % funFacts.length;
+        lastScrollTime = now;
+        
+        setTimeout(() => {
+          mascotBubble.classList.remove('show');
+        }, 4000);
+      }
+    });
+    
+    // Initial fun fact display
+    setTimeout(() => {
+      bubbleText.textContent = "Welcome to WWII History! Click countries and events to learn more!";
+      mascotBubble.classList.add('show');
+      
+      setTimeout(() => {
+        mascotBubble.classList.remove('show');
+      }, 3000);
+    }, 1000);
+  </script>
+</body>
+</html>

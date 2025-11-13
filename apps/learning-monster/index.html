@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Learning Monster UI Prototype</title>
+  <style>
+    :root {
+      --pink: #ff62b0;
+      --soft: #fff7fb;
+      --off: #f7f3f7;
+      --ink: #1f1d29;
+      --muted: #6b667a;
+      --card: #ffffff;
+      /* Subject colors */
+      --math: #6fd7c9;
+      --science: #66a6ff;
+      --history: #f6d365;
+      --english: #ffa3c1;
+      --other: #c8a2c8;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, var(--soft), var(--off));
+      color: var(--ink);
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    nav.top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: var(--card);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-bottom: 2px solid var(--off);
+    }
+    nav.top-nav .logo {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--pink);
+    }
+    nav.top-nav .nav-links {
+      display: flex;
+      gap: 15px;
+    }
+    nav.top-nav .nav-links a {
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 10px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    nav.top-nav .nav-links a:hover,
+    nav.top-nav .nav-links a.active {
+      background-color: var(--pink);
+      color: white;
+    }
+    /* Main page container */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: none;
+    }
+    .main-content.active {
+      display: block;
+    }
+    /* Generic widget styling */
+    .widget-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .widget {
+      background-color: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .widget:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .widget h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    /* Planner styling */
+    .planner-toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .planner-toolbar button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 10px;
+      background-color: var(--pink);
+      color: white;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .planner-container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .calendar {
+      flex: 3;
+      min-width: 300px;
+      margin-right: 20px;
+    }
+    .calendar table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .calendar th, .calendar td {
+      border: 1px solid var(--off);
+      padding: 8px;
+      text-align: center;
+      height: 40px;
+    }
+    .calendar th {
+      background-color: var(--off);
+    }
+    .calendar td.empty {
+      background-color: var(--soft);
+    }
+    .class-schedule {
+      flex: 1;
+      min-width: 200px;
+      background-color: var(--card);
+      border-radius: 20px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .class-schedule h4 {
+      margin-top: 0;
+    }
+    .class-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .class-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      margin-right: 8px;
+    }
+    /* Subject cards */
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+    }
+    .subject-card {
+      background-color: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .subject-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .subject-card .icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+    .subject-card.math { background-color: var(--math); }
+    .subject-card.science { background-color: var(--science); }
+    .subject-card.history { background-color: var(--history); }
+    .subject-card.english { background-color: var(--english); }
+    .subject-card.other { background-color: var(--other); }
+    .subject-card h4 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--ink);
+    }
+    /* Subject pages (Math, Science, English) */
+    .subject-page {
+      display: none;
+      height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+    .subject-page.active {
+      display: block;
+    }
+    .subject-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 20px;
+      height: 100%;
+    }
+    .subject-section {
+      background-color: var(--card);
+      border-radius: 20px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      overflow-y: auto;
+    }
+    .subject-section h4 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    .tools-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    .tools-list li {
+      background-color: var(--off);
+      border-radius: 10px;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+    .notes-area {
+      width: 100%;
+      height: 100%;
+      min-height: 150px;
+      border: 1px solid var(--off);
+      border-radius: 10px;
+      padding: 10px;
+      resize: vertical;
+    }
+    /* Games cards */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .game-card {
+      background-color: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .game-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .game-card .icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+    /* Library and Customize pages placeholder */
+    .placeholder {
+      background-color: var(--card);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      font-size: 18px;
+    }
+    /* LM avatar and chat overlay */
+    #lm-avatar {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background-color: var(--pink);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      animation: bounce 3s infinite;
+      z-index: 1000;
+    }
+    #lm-avatar span {
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    #chat-overlay {
+      position: fixed;
+      bottom: 110px;
+      right: 30px;
+      width: 320px;
+      height: 400px;
+      background-color: var(--card);
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1000;
+    }
+    #chat-overlay header {
+      background-color: var(--pink);
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+    }
+    #chat-overlay .messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+    #chat-overlay .messages p {
+      margin: 5px 0;
+    }
+    #chat-overlay .input-area {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid var(--off);
+    }
+    #chat-overlay input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid var(--off);
+      border-radius: 10px;
+    }
+    #chat-overlay button {
+      padding: 8px 12px;
+      margin-left: 6px;
+      background-color: var(--pink);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .back-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 10px;
+      background-color: var(--muted);
+      color: white;
+      cursor: pointer;
+      font-weight: 500;
+      margin-bottom: 15px;
+    }
+    .back-btn:hover {
+      background-color: var(--pink);
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="logo">LM Prototype</div>
+    <div class="nav-links">
+      <a href="../../index.html">🏠 Main Hub</a>
+      <a href="#" data-target="home-page" class="active">Home</a>
+      <a href="#" data-target="planner-page">Planner</a>
+      <a href="#" data-target="subjects-page">Subjects</a>
+      <a href="#" data-target="games-page">Games</a>
+      <a href="#" data-target="library-page">Library</a>
+      <a href="#" data-target="customize-page">Customize</a>
+    </div>
+  </nav>
+  <!-- Home Page -->
+  <div id="home-page" class="main-content active">
+    <h2>Home</h2>
+    <div class="widget-grid">
+      <div class="widget">
+        <h3>Focus Goal</h3>
+        <p>Set your goal for this session.</p>
+        <input type="text" placeholder="e.g. Finish reading chapter 3" style="width:100%; padding:8px; border:1px solid var(--off); border-radius:8px;"/>
+      </div>
+      <div class="widget">
+        <h3>Motivation / Prayer</h3>
+        <p>"Believe in yourself! You can do great things."</p>
+      </div>
+      <div class="widget">
+        <h3>State</h3>
+        <p>Select how you're feeling:</p>
+        <div style="display:flex; gap:10px;">
+          <button style="flex:1; padding:8px; border:none; border-radius:10px; background-color:var(--math); color:white; cursor:default;">😊 Happy</button>
+          <button style="flex:1; padding:8px; border:none; border-radius:10px; background-color:var(--science); color:white; cursor:default;">⚡ Focused</button>
+          <button style="flex:1; padding:8px; border:none; border-radius:10px; background-color:var(--history); color:white; cursor:default;">🌙 Calm</button>
+        </div>
+      </div>
+      <div class="widget">
+        <h3>Date &amp; Time &amp; Weather</h3>
+        <p><strong>November 2, 2025</strong></p>
+        <p>72°F – Sunny</p>
+      </div>
+      <div class="widget">
+        <h3>Today's Stats</h3>
+        <p>Study Minutes: 45</p>
+        <p>Tasks Completed: 3</p>
+        <p>Streak: 5 days</p>
+      </div>
+      <div class="widget">
+        <h3>Mini Task Board</h3>
+        <ul style="padding-left:20px; margin:0;">
+          <li>Review lecture notes</li>
+          <li>Complete math exercise</li>
+          <li>Take a mindful break</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- Planner Page -->
+  <div id="planner-page" class="main-content">
+    <h2>Planner</h2>
+    <div class="planner-toolbar">
+      <button>Add Task</button>
+      <button>Save Plan</button>
+    </div>
+    <div class="planner-container">
+      <div class="calendar">
+        <h3>November 2025</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="empty"></td><td class="empty"></td><td class="empty"></td><td class="empty"></td><td>1</td><td>2</td><td>3</td>
+            </tr>
+            <tr>
+              <td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td>
+            </tr>
+            <tr>
+              <td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td>
+            </tr>
+            <tr>
+              <td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td>
+            </tr>
+            <tr>
+              <td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td class="empty"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="class-schedule">
+        <h4>Class Schedule</h4>
+        <div class="class-item"><span class="class-color" style="background-color:var(--math);"></span> Math – 9:00 AM</div>
+        <div class="class-item"><span class="class-color" style="background-color:var(--science);"></span> Science – 11:00 AM</div>
+        <div class="class-item"><span class="class-color" style="background-color:var(--history);"></span> History – 1:00 PM</div>
+        <div class="class-item"><span class="class-color" style="background-color:var(--english);"></span> English – 3:00 PM</div>
+        <h4>Upcoming Tests</h4>
+        <div>Math Test – Nov 15</div>
+        <div>Science Quiz – Nov 22</div>
+      </div>
+    </div>
+  </div>
+  <!-- Subjects Page -->
+  <div id="subjects-page" class="main-content">
+    <h2>Subjects</h2>
+    <div class="subjects-grid">
+      <div class="subject-card math" data-subject="math">
+        <div class="icon">➗</div>
+        <h4>Math</h4>
+      </div>
+      <div class="subject-card science" data-subject="science">
+        <div class="icon">🔬</div>
+        <h4>Science</h4>
+      </div>
+      <div class="subject-card history" data-subject="english-history">
+        <div class="icon">📜</div>
+        <h4>History/English</h4>
+      </div>
+      <div class="subject-card other" data-subject="add-class">
+        <div class="icon">➕</div>
+        <h4>Add My Class</h4>
+      </div>
+    </div>
+    <!-- Math Page -->
+    <div id="math" class="subject-page">
+      <button class="back-btn" onclick="backToSubjects()">← Back to Subjects</button>
+      <h3>Math</h3>
+      <div class="subject-grid">
+        <div class="subject-section">
+          <h4>Lecture Recorder &amp; Transcript</h4>
+          <button style="padding:8px 12px; border:none; border-radius:10px; background-color:var(--pink); color:white; margin-bottom:10px;">Start Recording</button>
+          <p><em>Transcription will appear here as the lecture progresses...</em></p>
+        </div>
+        <div class="subject-section">
+          <h4>Tools</h4>
+          <ul class="tools-list">
+            <li><a href="../calculator/index.html" target="_blank" style="text-decoration:none; color:inherit;">Basic Calculator</a></li>
+            <li><a href="../calculator/index.html#graph" target="_blank" style="text-decoration:none; color:inherit;">Graphing Calculator</a></li>
+            <li>Formula Lookup</li>
+            <li>Lecture Video Search</li>
+          </ul>
+        </div>
+        <div class="subject-section">
+          <h4>Notes &amp; Drawing</h4>
+          <textarea class="notes-area" placeholder="Type or draw your notes here..."></textarea>
+        </div>
+        <div class="subject-section">
+          <h4>Little Monster Chat</h4>
+          <p><em>Ask questions during the lecture and LM will answer in real time.</em></p>
+        </div>
+      </div>
+    </div>
+    <!-- Science Page -->
+    <div id="science" class="subject-page">
+      <button class="back-btn" onclick="backToSubjects()">← Back to Subjects</button>
+      <h3>Science</h3>
+      <div class="subject-grid">
+        <div class="subject-section">
+          <h4>Lecture Recorder &amp; Transcript</h4>
+          <button style="padding:8px 12px; border:none; border-radius:10px; background-color:var(--pink); color:white; margin-bottom:10px;">Start Recording</button>
+          <p><em>Transcription will appear here as the lecture progresses...</em></p>
+        </div>
+        <div class="subject-section">
+          <h4>Tools</h4>
+          <ul class="tools-list">
+            <li><a href="../calculator/index.html" target="_blank" style="text-decoration:none; color:inherit;">Scientific Calculator</a></li>
+            <li>Periodic Table</li>
+            <li>Timeline (Chem/Physics)</li>
+            <li>Formula Lab</li>
+          </ul>
+        </div>
+        <div class="subject-section">
+          <h4>Notes &amp; Drawing</h4>
+          <textarea class="notes-area" placeholder="Type or draw your notes here..."></textarea>
+        </div>
+        <div class="subject-section">
+          <h4>Little Monster Chat</h4>
+          <p><em>Ask questions during the lecture and LM will answer in real time.</em></p>
+        </div>
+      </div>
+    </div>
+    <!-- English/History Page -->
+    <div id="english-history" class="subject-page">
+      <button class="back-btn" onclick="backToSubjects()">← Back to Subjects</button>
+      <h3>English &amp; History</h3>
+      <div class="subject-grid">
+        <div class="subject-section">
+          <h4>Lecture Recorder &amp; Transcript</h4>
+          <button style="padding:8px 12px; border:none; border-radius:10px; background-color:var(--pink); color:white; margin-bottom:10px;">Start Recording</button>
+          <p><em>Transcription will appear here as the lecture progresses...</em></p>
+        </div>
+        <div class="subject-section">
+          <h4>Tools</h4>
+          <ul class="tools-list">
+            <li><a href="../english-hub/index.html" target="_blank" style="text-decoration:none; color:inherit;">Grammar Check</a></li>
+            <li>Timeline Builder</li>
+            <li>Book Reference</li>
+            <li><a href="../english-hub/index.html" target="_blank" style="text-decoration:none; color:inherit;">Essay Prep</a></li>
+          </ul>
+        </div>
+        <div class="subject-section">
+          <h4>Notes &amp; Drawing</h4>
+          <textarea class="notes-area" placeholder="Type or draw your notes here..."></textarea>
+        </div>
+        <div class="subject-section">
+          <h4>Little Monster Chat</h4>
+          <p><em>Ask questions during the lecture and LM will answer in real time.</em></p>
+        </div>
+      </div>
+    </div>
+    <!-- Add Class placeholder -->
+    <div id="add-class" class="subject-page">
+      <button class="back-btn" onclick="backToSubjects()">← Back to Subjects</button>
+      <h3>Add My Class</h3>
+      <p>Feature coming soon...</p>
+    </div>
+  </div>
+  <!-- Games Page -->
+  <div id="games-page" class="main-content">
+    <h2>Games</h2>
+    <div class="games-grid">
+      <div class="game-card" onclick="window.open('../../games/school-dash/index.html', '_blank')">
+        <div class="icon">👾</div>
+        <h4>Monster Dash</h4>
+        <p>Run &amp; collect points while sharpening focus.</p>
+      </div>
+      <div class="game-card" onclick="window.open('../../games/flashcards/index.html', '_blank')">
+        <div class="icon">🎴</div>
+        <h4>Flash Cards</h4>
+        <p>Practice your topics with quick flash cards.</p>
+      </div>
+      <div class="game-card" onclick="window.open('../../games/quiz-arena/index.html', '_blank')">
+        <div class="icon">⚔️</div>
+        <h4>Quiz Arena</h4>
+        <p>Battle with timed quizzes.</p>
+      </div>
+      <div class="game-card" onclick="window.open('../../games/snake/index.html', '_blank')">
+        <div class="icon">🐍</div>
+        <h4>Snake</h4>
+        <p>Classic game to relax your mind.</p>
+      </div>
+      <div class="game-card" onclick="window.open('../../games/2048/index.html', '_blank')">
+        <div class="icon">🧩</div>
+        <h4>2048</h4>
+        <p>Combine numbers to reach 2048.</p>
+      </div>
+      <div class="game-card" onclick="window.open('../../games/milkshake-maker/index.html', '_blank')">
+        <div class="icon">🥤</div>
+        <h4>Milkshake Maker</h4>
+        <p>Create fun milkshakes and unwind.</p>
+      </div>
+      <div class="game-card">
+        <div class="icon">🧠</div>
+        <h4>Learn Mode</h4>
+        <p>Adaptive mode with hints (Coming Soon).</p>
+      </div>
+    </div>
+  </div>
+  <!-- Library Page -->
+  <div id="library-page" class="main-content">
+    <h2>Library</h2>
+    <div class="placeholder">
+      <p>Your saved notes, videos and transcripts will appear here.</p>
+      <button onclick="window.open('../library/index.html', '_blank')" style="margin-top:20px; padding:10px 20px; background:var(--pink); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:600;">Open Full Library</button>
+    </div>
+  </div>
+  <!-- Customize Page -->
+  <div id="customize-page" class="main-content">
+    <h2>Customize</h2>
+    <div class="placeholder">Customization options coming soon.</div>
+  </div>
+  <!-- LM Avatar & Chat Overlay -->
+  <div id="lm-avatar">
+    <span>😊</span>
+  </div>
+  <div id="chat-overlay">
+    <header>LM Chat</header>
+    <div class="messages">
+      <p><em>Start chatting with LM...</em></p>
+    </div>
+    <div class="input-area">
+      <input type="text" placeholder="Type a message..."/>
+      <button onclick="sendChatMessage()">Send</button>
+    </div>
+  </div>
+  <script>
+    // Navigation logic
+    const navLinks = document.querySelectorAll('.top-nav .nav-links a:not([href="../../index.html"])');
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('data-target');
+        document.querySelectorAll('.main-content').forEach(page => {
+          page.classList.remove('active');
+        });
+        document.getElementById(targetId).classList.add('active');
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+    // Subjects navigation inside the Subjects page
+    const subjectCards = document.querySelectorAll('.subject-card');
+    const subjectPages = document.querySelectorAll('.subject-page');
+    const subjectsGrid = document.querySelector('.subjects-grid');
+    subjectCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const subject = card.getAttribute('data-subject');
+        subjectsGrid.style.display = 'none';
+        subjectPages.forEach(p => p.classList.remove('active'));
+        const page = document.getElementById(subject);
+        if (page) {
+          page.classList.add('active');
+        }
+      });
+    });
+    
+    function backToSubjects() {
+      subjectPages.forEach(p => p.classList.remove('active'));
+      subjectsGrid.style.display = 'grid';
+    }
+    
+    // LM avatar toggle chat overlay
+    const avatar = document.getElementById('lm-avatar');
+    const chatOverlay = document.getElementById('chat-overlay');
+    avatar.addEventListener('click', () => {
+      if (chatOverlay.style.display === 'flex') {
+        chatOverlay.style.display = 'none';
+      } else {
+        chatOverlay.style.display = 'flex';
+        chatOverlay.style.flexDirection = 'column';
+      }
+    });
+    // Simple chat send handler (adds message to chat log)
+    function sendChatMessage() {
+      const input = chatOverlay.querySelector('input');
+      const text = input.value.trim();
+      if (text) {
+        const msg = document.createElement('p');
+        msg.textContent = 'You: ' + text;
+        chatOverlay.querySelector('.messages').appendChild(msg);
+        input.value = '';
+        // Auto scroll to bottom
+        chatOverlay.querySelector('.messages').scrollTop = chatOverlay.querySelector('.messages').scrollHeight;
+      }
+    }
+    
+    // Check for hash navigation on load
+    window.addEventListener('load', () => {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const link = document.querySelector(`[data-target="${hash}"]`);
+        if (link) link.click();
+      }
+    });
+  </script>
+</body>
+</html>

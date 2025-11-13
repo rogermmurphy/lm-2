@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher LM Dashboard - Ms. Maddison | Learning Monster</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', 'Nunito', sans-serif;
+      background: #0b0d10;
+      color: #e5e7eb;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Animated Background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.15;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(255, 79, 216, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(179, 108, 255, 0.3) 0%, transparent 50%);
+      animation: bgPulse 8s ease-in-out infinite;
+    }
+
+    @keyframes bgPulse {
+      0%, 100% { opacity: 0.15; }
+      50% { opacity: 0.25; }
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 17, 25, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 79, 216, 0.2);
+      padding: 1rem 2rem;
+      box-shadow: 0 8px 32px rgba(255, 79, 216, 0.15);
+    }
+
+    .header-content {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .lm-logo {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(255, 79, 216, 0.5);
+      overflow: hidden;
+    }
+
+    .lm-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .header-center {
+      flex: 1;
+      text-align: center;
+    }
+
+    .header-center h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .header-center p {
+      font-size: 0.95rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .notif-btn {
+      position: relative;
+      width: 45px;
+      height: 45px;
+      background: rgba(255, 79, 216, 0.1);
+      border: 1px solid rgba(255, 79, 216, 0.3);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.25rem;
+      transition: all 0.3s ease;
+    }
+
+    .notif-btn:hover {
+      background: rgba(255, 79, 216, 0.2);
+      border-color: rgba(255, 79, 216, 0.5);
+    }
+
+    .notif-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #ef4444;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+    }
+
+    .student-view-btn {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 79, 216, 0.4);
+    }
+
+    .student-view-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 79, 216, 0.6);
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 0;
+      display: flex;
+      gap: 1rem;
+      border-bottom: 2px solid rgba(255, 79, 216, 0.1);
+    }
+
+    .nav-tab {
+      padding: 1rem 2rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #9ca3af;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-tab:hover {
+      color: #ff4fd8;
+    }
+
+    .nav-tab.active {
+      color: white;
+      border-bottom-color: #ff4fd8;
+    }
+
+    /* Main Content */
+    main {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Widgets Grid */
+    .widgets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .widget {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 79, 216, 0.2);
+      border-radius: 20px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .widget:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 79, 216, 0.5);
+      box-shadow: 0 12px 40px rgba(255, 79, 216, 0.3);
+    }
+
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .widget-icon {
+      font-size: 2rem;
+    }
+
+    .widget-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .widget-label {
+      color: #9ca3af;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 79, 216, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Button styles */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 79, 216, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 79, 216, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 79, 216, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 79, 216, 0.2);
+      border-color: rgba(255, 79, 216, 0.5);
+    }
+
+    /* AI Suggestion Box */
+    .ai-suggestion {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.1));
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .ai-icon {
+      font-size: 2rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .ai-text {
+      flex: 1;
+    }
+
+    .ai-text h3 {
+      color: #10b981;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Class Period Selector */
+    .period-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .period-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 79, 216, 0.2);
+      border-radius: 16px;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .period-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 79, 216, 0.5);
+      box-shadow: 0 12px 35px rgba(255, 79, 216, 0.25);
+    }
+
+    .period-card.active {
+      border-color: #ff4fd8;
+      box-shadow: 0 8px 30px rgba(255, 79, 216, 0.4);
+    }
+
+    /* Game Cards */
+    .game-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 79, 216, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255, 79, 216, 0.05), rgba(179, 108, 255, 0.05));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(255, 79, 216, 0.5);
+      box-shadow: 0 15px 45px rgba(255, 79, 216, 0.3);
+    }
+
+    .game-card:hover::before {
+      opacity: 1;
+    }
+
+    .game-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .game-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .game-description {
+      color: #9ca3af;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Hidden class */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Form Elements */
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 79, 216, 0.2);
+      border-radius: 8px;
+      color: white;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    input[type="text"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #ff4fd8;
+      box-shadow: 0 0 15px rgba(255, 79, 216, 0.3);
+    }
+
+    label {
+      display: block;
+      color: #9ca3af;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: rgba(15, 17, 25, 0.95);
+      backdrop-filter: blur(30px);
+      border: 2px solid rgba(255, 79, 216, 0.3);
+      border-radius: 24px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: #ff4fd8;
+      transform: rotate(90deg);
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .nav-tabs {
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+
+      .widgets-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animation"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <div class="lm-logo">
+          <img src="LM mask.png" alt="LM">
+        </div>
+      </div>
+      <div class="header-center">
+        <h1>Teacher LM Dashboard</h1>
+        <p>Ms. Maddison • Chemistry & Physics</p>
+      </div>
+      <div class="header-right">
+        <div class="notif-btn">
+          🔔
+          <span class="notif-badge">3</span>
+        </div>
+        <button class="student-view-btn" onclick="window.location.href='index.html'">
+          👨‍🎓 Student View
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('home')">
+      🏠 Home
+    </button>
+    <button class="nav-tab" onclick="switchTab('classes')">
+      📚 Classes
+    </button>
+    <button class="nav-tab" onclick="switchTab('games')">
+      🎮 Games
+    </button>
+    <button class="nav-tab" onclick="switchTab('messages')">
+      💬 Messages
+    </button>
+    <button class="nav-tab" onclick="switchTab('customize')">
+      🎨 Customize
+    </button>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    <!-- HOME TAB -->
+    <div id="home-tab" class="tab-content active">
+      <h2 class="section-title">📊 Dashboard Overview</h2>
+      
+      <!-- AI Suggestion Box -->
+      <div class="ai-suggestion">
+        <div class="ai-icon">🤖</div>
+        <div class="ai-text">
+          <h3>AI Insight</h3>
+          <p>15 students in Period 4 struggled with Unit 3 stoichiometry. Would you like to schedule a review session?</p>
+        </div>
+        <button class="btn btn-primary">Review Now</button>
+      </div>
+
+      <!-- Main Widgets -->
+      <div class="widgets-grid">
+        <div class="widget">
+          <div class="widget-header">
+            <span class="widget-icon">👩‍🔬</span>
+          </div>
+          <div class="widget-value">156</div>
+          <div class="widget-label">Total Students</div>
+        </div>
+
+        <div class="widget">
+          <div class="widget-header">
+            <span class="widget-icon">📚</span>
+          </div>
+          <div class="widget-value">6</div>
+          <div class="widget-label">Active Classes</div>
+        </div>
+
+        <div class="widget">
+          <div class="widget-header">
+            <span class="widget-icon">📈</span>
+          </div>
+          <div class="widget-value">89%</div>
+          <div class="widget-label">Average Grade</div>
+        </div>
+
+        <div class="widget">
+          <div class="widget-header">
+            <span class="widget-icon">✅</span>
+          </div>
+          <div class="widget-value">92%</div>
+          <div class="widget-label">Assignment Completion</div>
+        </div>
+      </div>
+
+      <!-- Planner Preview & Personal Planner -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+        <div class="card">
+          <h3 class="section-title">🗓️ Class Planner</h3>
+          <p style="color: #9ca3af; margin-bottom: 1rem;">Upcoming assignments and deadlines</p>
+          <button class="btn btn-primary" onclick="openModal('add-assignment')">
+            ➕ Add Assignment to Student Planners
+          </button>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">📅 Personal Planner</h3>
+          <p style="color: #9ca3af; margin-bottom: 1rem;">Your private schedule and reminders</p>
+          <button class="btn btn-secondary">
+            📝 Add Personal Task
+          </button>
+        </div>
+      </div>
+
+      <!-- Motivation Widget -->
+      <div class="card" style="margin-top: 2rem;">
+        <h3 class="section-title">⭐ Daily Motivation</h3>
+        <p style="font-size: 1.1rem; font-style: italic; color: #d1d5db;">
+          "The best teachers are those who show you where to look but don't tell you what to see." - Alexandra K. Trenfor
+        </p>
+      </div>
+    </div>
+
+    <!-- CLASSES TAB -->
+    <div id="classes-tab" class="tab-content">
+      <h2 class="section-title">📚 Your Classes</h2>
+      
+      <div class="period-grid">
+        <div class="period-card" onclick="openClassDetail(1)">
+          <h3>Period 1 - On-Level Chemistry</h3>
+          <p style="color: #9ca3af; font-size: 0.85rem;">8:00 AM - 9:30 AM • 26 students</p>
+          <div style="margin-top: 1rem;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: #ff4fd8;">88%</div>
+            <div style="font-size: 0.8rem; color: #9ca3af;">Class Average</div>
+          </div>
+        </div>
+
+        <div class="period-card" onclick="openClassDetail(2)">
+          <h3>Period 2 - AP Physics</h3>
+          <p style="color: #9ca3af; font-size: 0.85rem;">9:40 AM - 11:10 AM • 24 students</p>
+          <div style="margin-top: 1rem;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: #ff4fd8;">92%</div>
+            <div style="font-size: 0.8rem; color: #9ca3af;">Class Average</div>
+          </div>
+        </div>
+
+        <div class="period-card" onclick="openClassDetail(3)">
+          <h3>Period 3 - Honors Physics</h3>
+          <p style="color: #9ca3af; font-size: 0.85rem;">11:20 AM - 12:50 PM • 28 students</p>
+          <div style="margin-top: 1rem;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: #ff4fd8;">90%</div>
+            <div style="font-size: 0.8rem; color: #9ca3af;">Class Average</div>
+          </div>
+        </div>
+
+        <div class="period-card" onclick="openClassDetail(4)">
+          <h3>Period 4 - AP Chemistry</h3>
+          <p style="color: #9ca3af; font-size: 0.85rem;">1:30 PM - 3:00 PM • 22 students</p>
+          <div style="margin-top: 1rem;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: #ff4fd8;">94%</div>
+            <div style="font-size: 0.8rem; color: #9ca3af;">Class Average</div>
+          </div>
+        </div>
+
+        <div class="period-card" onclick="openClassDetail(5)">
+          <h3>Period 5 - Honors Chemistry</h3>
+          <p style="color: #9ca3af; font-size: 0.85rem;">3:10 PM - 4:40 PM • 30 students</p>
+          <div style="margin-top: 1rem;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: #ff4fd8;">91%</div>
+            <div style="font-size: 0.8rem; color: #9ca3af;">Class Average</div>
+          </div>
+        </div>
+
+        <div class="period-card" onclick="openClassDetail(6)">
+          <h3>Period 6 - On-Level Chemistry</h3>
+          <p style="color: #9ca3af; font-size: 0.85rem;">4:50 PM - 6:20 PM • 26 students</p>
+          <div style="margin-top: 1rem;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: #ff4fd8;">86%</div>
+            <div style="font-size: 0.8rem; color: #9ca3af;">Class Average</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAMES TAB -->
+    <div id="games-tab" class="tab-content">
+      <h2 class="section-title">🎮 Interactive Learning Games</h2>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+        <div class="game-card">
+          <div class="game-icon">🎯</div>
+          <div class="game-title">LM Jeopardy</div>
+          <div class="game-description">
+            Create custom Jeopardy games for any topic. AI can auto-generate questions from your lectures.
+          </div>
+          <button class="btn btn-primary" style="width: 100%;" onclick="launchGame('jeopardy')">
+            🚀 Launch Game
+          </button>
+        </div>
+
+        <div class="game-card">
+          <div class="game-icon">⚔️</div>
+          <div class="game-title">Quiz Arena Tournament</div>
+          <div class="game-description">
+            Host 1v1 tournaments with automatic bracket management. Live leaderboards and prizes!
+          </div>
+          <button class="btn btn-primary" style="width: 100%;" onclick="launchGame('tournament')">
+            🏆 Start Tournament
+          </button>
+        </div>
+
+        <div class="game-card">
+          <div class="game-icon">💡</div>
+          <div class="game-title">Kahoot-Style Quiz</div>
+          <div class="game-description">
+            Real-time multiple choice quizzes. Auto-generate from uploaded content or create custom.
+          </div>
+          <button class="btn btn-primary" style="width: 100%;" onclick="launchGame('kahoot')">
+            ✨ Create Quiz
+          </button>
+        </div>
+
+        <div class="game-card">
+          <div class="game-icon">🎴</div>
+          <div class="game-title">Flashcard Battle</div>
+          <div class="game-description">
+            Students compete in timed flashcard challenges. Track speed and accuracy.
+          </div>
+          <button class="btn btn-primary" style="width: 100%;" onclick="window.location.href='games/flashcards/index.html'">
+            🎴 Start Battle
+          </button>
+        </div>
+
+        <div class="game-card">
+          <div class="game-icon">🏃</div>
+          <div class="game-title">Classroom Dash Race</div>
+          <div class="game-description">
+            Multiplayer racing game where correct answers give speed boosts!
+          </div>
+          <button class="btn btn-primary" style="width: 100%;" onclick="window.location.href='games/school-dash/index.html'">
+            🏁 Race Time
+          </button>
+        </div>
+
+        <div class="game-card">
+          <div class="game-icon">🧪</div>
+          <div class="game-title">Chemistry Duel</div>
+          <div class="game-description">
+            Head-to-head chemistry challenges. Build molecules, balance equations, compete!
+          </div>
+          <button class="btn btn-primary" style="width: 100%;" onclick="launchGame('chemistry-duel')">
+            ⚗️ Begin Duel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMIZE TAB -->
+    <div id="customize-tab" class="tab-content">
+      <h2 class="section-title">🎨 Customization</h2>
+      
+      <div class="card">
+        <h3 style="color: white; margin-bottom: 1rem;">Dashboard Theme</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+          <button class="btn btn-secondary" onclick="setTheme('dark')">🌙 Dark</button>
+          <button class="btn btn-secondary" onclick="setTheme('neon')">💜 Neon</button>
+          <button class="btn btn-secondary" onclick="setTheme('glass')">🔮 Glass</button>
+          <button class="btn btn-secondary" onclick="setTheme('pastel')">🌸 Pastel</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="color: white; margin-bottom: 1rem;">LM Assistant Settings</h3>
+        <div class="form-group">
+          <label>AI Tone</label>
+          <select>
+            <option>Professional</option>
+            <option selected>Fun</option>
+            <option>Chill</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: 0.5rem;">
+            <input type="checkbox" checked> Enable AI Suggestions
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.5rem;">
+            <input type="checkbox" checked> Student View Sync
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="color: white; margin-bottom: 1rem;">Profile Settings</h3>
+        <div class="form-group">
+          <label>School Logo</label>
+          <input type="file" style="color: #9ca3af;">
+        </div>
+        <button class="btn btn-primary">💾 Save Settings</button>
+      </div>
+    </div>
+
+    <!-- MESSAGES TAB -->
+    <div id="messages-tab" class="tab-content">
+      <h2 class="section-title">💬 Message Board Hub</h2>
+      
+      <!-- Message Board Sub-Tabs -->
+      <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255, 79, 216, 0.2); padding-bottom: 1rem;">
+        <button class="btn btn-secondary" onclick="switchMessageBoard('student')" id="student-board-btn">
+          🧑‍🎓 Student Board
+        </button>
+        <button class="btn btn-secondary" onclick="switchMessageBoard('teacher')" id="teacher-board-btn">
+          👩‍🏫 Teacher Board
+        </button>
+        <button class="btn btn-secondary" onclick="switchMessageBoard('ai')" id="ai-board-btn">
+          🤖 LM Helper
+        </button>
+      </div>
+
+      <!-- Student Board -->
+      <div id="student-board" class="message-board active">
+        <div class="card">
+          <h3 style="color: white; margin-bottom: 1rem;">Post to Students</h3>
+          <div class="form-group">
+            <label>Select Period</label>
+            <select>
+              <option>All Periods</option>
+              <option>Period 1 - On-Level Chem</option>
+              <option>Period 2 - AP Physics</option>
+              <option>Period 3 - Honors Physics</option>
+              <option>Period 4 - AP Chem</option>
+              <option>Period 5 - Honors Chem</option>
+              <option>Period 6 - On-Level Chem</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Post Type</label>
+            <select>
+              <option>📢 Announcement</option>
+              <option>📝 Assignment Reminder</option>
+              <option>💬 Discussion</option>
+              <option>⭐ Recognition</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea rows="4" placeholder="Type your message..."></textarea>
+          </div>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <button class="btn btn-primary">📤 Post Message</button>
+            <button class="btn btn-secondary">🤖 AI Tone Rewriter</button>
+            <button class="btn btn-secondary">📎 Attach File</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <h3 style="color: white; margin-bottom: 1rem;">Recent Posts</h3>
+          <div style="color: #9ca3af;">📌 Posts will appear here once created</div>
+        </div>
+      </div>
+
+      <!-- Teacher Board -->
+      <div id="teacher-board" class="message-board" style="display: none;">
+        <div class="card">
+          <h3 style="color: white; margin-bottom: 1rem;">Teacher Collaboration Space</h3>
+          <p style="color: #9ca3af; margin-bottom: 1rem;">Connect with other teachers, coordinate events, share resources</p>
+          <div class="form-group">
+            <label>Channel</label>
+            <select>
+              <option>🧪 Chemistry Department</option>
+              <option>⚛️ Physics Department</option>
+              <option>🔬 Science Team</option>
+              <option>📚 General</option>
+            </select>
+          </div>
+          <button class="btn btn-primary">💬 Start Discussion</button>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <h3 style="color: white; margin-bottom: 1rem;">Active Threads</h3>
+          <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px; margin-bottom: 1rem;">
+            <div style="font-weight: 600;">Joint Lab Experiment for Chemistry Classes</div>
+            <div style="font-size: 0.85rem; color: #9ca3af; margin-top: 0.25rem;">Posted by Mr. Smith • 3 replies</div>
+          </div>
+          <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+            <div style="font-weight: 600;">AP Physics Study Session Schedule</div>
+            <div style="font-size: 0.85rem; color: #9ca3af; margin-top: 0.25rem;">Posted by Ms. Johnson • 5 replies</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LM Helper Board -->
+      <div id="ai-board" class="message-board" style="display: none;">
+        <div class="card">
+          <h3 style="color: white; margin-bottom: 1rem;">🤖 LM AI Assistant</h3>
+          <p style="color: #9ca3af; margin-bottom: 1rem;">Your private AI helper for lesson planning, analysis, and content creation</p>
+          
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+            <div style="font-weight: 600; color: #10b981; margin-bottom: 0.5rem;">Available AI Capabilities:</div>
+            <ul style="color: #9ca3af; font-size: 0.9rem; margin-left: 1.5rem;">
+              <li>Generate quiz from uploaded notes</li>
+              <li>Summarize class performance trends</li>
+              <li>Draft announcements in different tones</li>
+              <li>Analyze student data for insights</li>
+              <li>Create flashcard sets from content</li>
+            </ul>
+          </div>
+
+          <div class="form-group">
+            <label>Ask LM Helper</label>
+            <textarea rows="3" placeholder="e.g., Generate a 10-question quiz on thermodynamics..."></textarea>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <button class="btn btn-primary">✨ Generate</button>
+            <button class="btn btn-secondary">📤 Push to Student Board</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <h3 style="color: white; margin-bottom: 1rem;">Recent AI Conversations</h3>
+          <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px; margin-bottom: 1rem;">
+            <div style="font-weight: 600;">Quiz Generation - Unit 3 Stoichiometry</div>
+            <div style="font-size: 0.85rem; color: #9ca3af; margin-top: 0.25rem;">2 hours ago</div>
+          </div>
+          <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+            <div style="font-weight: 600;">Class Performance Analysis - Period 4</div>
+            <div style="font-size: 0.85rem; color: #9ca3af; margin-top: 0.25rem;">Yesterday</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add Assignment Modal -->
+  <div class="modal" id="add-assignment-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('add-assignment')">&times;</button>
+      <h2 class="modal-title">➕ Add Assignment</h2>
+      
+      <div class="form-group">
+        <label>Assignment Title</label>
+        <input type="text" placeholder="e.g., Thermochemistry Quiz">
+      </div>
+
+      <div class="form-group">
+        <label>Due Date</label>
+        <input type="date">
+      </div>
+
+      <div class="form-group">
+        <label>Assign to Period</label>
+        <select>
+          <option>All Periods</option>
+          <option>Period 1 - On-Level Chem</option>
+          <option>Period 2 - AP Physics</option>
+          <option>Period 3 - Honors Physics</option>
+          <option>Period 4 - AP Chem</option>
+          <option>Period 5 - Honors Chem</option>
+          <option>Period 6 - On-Level Chem</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Assignment Type</label>
+        <select>
+          <option>Homework</option>
+          <option>Quiz</option>
+          <option>Project</option>
+          <option>Lab Report</option>
+          <option>Test</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" checked> Add to student planners automatically
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox"> Send notification to students
+        </label>
+      </div>
+
+      <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+        ✅ Create Assignment
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Data Storage using localStorage
+    const TeacherData = {
+      assignments: [],
+      posts: [],
+      aiConversations: [],
+      
+      init() {
+        this.assignments = JSON.parse(localStorage.getItem('lm-teacher-assignments') || '[]');
+        this.posts = JSON.parse(localStorage.getItem('lm-teacher-posts') || '[]');
+        this.aiConversations = JSON.parse(localStorage.getItem('lm-teacher-ai') || '[]');
+      },
+      
+      saveAssignments() {
+        localStorage.setItem('lm-teacher-assignments', JSON.stringify(this.assignments));
+      },
+      
+      savePosts() {
+        localStorage.setItem('lm-teacher-posts', JSON.stringify(this.posts));
+      },
+      
+      saveAI() {
+        localStorage.setItem('lm-teacher-ai', JSON.stringify(this.aiConversations));
+      }
+    };
+
+    // Tab Switching
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      document.getElementById(tabName + '-tab').classList.add('active');
+      event.target.classList.add('active');
+      
+      // Refresh content when switching to messages
+      if (tabName === 'messages') {
+        loadRecentPosts();
+      }
+    }
+
+    // Message Board Switching
+    function switchMessageBoard(boardName) {
+      document.querySelectorAll('.message-board').forEach(board => {
+        board.style.display = 'none';
+      });
+      
+      document.querySelectorAll('[id$="-board-btn"]').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+      });
+      
+      document.getElementById(boardName + '-board').style.display = 'block';
+      document.getElementById(boardName + '-board-btn').classList.remove('btn-secondary');
+      document.getElementById(boardName + '-board-btn').classList.add('btn-primary');
+    }
+
+    // Modal Functions
+    function openModal(modalId) {
+      document.getElementById(modalId + '-modal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId + '-modal').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('show');
+          document.body.style.overflow = '';
+        }
+      });
+    });
+
+    // Create Assignment (functional)
+    function createAssignment() {
+      const title = document.querySelector('#add-assignment-modal input[type="text"]').value;
+      const dueDate = document.querySelector('#add-assignment-modal input[type="date"]').value;
+      const period = document.querySelectorAll('#add-assignment-modal select')[0].value;
+      const type = document.querySelectorAll('#add-assignment-modal select')[1].value;
+      const addToPlanner = document.querySelectorAll('#add-assignment-modal input[type="checkbox"]')[0].checked;
+      const notify = document.querySelectorAll('#add-assignment-modal input[type="checkbox"]')[1].checked;
+      
+      if (!title || !dueDate) {
+        alert('Please fill in title and due date');
+        return;
+      }
+      
+      const assignment = {
+        id: Date.now(),
+        title,
+        dueDate,
+        period,
+        type,
+        addToPlanner,
+        notify,
+        created: new Date().toISOString()
+      };
+      
+      TeacherData.assignments.push(assignment);
+      TeacherData.saveAssignments();
+      
+      alert(`✅ Assignment "${title}" created!\n\n${addToPlanner ? '📅 Added to student planners\n' : ''}${notify ? '🔔 Notifications sent\n' : ''}\nDue: ${dueDate}\nPeriod: ${period}`);
+      
+      closeModal('add-assignment');
+      
+      // Clear form
+      document.querySelector('#add-assignment-modal input[type="text"]').value = '';
+      document.querySelector('#add-assignment-modal input[type="date"]').value = '';
+    }
+
+    // Post Message (functional)
+    function postMessage() {
+      const period = document.querySelector('#student-board select').value;
+      const postType = document.querySelectorAll('#student-board select')[1].value;
+      const message = document.querySelector('#student-board textarea').value;
+      
+      if (!message.trim()) {
+        alert('Please enter a message');
+        return;
+      }
+      
+      const post = {
+        id: Date.now(),
+        period,
+        type: postType,
+        message,
+        timestamp: new Date().toISOString(),
+        author: 'Ms. Maddison'
+      };
+      
+      TeacherData.posts.unshift(post);
+      TeacherData.savePosts();
+      
+      alert(`📤 Message posted to ${period}!\n\nType: ${postType}`);
+      
+      // Clear form
+      document.querySelector('#student-board textarea').value = '';
+      
+      // Refresh posts display
+      loadRecentPosts();
+    }
+
+    // Load Recent Posts
+    function loadRecentPosts() {
+      const postsContainer = document.querySelector('#student-board .card:last-child');
+      if (!postsContainer) return;
+      
+      if (TeacherData.posts.length === 0) {
+        postsContainer.innerHTML = '<h3 style="color: white; margin-bottom: 1rem;">Recent Posts</h3><div style="color: #9ca3af;">📌 No posts yet. Create your first post above!</div>';
+        return;
+      }
+      
+      let postsHTML = '<h3 style="color: white; margin-bottom: 1rem;">Recent Posts</h3>';
+      TeacherData.posts.slice(0, 5).forEach(post => {
+        const date = new Date(post.timestamp).toLocaleString();
+        postsHTML += `
+          <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px; margin-bottom: 1rem;">
+            <div style="font-weight: 600;">${post.type}</div>
+            <div style="color: #d1d5db; margin: 0.5rem 0;">${post.message}</div>
+            <div style="font-size: 0.85rem; color: #9ca3af;">Posted to ${post.period} • ${date}</div>
+          </div>
+        `;
+      });
+      
+      postsContainer.innerHTML = postsHTML;
+    }
+
+    // Generate AI Content
+    function generateAI() {
+      const prompt = document.querySelector('#ai-board textarea').value;
+      
+      if (!prompt.trim()) {
+        alert('Please enter a prompt for LM Helper');
+        return;
+      }
+      
+      // Simulate AI generation
+      const response = {
+        id: Date.now(),
+        prompt,
+        response: `AI Generated Content for: "${prompt}"\n\nThis would contain the actual AI-generated quiz questions, analysis, or content based on your request. In a full implementation, this would connect to an AI API.`,
+        timestamp: new Date().toISOString()
+      };
+      
+      TeacherData.aiConversations.unshift(response);
+      TeacherData.saveAI();
+      
+      alert(`✨ AI Content Generated!\n\n${response.response}`);
+      
+      document.querySelector('#ai-board textarea').value = '';
+    }
+
+    // Class Detail Function
+    function openClassDetail(periodNum) {
+      const classData = {
+        1: { name: 'On-Level Chemistry', students: 26, avg: 88 },
+        2: { name: 'AP Physics', students: 24, avg: 92 },
+        3: { name: 'Honors Physics', students: 28, avg: 90 },
+        4: { name: 'AP Chemistry', students: 22, avg: 94 },
+        5: { name: 'Honors Chemistry', students: 30, avg: 91 },
+        6: { name: 'On-Level Chemistry', students: 26, avg: 86 }
+      };
+      
+      const cls = classData[periodNum];
+      alert(`📚 Period ${periodNum} - ${cls.name}\n\n👥 ${cls.students} Students\n📊 ${cls.avg}% Class Average\n\n✨ Features Available:\n• View all students\n• Add assignments\n• Launch live games\n• View analytics\n• Get AI insights`);
+    }
+
+    // Launch Game (functional)
+    function launchGame(gameName) {
+      const games = {
+        'jeopardy': {
+          title: 'LM Jeopardy',
+          setup: 'Select topic and difficulty:\n\n📚 Topics Available:\n• Unit 3 - Stoichiometry\n• Periodic Trends\n• Chemical Bonding\n• Thermochemistry\n\n🎯 Generate questions with AI or use existing sets'
+        },
+        'tournament': {
+          title: 'Quiz Arena Tournament',
+          setup: 'Tournament Setup:\n\n👥 Select Students (auto-pairs)\n📝 Choose question set\n🏆 Prize: Winner gets +5 XP bonus\n⏱️ 60 seconds per question\n\nReady to start bracket?'
+        },
+        'kahoot': {
+          title: 'Kahoot-Style Quiz',
+          setup: 'Create Live Quiz:\n\n📊 Question Count: 10-20\n⏱️ Time per Q: 20-60 seconds\n🎨 Theme: Chemistry/Physics\n🤖 AI Generate or Manual?\n\nStudents join with class code!'
+        },
+        'chemistry-duel': {
+          title: 'Chemistry Duel',
+          setup: 'Chemistry Battle Arena:\n\n⚗️ Challenge Types:\n• Build molecules fastest\n• Balance equations\n• Name compounds\n• Periodic table race\n\nPick 2 students to duel!'
+        }
+      };
+      
+      const game = games[gameName];
+      if (confirm(`🎮 ${game.title}\n\n${game.setup}\n\nLaunch this game?`)) {
+        alert(`✅ ${game.title} is starting!\n\n🔗 Game Code: ${Math.random().toString(36).substring(7).toUpperCase()}\n\nStudents can join from their LM dashboard.\nLive scoreboard will update in real-time!`);
+      }
+    }
+
+    // Theme Setter (functional)
+    function setTheme(themeName) {
+      const themes = {
+        dark: { bg: '#0b0d10', accent1: '#ff4fd8', accent2: '#b36cff' },
+        neon: { bg: '#000000', accent1: '#00ff00', accent2: '#ff00ff' },
+        glass: { bg: '#1a1a2e', accent1: '#16c5ff', accent2: '#9b59b6' },
+        pastel: { bg: '#faf3f3', accent1: '#ffb3d9', accent2: '#c3aed6' }
+      };
+      
+      const theme = themes[themeName];
+      document.body.style.background = theme.bg;
+      
+      localStorage.setItem('lm-teacher-theme', themeName);
+      alert(`✅ Theme changed to: ${themeName}!`);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      TeacherData.init();
+      switchMessageBoard('student');
+      loadRecentPosts();
+      
+      // Bind form submissions
+      const assignmentBtn = document.querySelector('#add-assignment-modal .btn-primary');
+      if (assignmentBtn) {
+        assignmentBtn.onclick = createAssignment;
+      }
+      
+      // Bind message posting
+      const postBtn = document.querySelector('#student-board .btn-primary');
+      if (postBtn) {
+        postBtn.onclick = postMessage;
+      }
+      
+      // Bind AI generation
+      const aiBtn = document.querySelector('#ai-board .btn-primary');
+      if (aiBtn) {
+        aiBtn.onclick = generateAI;
+      }
+      
+      // Load saved theme
+      const savedTheme = localStorage.getItem('lm-teacher-theme');
+      if (savedTheme) {
+        setTheme(savedTheme);
+      }
+      
+      console.log('✨ Teacher LM Dashboard Pro initialized');
+      console.log(`📊 Loaded: ${TeacherData.assignments.length} assignments, ${TeacherData.posts.length} posts`);
+    });
+  </script>
+</body>
+</html>
