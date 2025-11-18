@@ -475,40 +475,108 @@
       segments.push(makeSegment(-i * SEG_LEN));
     }
 
-    // LM Player model: sphere with horns
+    // ======= FULL 3D LM CHARACTER =======
     const LM = new THREE.Group();
     
-    const geometry = new THREE.SphereGeometry(1.1, 32, 32);
-    const material = new THREE.MeshStandardMaterial({
+    // Body - Main sphere with slight roughness for furry look
+    const bodyGeometry = new THREE.SphereGeometry(0.6, 32, 32);
+    const bodyMaterial = new THREE.MeshStandardMaterial({
       color: 0xff66cc,
       emissive: 0xa066ff,
       emissiveIntensity: 0.4,
-      roughness: 0.4,
-      metalness: 0.2
+      roughness: 0.6,
+      metalness: 0.1
     });
-    
-    const body = new THREE.Mesh(geometry, material);
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    body.position.y = 0.6;
+    body.castShadow = true;
     LM.add(body);
     
-    // Little LM horns
-    const hornGeo = new THREE.ConeGeometry(0.3, 0.5, 16);
+    // Horns - Two small white cones
+    const hornGeo = new THREE.ConeGeometry(0.12, 0.35, 12);
     const hornMat = new THREE.MeshStandardMaterial({ 
       color: 0xffffff,
       emissive: 0xff66cc,
-      emissiveIntensity: 0.2
+      emissiveIntensity: 0.3,
+      roughness: 0.3
     });
     
     const horn1 = new THREE.Mesh(hornGeo, hornMat);
-    horn1.position.set(0.4, 1, -0.2);
-    horn1.rotation.z = 0.4;
+    horn1.position.set(0.25, 0.95, 0);
+    horn1.rotation.z = 0.3;
+    horn1.castShadow = true;
     LM.add(horn1);
     
-    const horn2 = horn1.clone();
-    horn2.position.x = -0.4;
-    horn2.rotation.z = -0.4;
+    const horn2 = new THREE.Mesh(hornGeo, hornMat);
+    horn2.position.set(-0.25, 0.95, 0);
+    horn2.rotation.z = -0.3;
+    horn2.castShadow = true;
     LM.add(horn2);
     
-    LM.position.set(LANES[currentLaneIndex], 0.9, 0);
+    // Legs - Two cylinders (darker pink)
+    const legMaterial = new THREE.MeshStandardMaterial({
+      color: 0xd14ba7,
+      roughness: 0.5,
+      metalness: 0.1
+    });
+    
+    const legGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.4, 12);
+    const legLeft = new THREE.Mesh(legGeo, legMaterial);
+    legLeft.position.set(-0.2, 0.2, 0.1);
+    legLeft.castShadow = true;
+    LM.add(legLeft);
+    
+    const legRight = new THREE.Mesh(legGeo, legMaterial);
+    legRight.position.set(0.2, 0.2, 0.1);
+    legRight.castShadow = true;
+    LM.add(legRight);
+    
+    // Feet - Small spheres
+    const footGeo = new THREE.SphereGeometry(0.12, 12, 12);
+    const footLeft = new THREE.Mesh(footGeo, legMaterial);
+    footLeft.position.set(-0.2, 0.05, 0.15);
+    footLeft.scale.set(1, 0.6, 1.2);
+    LM.add(footLeft);
+    
+    const footRight = new THREE.Mesh(footGeo, legMaterial);
+    footRight.position.set(0.2, 0.05, 0.15);
+    footRight.scale.set(1, 0.6, 1.2);
+    LM.add(footRight);
+    
+    // Arms - Two small cylinders
+    const armGeo = new THREE.CylinderGeometry(0.08, 0.07, 0.35, 12);
+    const armLeft = new THREE.Mesh(armGeo, legMaterial);
+    armLeft.position.set(-0.5, 0.55, 0);
+    armLeft.rotation.z = 0.3;
+    armLeft.castShadow = true;
+    LM.add(armLeft);
+    
+    const armRight = new THREE.Mesh(armGeo, legMaterial);
+    armRight.position.set(0.5, 0.55, 0);
+    armRight.rotation.z = -0.3;
+    armRight.castShadow = true;
+    LM.add(armRight);
+    
+    // Tail - Small sphere + cone
+    const tailBase = new THREE.Mesh(
+      new THREE.SphereGeometry(0.1, 12, 12),
+      legMaterial
+    );
+    tailBase.position.set(0, 0.4, -0.6);
+    LM.add(tailBase);
+    
+    const tailTip = new THREE.Mesh(
+      new THREE.ConeGeometry(0.08, 0.25, 12),
+      legMaterial
+    );
+    tailTip.position.set(0, 0.35, -0.75);
+    tailTip.rotation.x = Math.PI / 2;
+    LM.add(tailTip);
+    
+    // Animation state
+    let runCycle = 0;
+    
+    LM.position.set(LANES[currentLaneIndex], 1.2, 0);
     scene.add(LM);
 
     // XP orbs
@@ -703,35 +771,99 @@
         return; 
       }
 
-      // Smooth lane switch
+      // Smooth lane switch with rotation
+      const prevX = LM.position.x;
       LM.position.x += (targetX - LM.position.x) * Math.min(1, 10 * dt);
+      const xDiff = LM.position.x - prevX;
+      
+      // Lean when turning
+      body.rotation.z = -xDiff * 2;
 
       // LM glow pulse animation
       body.material.emissiveIntensity = 0.4 + Math.sin(now * 0.003) * 0.15;
 
-      // Jump
+      // Run cycle animation (when moving)
+      if (running && !jumping && !sliding) {
+        runCycle += dt * speed * 15;
+        
+        // Body bob
+        body.position.y = 0.6 + Math.sin(runCycle) * 0.05;
+        
+        // Leg animation - alternate forward/back
+        const legSwing = Math.sin(runCycle) * 0.4;
+        legLeft.rotation.x = legSwing;
+        legRight.rotation.x = -legSwing;
+        footLeft.rotation.x = legSwing * 0.5;
+        footRight.rotation.x = -legSwing * 0.5;
+        
+        // Arm animation - opposite to legs
+        const armSwing = Math.sin(runCycle) * 0.3;
+        armLeft.rotation.x = -armSwing;
+        armRight.rotation.x = armSwing;
+        
+        // Tail sway
+        const tailSway = Math.sin(runCycle * 0.8) * 0.15;
+        tailBase.rotation.y = tailSway;
+        tailTip.rotation.y = tailSway;
+      }
+
+      // Jump animation
       if (jumping) {
         jumpT += dt * 2;
-        const h = Math.sin(Math.PI * Math.min(1, jumpT)) * 1.5;
-        LM.position.y = 0.9 + h;
+        const jumpProgress = Math.min(1, jumpT);
+        const h = Math.sin(Math.PI * jumpProgress) * 1.5;
+        LM.position.y = 1.2 + h;
+        
+        // Arms lift up during jump
+        const armLift = Math.sin(Math.PI * jumpProgress) * 0.6;
+        armLeft.rotation.x = -armLift;
+        armRight.rotation.x = -armLift;
+        armLeft.rotation.z = 0.3 - armLift * 0.3;
+        armRight.rotation.z = -0.3 + armLift * 0.3;
+        
+        // Legs tuck during jump peak
+        const legTuck = Math.sin(Math.PI * jumpProgress) * 0.5;
+        legLeft.rotation.x = -legTuck;
+        legRight.rotation.x = -legTuck;
+        
         if (jumpT >= 1) { 
           jumping = false; 
-          LM.position.y = 0.9; 
+          LM.position.y = 1.2;
+          // Reset limbs
+          armLeft.rotation.z = 0.3;
+          armRight.rotation.z = -0.3;
         }
       }
 
-      // Slide
+      // Slide animation
       if (sliding) {
         slideT += dt * 2;
-        LM.scale.y = 1 - 0.35 * Math.min(1, slideT * 2);
+        const slideProgress = Math.min(1, slideT * 2);
+        
+        // Squash body vertically
+        body.scale.y = 1 - 0.4 * slideProgress;
+        body.scale.x = 1 + 0.2 * slideProgress;
+        body.scale.z = 1 + 0.2 * slideProgress;
+        
+        // Arms go back
+        armLeft.rotation.x = slideProgress * 0.8;
+        armRight.rotation.x = slideProgress * 0.8;
+        armLeft.rotation.z = 0.3 + slideProgress * 0.5;
+        armRight.rotation.z = -0.3 - slideProgress * 0.5;
+        
+        // Legs extend forward
+        legLeft.rotation.x = slideProgress * 0.6;
+        legRight.rotation.x = slideProgress * 0.6;
+        
         if (slideT >= 1) { 
-          sliding = false; 
-          LM.scale.y = 1; 
+          sliding = false;
+          // Reset body scale
+          body.scale.set(1, 1, 1);
+          // Reset limbs
+          armLeft.rotation.z = 0.3;
+          armRight.rotation.z = -0.3;
         }
       }
-
-      // Rotate LM slightly for animation
-      LM.rotation.y += dt * 0.5;
 
       // Move hallway segments
       for (let seg of segments) {
