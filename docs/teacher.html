@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard - Learning Monster</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0b0d10 0%, #1a0a2e 100%);
+      color: #e5e7eb;
+      min-height: 100vh;
+    }
+    
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+    
+    .bg-animation::before, .bg-animation::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+    }
+    
+    .bg-animation::before {
+      width: 500px;
+      height: 500px;
+      background: #ff4fd8;
+      top: 20%;
+      left: 10%;
+      animation: float 8s ease-in-out infinite;
+    }
+    
+    .bg-animation::after {
+      width: 400px;
+      height: 400px;
+      background: #b36cff;
+      bottom: 20%;
+      right: 10%;
+      animation: float 10s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(30px, -30px); }
+    }
+    
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 17, 25, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 79, 216, 0.3);
+      box-shadow: 0 8px 32px rgba(255, 79, 216, 0.2);
+    }
+    
+    .header-content {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .lm-logo {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 4px 20px rgba(255, 79, 216, 0.5);
+    }
+    
+    .header-title h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .header-title p {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+    
+    .header-right {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    
+    .header-btn {
+      padding: 0.75rem 1.25rem;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 79, 216, 0.4);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    
+    .header-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 79, 216, 0.6);
+    }
+    
+    .header-btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 79, 216, 0.3);
+    }
+    
+    main {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 79, 216, 0.2);
+      border-radius: 20px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 79, 216, 0.5);
+      box-shadow: 0 12px 40px rgba(255, 79, 216, 0.3);
+    }
+    
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-label {
+      color: #9ca3af;
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+    }
+    
+    .section {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 79, 216, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .period-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .period-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 79, 216, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .period-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 79, 216, 0.5);
+      box-shadow: 0 12px 35px rgba(255, 79, 216, 0.25);
+    }
+    
+    .period-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .period-time {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      margin-bottom: 1rem;
+    }
+    
+    .period-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    
+    .period-stat {
+      text-align: center;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+    
+    .period-stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ff4fd8;
+    }
+    
+    .period-stat-label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+    
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .planner-item, .message-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 4px solid #ff4fd8;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .planner-item:hover, .message-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(5px);
+    }
+    
+    .planner-date, .message-from {
+      font-size: 0.85rem;
+      color: #ff4fd8;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .planner-title, .message-subject {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .planner-details, .message-preview {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+    
+    .message-item.unread {
+      background: rgba(255, 79, 216, 0.05);
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .modal.show {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: rgba(15, 17, 25, 0.98);
+      border: 2px solid rgba(255, 79, 216, 0.3);
+      border-radius: 24px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      line-height: 1;
+    }
+    
+    .modal-close:hover {
+      background: #ff4fd8;
+      transform: rotate(90deg);
+    }
+    
+    .modal-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      color: #9ca3af;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 79, 216, 0.2);
+      border-radius: 12px;
+      color: white;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #ff4fd8;
+      box-shadow: 0 0 15px rgba(255, 79, 216, 0.3);
+    }
+    
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #ff4fd8, #b36cff);
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 79, 216, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 79, 216, 0.6);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 79, 216, 0.3);
+    }
+    
+    @media (max-width: 768px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+      .period-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animation"></div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <div class="lm-logo">👩‍🏫</div>
+        <div class="header-title">
+          <h1>Learning Monster</h1>
+          <p>Teacher Dashboard - Ms. Anderson</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="header-btn" onclick="openModal('game-modal')">🎮 Start Live Game</button>
+        <button class="header-btn header-btn-secondary" onclick="openModal('upload-modal')">📤 Upload Lesson</button>
+        <a href="index.html" class="header-btn header-btn-secondary">🏠 Student View</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Stats -->
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">156</div>
+        <div class="stat-label">Total Students</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📚</div>
+        <div class="stat-value">6</div>
+        <div class="stat-label">Class Periods</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-value">89%</div>
+        <div class="stat-label">Average Grade</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">94%</div>
+        <div class="stat-label">Completion Rate</div>
+      </div>
+    </div>
+
+    <!-- Periods -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">📚 My Classes (6 Periods)</h2>
+        <button class="btn btn-primary" onclick="openModal('assignment-modal')">➕ Add Assignment</button>
+      </div>
+      <div class="period-grid">
+        <div class="period-card">
+          <div class="period-title">Period 1 - Chemistry</div>
+          <div class="period-time">8:00 AM - 9:30 AM</div>
+          <div class="period-stats">
+            <div class="period-stat">
+              <div class="period-stat-value">26</div>
+              <div class="period-stat-label">Students</div>
+            </div>
+            <div class="period-stat">
+              <div class="period-stat-value">88%</div>
+              <div class="period-stat-label">Avg Grade</div>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; font-size: 0.85rem; color: #9ca3af;">
+            Emma Johnson (95%), Michael Chen (92%), Sarah Martinez (94%), David Kim (85%), Olivia Brown (91%), James Wilson (87%)...
+          </div>
+        </div>
+
+        <div class="period-card">
+          <div class="period-title">Period 2 - AP Physics</div>
+          <div class="period-time">9:40 AM - 11:10 AM</div>
+          <div class="period-stats">
+            <div class="period-stat">
+              <div class="period-stat-value">24</div>
+              <div class="period-stat-label">Students</div>
+            </div>
+            <div class="period-stat">
+              <div class="period-stat-value">92%</div>
+              <div class="period-stat-label">Avg Grade</div>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; font-size: 0.85rem; color: #9ca3af;">
+            Sophia Lee (98%), Ethan Park (93%), Ava Martinez (96%), Noah Taylor (90%), Isabella Garcia (92%), Liam Anderson (89%)...
+          </div>
+        </div>
+
+        <div class="period-card">
+          <div class="period-title">Period 3 - Honors Physics</div>
+          <div class="period-time">11:20 AM - 12:50 PM</div>
+          <div class="period-stats">
+            <div class="period-stat">
+              <div class="period-stat-value">28</div>
+              <div class="period-stat-label">Students</div>
+            </div>
+            <div class="period-stat">
+              <div class="period-stat-value">90%</div>
+              <div class="period-stat-label">Avg Grade</div>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; font-size: 0.85rem; color: #9ca3af;">
+            Mia Thompson (94%), Lucas White (88%), Charlotte Harris (92%), Benjamin Clark (87%), Amelia Lewis (93%), Mason Hall (85%)...
+          </div>
+        </div>
+
+        <div class="period-card">
+          <div class="period-title">Period 4 - AP Chemistry</div>
+          <div class="period-time">1:30 PM - 3:00 PM</div>
+          <div class="period-stats">
+            <div class="period-stat">
+              <div class="period-stat-value">22</div>
+              <div class="period-stat-label">Students</div>
+            </div>
+            <div class="period-stat">
+              <div class="period-stat-value">94%</div>
+              <div class="period-stat-label">Avg Grade</div>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; font-size: 0.85rem; color: #9ca3af;">
+            Harper Young (97%), Alexander King (96%), Evelyn Wright (95%), Daniel Lopez (93%), Abigail Hill (94%), Matthew Scott (91%)...
+          </div>
+        </div>
+
+        <div class="period-card">
+          <div class="period-title">Period 5 - Honors Chemistry</div>
+          <div class="period-time">3:10 PM - 4:40 PM</div>
+          <div class="period-stats">
+            <div class="period-stat">
+              <div class="period-stat-value">30</div>
+              <div class="period-stat-label">Students</div>
+            </div>
+            <div class="period-stat">
+              <div class="period-stat-value">91%</div>
+              <div class="period-stat-label">Avg Grade</div>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; font-size: 0.85rem; color: #9ca3af;">
+            Emily Green (93%), William Adams (90%), Sofia Baker (92%), Jackson Nelson (88%), Madison Carter (94%), Aiden Mitchell (89%)...
+          </div>
+        </div>
+
+        <div class="period-card">
+          <div class="period-title">Period 6 - Chemistry</div>
+          <div class="period-time">4:50 PM - 6:20 PM</div>
+          <div class="period-stats">
+            <div class="period-stat">
+              <div class="period-stat-value">26</div>
+              <div class="period-stat-label">Students</div>
+            </div>
+            <div class="period-stat">
+              <div class="period-stat-value">86%</div>
+              <div class="period-stat-label">Avg Grade</div>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; font-size: 0.85rem; color: #9ca3af;">
+            Ella Perez (91%), Sebastian Roberts (84%), Scarlett Turner (88%), Jack Phillips (82%), Lily Campbell (89%), Logan Parker (85%)...
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Planner & Messages -->
+    <div class="two-col">
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">📅 Planner</h2>
+        </div>
+        <div class="planner-item">
+          <div class="planner-date">Nov 20, 2025</div>
+          <div class="planner-title">Chemistry Lab Report Due</div>
+          <div class="planner-details">Period 1, 5, 6 • 78 submissions expected</div>
+        </div>
+        <div class="planner-item">
+          <div class="planner-date">Nov 22, 2025</div>
+          <div class="planner-title">AP Physics Unit Test</div>
+          <div class="planner-details">Period 2 • 24 students</div>
+        </div>
+        <div class="planner-item">
+          <div class="planner-date">Nov 25, 2025</div>
+          <div class="planner-title">Stoichiometry Quiz</div>
+          <div class="planner-details">Period 4 • 22 students</div>
+        </div>
+        <div class="planner-item">
+          <div class="planner-date">Nov 27, 2025</div>
+          <div class="planner-title">Project Presentations</div>
+          <div class="planner-details">Period 3 • Renewable Energy Projects</div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">💬 Messages</h2>
+        </div>
+        <div class="message-item unread">
+          <div class="message-from">Emma Johnson (Period 1)</div>
+          <div class="message-subject">Question about Lab Report</div>
+          <div class="message-preview">Hi Ms. Anderson, I have a question about the conclusion section...</div>
+        </div>
+        <div class="message-item unread">
+          <div class="message-from">Parent - David Kim</div>
+          <div class="message-subject">Meeting Request</div>
+          <div class="message-preview">Hello, I would like to discuss David's progress this semester...</div>
+        </div>
+        <div class="message-item">
+          <div class="message-from">Sophia Lee (Period 2)</div>
+          <div class="message-subject">Extra Credit Opportunity</div>
+          <div class="message-preview">Are there any extra credit assignments available for this unit?</div>
+        </div>
+        <div class="message-item">
+          <div class="message-from">Principal Rodriguez</div>
+          <div class="message-subject">Department Meeting - Nov 23</div>
+          <div class="message-preview">Reminder: Science department meeting next Thursday at 3pm...</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Calendar -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">📆 November 2025</h2>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; text-align: center;">
+        <div style="padding: 0.5rem; color: #9ca3af; font-weight: 600; font-size: 0.75rem;">Sun</div>
+        <div style="padding: 0.5rem; color: #9ca3af; font-weight: 600; font-size: 0.75rem;">Mon</div>
+        <div style="padding: 0.5rem; color: #9ca3af; font-weight: 600; font-size: 0.75rem;">Tue</div>
+        <div style="padding: 0.5rem; color: #9ca3af; font-weight: 600; font-size: 0.75rem;">Wed</div>
+        <div style="padding: 0.5rem; color: #9ca3af; font-weight: 600; font-size: 0.75rem;">Thu</div>
+        <div style="padding: 0.5rem; color: #9ca3af; font-weight: 600; font-size: 0.75rem;">Fri</div>
+        <div style="padding: 0.5rem; color: #9ca3af; font-weight: 600; font-size: 0.75rem;">Sat</div>
+        
+        <div style="padding: 0.75rem; opacity: 0.5;">27</div>
+        <div style="padding: 0.75rem; opacity: 0.5;">28</div>
+        <div style="padding: 0.75rem; opacity: 0.5;">29</div>
+        <div style="padding: 0.75rem; opacity: 0.5;">30</div>
+        <div style="padding: 0.75rem; opacity: 0.5;">31</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">1</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">2</div>
+        
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">3</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">4</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">5</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">6</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">7</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">8</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">9</div>
+        
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">10</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">11</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">12</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">13</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">14</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">15</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">16</div>
+        
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">17</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: linear-gradient(135deg, #ff4fd8, #b36cff); font-weight: 700;">18</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">19</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05); position: relative;"><span>20</span><span style="position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #10b981; border-radius: 50%;"></span></div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">21</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05); position: relative;"><span>22</span><span style="position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #10b981; border-radius: 50%;"></span></div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">23</div>
+        
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">24</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05); position: relative;"><span>25</span><span style="position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #10b981; border-radius: 50%;"></span></div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">26</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05); position: relative;"><span>27</span><span style="position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #10b981; border-radius: 50%;"></span></div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">28</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">29</div>
+        <div style="padding: 0.75rem; border-radius: 8px; cursor: pointer; background: rgba(255, 255, 255, 0.05);">30</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add Assignment Modal -->
+  <div class="modal" id="assignment-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('assignment-modal')">&times;</button>
+      <h2 class="modal-title">➕ Add Assignment</h2>
+      <div class="form-group">
+        <label>Assignment Title</label>
+        <input type="text" placeholder="e.g., Chapter 5 Quiz">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea placeholder="Assignment details..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Due Date</label>
+        <input type="date">
+      </div>
+      <div class="form-group">
+        <label>Assign to Period</label>
+        <select>
+          <option>All Periods</option>
+          <option>Period 1 - Chemistry</option>
+          <option>Period 2 - AP Physics</option>
+          <option>Period 3 - Honors Physics</option>
+          <option>Period 4 - AP Chemistry</option>
+          <option>Period 5 - Honors Chemistry</option>
+          <option>Period 6 - Chemistry</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="alert('Assignment created!'); closeModal('assignment-modal');">Create Assignment</button>
+    </div>
+  </div>
+
+  <!-- Start Live Game Modal -->
+  <div class="modal" id="game-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('game-modal')">&times;</button>
+      <h2 class="modal-title">🎮 Start Live Game</h2>
+      <div class="form-group">
+        <label>Game Type</label>
+        <select>
+          <option>Quiz Arena</option>
+          <option>Flashcard Battle</option>
+          <option>Jeopardy</option>
+          <option>Monster Arena</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Select Period</label>
+        <select>
+          <option>Period 1 - Chemistry</option>
+          <option>Period 2 - AP Physics</option>
+          <option>Period 3 - Honors Physics</option>
+          <option>Period 4 - AP Chemistry</option>
+          <option>Period 5 - Honors Chemistry</option>
+          <option>Period 6 - Chemistry</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Topic/Subject</label>
+        <input type="text" placeholder="e.g., Stoichiometry">
+      </div>
+      <button class="btn btn-primary" onclick="alert('Game starting! Join code: ' + Math.random().toString(36).substring(7).toUpperCase()); closeModal('game-modal');">Start Game</button>
+    </div>
+  </div>
+
+  <!-- Upload Lesson Modal -->
+  <div class="modal" id="upload-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('upload-modal')">&times;</button>
+      <h2 class="modal-title">📤 Upload Lesson</h2>
+      <div class="form-group">
+        <label>Lesson Title</label>
+        <input type="text" placeholder="e.g., Unit 3 - Chemical Reactions">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea placeholder="Lesson description..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Upload File</label>
+        <input type="file">
+      </div>
+      <div class="form-group">
+        <label>Share with Period</label>
+        <select>
+          <option>All Periods</option>
+          <option>Period 1 - Chemistry</option>
+          <option>Period 2 - AP Physics</option>
+          <option>Period 3 - Honors Physics</option>
+          <option>Period 4 - AP Chemistry</option>
+          <option>Period 5 - Honors Chemistry</option>
+          <option>Period 6 - Chemistry</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="alert('Lesson uploaded!'); closeModal('upload-modal');">Upload</button>
+    </div>
+  </div>
+
+  <script>
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('show');
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('show');
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('show');
+      }
+    }
+  </script>
+</body>
+</html>
